@@ -5,8 +5,11 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,17 +28,20 @@ import org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeType;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.util.ViewUtil;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * Fragment for configuring Lightning node connection.
  * 
  * Supports connecting to Lightning nodes via:
  * - NWC (Nostr Wallet Connect) - simplest option, just paste a nostr+walletconnect:// URI
- * 
- * Future support planned for:
- * - LND (URL + macaroon)
- * - CLN (URL + rune)
- * - Phoenixd (URL + password)
- * - Strike/Blink/Speed (API key)
+ * - LND - URL + macaroon
+ * - CLN (Core Lightning) - URL + rune
+ * - Phoenixd - URL + password
+ * - Strike - API key
+ * - Blink - API key
+ * - Speed - API key
  * 
  * @see <a href="https://github.com/lightning-node-interface/lni">LNI Library</a>
  */
@@ -43,11 +49,50 @@ public class LightningConfigFragment extends Fragment {
 
     private static final String TAG = Log.tag(LightningConfigFragment.class);
 
-    private EditText nwcUriInput;
+    // Node type mapping
+    private final Map<String, LightningNodeType> nodeTypeMap = new LinkedHashMap<>();
+    
+    // UI elements
+    private AutoCompleteTextView nodeTypeSelector;
     private Button connectButton;
     private Button disconnectButton;
     private ProgressBar spinner;
     private TextView statusText;
+    
+    // Sections
+    private LinearLayout nwcSection;
+    private LinearLayout lndSection;
+    private LinearLayout clnSection;
+    private LinearLayout phoenixdSection;
+    private LinearLayout strikeSection;
+    private LinearLayout blinkSection;
+    private LinearLayout speedSection;
+    
+    // NWC inputs
+    private EditText nwcUriInput;
+    
+    // LND inputs
+    private EditText lndUrlInput;
+    private EditText lndMacaroonInput;
+    
+    // CLN inputs
+    private EditText clnUrlInput;
+    private EditText clnRuneInput;
+    
+    // Phoenixd inputs
+    private EditText phoenixdUrlInput;
+    private EditText phoenixdPasswordInput;
+    
+    // Strike input
+    private EditText strikeApiKeyInput;
+    
+    // Blink input
+    private EditText blinkApiKeyInput;
+    
+    // Speed input
+    private EditText speedApiKeyInput;
+    
+    private LightningNodeType selectedNodeType = LightningNodeType.NWC;
 
     public LightningConfigFragment() {
         super(R.layout.lightning_config_fragment);
@@ -62,23 +107,120 @@ public class LightningConfigFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        
+        initNodeTypeMap();
 
         Toolbar toolbar = view.findViewById(R.id.lightning_config_toolbar);
-        nwcUriInput = view.findViewById(R.id.lightning_nwc_uri);
+        nodeTypeSelector = view.findViewById(R.id.lightning_node_type);
         connectButton = view.findViewById(R.id.lightning_connect_button);
         disconnectButton = view.findViewById(R.id.lightning_disconnect_button);
         spinner = view.findViewById(R.id.lightning_spinner);
         statusText = view.findViewById(R.id.lightning_status);
+        
+        // Sections
+        nwcSection = view.findViewById(R.id.lightning_nwc_section);
+        lndSection = view.findViewById(R.id.lightning_lnd_section);
+        clnSection = view.findViewById(R.id.lightning_cln_section);
+        phoenixdSection = view.findViewById(R.id.lightning_phoenixd_section);
+        strikeSection = view.findViewById(R.id.lightning_strike_section);
+        blinkSection = view.findViewById(R.id.lightning_blink_section);
+        speedSection = view.findViewById(R.id.lightning_speed_section);
+        
+        // NWC
+        nwcUriInput = view.findViewById(R.id.lightning_nwc_uri);
+        
+        // LND
+        lndUrlInput = view.findViewById(R.id.lightning_lnd_url);
+        lndMacaroonInput = view.findViewById(R.id.lightning_lnd_macaroon);
+        
+        // CLN
+        clnUrlInput = view.findViewById(R.id.lightning_cln_url);
+        clnRuneInput = view.findViewById(R.id.lightning_cln_rune);
+        
+        // Phoenixd
+        phoenixdUrlInput = view.findViewById(R.id.lightning_phoenixd_url);
+        phoenixdPasswordInput = view.findViewById(R.id.lightning_phoenixd_password);
+        
+        // Strike
+        strikeApiKeyInput = view.findViewById(R.id.lightning_strike_api_key);
+        
+        // Blink
+        blinkApiKeyInput = view.findViewById(R.id.lightning_blink_api_key);
+        
+        // Speed
+        speedApiKeyInput = view.findViewById(R.id.lightning_speed_api_key);
 
         toolbar.setNavigationOnClickListener(v -> {
             ViewUtil.hideKeyboard(requireContext(), v);
             Navigation.findNavController(v).popBackStack();
         });
 
-        connectButton.setOnClickListener(v -> connectNwc());
+        setupNodeTypeSelector();
+        
+        connectButton.setOnClickListener(v -> connect());
         disconnectButton.setOnClickListener(v -> disconnect());
 
         updateUiState();
+    }
+    
+    private void initNodeTypeMap() {
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_nwc), LightningNodeType.NWC);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_lnd), LightningNodeType.LND);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_cln), LightningNodeType.CLN);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_phoenixd), LightningNodeType.PHOENIXD);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_strike), LightningNodeType.STRIKE);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_blink), LightningNodeType.BLINK);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_speed), LightningNodeType.SPEED);
+    }
+    
+    private void setupNodeTypeSelector() {
+        String[] nodeTypes = nodeTypeMap.keySet().toArray(new String[0]);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), 
+            android.R.layout.simple_dropdown_item_1line, nodeTypes);
+        nodeTypeSelector.setAdapter(adapter);
+        nodeTypeSelector.setText(nodeTypes[0], false);
+        
+        nodeTypeSelector.setOnItemClickListener((parent, v, position, id) -> {
+            String selected = nodeTypes[position];
+            selectedNodeType = nodeTypeMap.get(selected);
+            showSectionForNodeType(selectedNodeType);
+        });
+    }
+    
+    private void showSectionForNodeType(LightningNodeType type) {
+        // Hide all sections
+        nwcSection.setVisibility(View.GONE);
+        lndSection.setVisibility(View.GONE);
+        clnSection.setVisibility(View.GONE);
+        phoenixdSection.setVisibility(View.GONE);
+        strikeSection.setVisibility(View.GONE);
+        blinkSection.setVisibility(View.GONE);
+        speedSection.setVisibility(View.GONE);
+        
+        // Show the selected section
+        switch (type) {
+            case NWC:
+                nwcSection.setVisibility(View.VISIBLE);
+                break;
+            case LND:
+                lndSection.setVisibility(View.VISIBLE);
+                break;
+            case CLN:
+                clnSection.setVisibility(View.VISIBLE);
+                break;
+            case PHOENIXD:
+                phoenixdSection.setVisibility(View.VISIBLE);
+                break;
+            case STRIKE:
+                strikeSection.setVisibility(View.VISIBLE);
+                break;
+            case BLINK:
+                blinkSection.setVisibility(View.VISIBLE);
+                break;
+            case SPEED:
+                speedSection.setVisibility(View.VISIBLE);
+                break;
+        }
     }
 
     private void updateUiState() {
@@ -88,18 +230,58 @@ public class LightningConfigFragment extends Fragment {
         if (isConfigured && nodeType != null) {
             statusText.setText(getString(R.string.LightningConfig__connected_to, nodeType.name()));
             statusText.setVisibility(View.VISIBLE);
-            nwcUriInput.setVisibility(View.GONE);
+            
+            // Hide config UI when connected
+            requireView().findViewById(R.id.lightning_node_type_layout).setVisibility(View.GONE);
+            nwcSection.setVisibility(View.GONE);
+            lndSection.setVisibility(View.GONE);
+            clnSection.setVisibility(View.GONE);
+            phoenixdSection.setVisibility(View.GONE);
+            strikeSection.setVisibility(View.GONE);
+            blinkSection.setVisibility(View.GONE);
+            speedSection.setVisibility(View.GONE);
+            
             connectButton.setVisibility(View.GONE);
             disconnectButton.setVisibility(View.VISIBLE);
         } else {
             statusText.setText(R.string.LightningConfig__not_connected);
             statusText.setVisibility(View.VISIBLE);
-            nwcUriInput.setVisibility(View.VISIBLE);
+            
+            // Show config UI when not connected
+            requireView().findViewById(R.id.lightning_node_type_layout).setVisibility(View.VISIBLE);
+            showSectionForNodeType(selectedNodeType);
+            
             connectButton.setVisibility(View.VISIBLE);
             disconnectButton.setVisibility(View.GONE);
         }
     }
 
+    private void connect() {
+        switch (selectedNodeType) {
+            case NWC:
+                connectNwc();
+                break;
+            case LND:
+                connectLnd();
+                break;
+            case CLN:
+                connectCln();
+                break;
+            case PHOENIXD:
+                connectPhoenixd();
+                break;
+            case STRIKE:
+                connectStrike();
+                break;
+            case BLINK:
+                connectBlink();
+                break;
+            case SPEED:
+                connectSpeed();
+                break;
+        }
+    }
+    
     private void connectNwc() {
         String uri = nwcUriInput.getText().toString().trim();
         
@@ -114,39 +296,189 @@ public class LightningConfigFragment extends Fragment {
         }
 
         setLoading(true);
-
+        
         new Thread(() -> {
             try {
                 boolean success = LightningUiInteractor.configureNwc(AppDependencies.getApplication(), uri);
-                
-                if (success) {
-                    // Test the connection
-                    boolean available = LightningUiInteractor.isAvailableBlocking(AppDependencies.getApplication());
-                    
-                    requireView().post(() -> {
-                        setLoading(false);
-                        if (available) {
-                            SignalStore.payments().setLightningEnabled(true);
-                            Toast.makeText(requireContext(), R.string.LightningConfig__connected_successfully, Toast.LENGTH_SHORT).show();
-                            updateUiState();
-                        } else {
-                            Toast.makeText(requireContext(), R.string.LightningConfig__connection_failed, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                } else {
-                    requireView().post(() -> {
-                        setLoading(false);
-                        Toast.makeText(requireContext(), R.string.LightningConfig__configuration_failed, Toast.LENGTH_LONG).show();
-                    });
-                }
+                handleConnectionResult(success);
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure NWC", t);
-                requireView().post(() -> {
-                    setLoading(false);
-                    Toast.makeText(requireContext(), R.string.LightningConfig__configuration_failed, Toast.LENGTH_LONG).show();
-                });
+                handleConnectionError();
             }
         }).start();
+    }
+    
+    private void connectLnd() {
+        String url = lndUrlInput.getText().toString().trim();
+        String macaroon = lndMacaroonInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(url)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_url, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (TextUtils.isEmpty(macaroon)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_macaroon, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configureLnd(AppDependencies.getApplication(), url, macaroon);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure LND", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectCln() {
+        String url = clnUrlInput.getText().toString().trim();
+        String rune = clnRuneInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(url)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_url, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (TextUtils.isEmpty(rune)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_rune, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configureCln(AppDependencies.getApplication(), url, rune);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure CLN", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectPhoenixd() {
+        String url = phoenixdUrlInput.getText().toString().trim();
+        String password = phoenixdPasswordInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(url)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_url, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (TextUtils.isEmpty(password)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_password, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configurePhoenixd(AppDependencies.getApplication(), url, password);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure Phoenixd", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectStrike() {
+        String apiKey = strikeApiKeyInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(apiKey)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_api_key, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configureStrike(AppDependencies.getApplication(), apiKey);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure Strike", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectBlink() {
+        String apiKey = blinkApiKeyInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(apiKey)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_api_key, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configureBlink(AppDependencies.getApplication(), apiKey);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure Blink", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectSpeed() {
+        String apiKey = speedApiKeyInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(apiKey)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_api_key, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean success = LightningUiInteractor.configureSpeed(AppDependencies.getApplication(), apiKey);
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure Speed", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void handleConnectionResult(boolean success) {
+        if (success) {
+            boolean available = LightningUiInteractor.isAvailableBlocking(AppDependencies.getApplication());
+            
+            requireView().post(() -> {
+                setLoading(false);
+                if (available) {
+                    SignalStore.payments().setLightningEnabled(true);
+                    Toast.makeText(requireContext(), R.string.LightningConfig__connected_successfully, Toast.LENGTH_SHORT).show();
+                    updateUiState();
+                } else {
+                    Toast.makeText(requireContext(), R.string.LightningConfig__connection_failed, Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            requireView().post(() -> {
+                setLoading(false);
+                Toast.makeText(requireContext(), R.string.LightningConfig__configuration_failed, Toast.LENGTH_LONG).show();
+            });
+        }
+    }
+    
+    private void handleConnectionError() {
+        requireView().post(() -> {
+            setLoading(false);
+            Toast.makeText(requireContext(), R.string.LightningConfig__configuration_failed, Toast.LENGTH_LONG).show();
+        });
     }
 
     private void disconnect() {
@@ -176,6 +508,6 @@ public class LightningConfigFragment extends Fragment {
         spinner.setVisibility(loading ? View.VISIBLE : View.GONE);
         connectButton.setEnabled(!loading);
         disconnectButton.setEnabled(!loading);
-        nwcUriInput.setEnabled(!loading);
+        nodeTypeSelector.setEnabled(!loading);
     }
 }

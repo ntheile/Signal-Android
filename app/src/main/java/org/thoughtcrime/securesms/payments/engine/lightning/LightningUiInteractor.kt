@@ -94,6 +94,117 @@ object LightningUiInteractor {
     }
 
     /**
+     * Configure an LND connection.
+     */
+    @JvmStatic
+    fun configureLnd(context: Context, url: String, macaroon: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.LND,
+                url = url,
+                credential = macaroon
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure LND", e)
+            false
+        }
+    }
+
+    /**
+     * Configure a Core Lightning (CLN) connection.
+     */
+    @JvmStatic
+    fun configureCln(context: Context, url: String, rune: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.CLN,
+                url = url,
+                credential = rune
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure CLN", e)
+            false
+        }
+    }
+
+    /**
+     * Configure a Phoenixd connection.
+     */
+    @JvmStatic
+    fun configurePhoenixd(context: Context, url: String, password: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.PHOENIXD,
+                url = url,
+                credential = password
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure Phoenixd", e)
+            false
+        }
+    }
+
+    /**
+     * Configure a Strike connection.
+     */
+    @JvmStatic
+    fun configureStrike(context: Context, apiKey: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.STRIKE,
+                credential = apiKey
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure Strike", e)
+            false
+        }
+    }
+
+    /**
+     * Configure a Blink connection.
+     */
+    @JvmStatic
+    fun configureBlink(context: Context, apiKey: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.BLINK,
+                credential = apiKey
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure Blink", e)
+            false
+        }
+    }
+
+    /**
+     * Configure a Speed connection.
+     */
+    @JvmStatic
+    fun configureSpeed(context: Context, apiKey: String): Boolean {
+        return try {
+            val config = LightningConfig(
+                type = LightningNodeType.SPEED,
+                credential = apiKey
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure Speed", e)
+            false
+        }
+    }
+
+    /**
      * Clear the Lightning configuration.
      */
     @JvmStatic
