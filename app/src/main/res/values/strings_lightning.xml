@@ -43,6 +43,7 @@
     <!-- Common -->
     <string name="LightningConfig__connect">Connect</string>
     <string name="LightningConfig__disconnect">Disconnect</string>
+    <string name="LightningConfig__test_connection">Test Connection</string>
     <string name="LightningConfig__connected_to">Connected to %1$s</string>
     <string name="LightningConfig__not_connected">Not connected</string>
     <string name="LightningConfig__please_enter_credentials">Please enter the required credentials</string>
@@ -59,6 +60,11 @@
     <string name="LightningConfig__disconnected">Lightning node disconnected</string>
     <string name="LightningConfig__disconnect_failed">Failed to disconnect Lightning node</string>
     <string name="LightningConfig__powered_by_lni">Powered by Lightning Node Interface (LNI)</string>
+    <string name="LightningConfig__balance">Balance</string>
+    <string name="LightningConfig__testing_connection">Testing connection…</string>
+    <string name="LightningConfig__connection_successful">Connection successful!</string>
+    <string name="LightningConfig__send_balance">Send: %1$s sats</string>
+    <string name="LightningConfig__receive_balance">Receive: %1$s sats</string>
     
     <!-- Node type names -->
     <string name="LightningConfig__node_type_nwc">NWC (Nostr Wallet Connect)</string>

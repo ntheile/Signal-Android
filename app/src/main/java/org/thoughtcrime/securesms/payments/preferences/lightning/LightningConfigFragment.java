@@ -56,8 +56,11 @@ public class LightningConfigFragment extends Fragment {
     private AutoCompleteTextView nodeTypeSelector;
     private Button connectButton;
     private Button disconnectButton;
+    private Button testButton;
     private ProgressBar spinner;
     private TextView statusText;
+    private LinearLayout balanceSection;
+    private TextView balanceText;
     
     // Sections
     private LinearLayout nwcSection;
@@ -114,8 +117,11 @@ public class LightningConfigFragment extends Fragment {
         nodeTypeSelector = view.findViewById(R.id.lightning_node_type);
         connectButton = view.findViewById(R.id.lightning_connect_button);
         disconnectButton = view.findViewById(R.id.lightning_disconnect_button);
+        testButton = view.findViewById(R.id.lightning_test_button);
         spinner = view.findViewById(R.id.lightning_spinner);
         statusText = view.findViewById(R.id.lightning_status);
+        balanceSection = view.findViewById(R.id.lightning_balance_section);
+        balanceText = view.findViewById(R.id.lightning_balance_text);
         
         // Sections
         nwcSection = view.findViewById(R.id.lightning_nwc_section);
@@ -159,6 +165,7 @@ public class LightningConfigFragment extends Fragment {
         
         connectButton.setOnClickListener(v -> connect());
         disconnectButton.setOnClickListener(v -> disconnect());
+        testButton.setOnClickListener(v -> testConnection());
 
         updateUiState();
     }
@@ -243,6 +250,11 @@ public class LightningConfigFragment extends Fragment {
             
             connectButton.setVisibility(View.GONE);
             disconnectButton.setVisibility(View.VISIBLE);
+            testButton.setVisibility(View.VISIBLE);
+            balanceSection.setVisibility(View.VISIBLE);
+            
+            // Fetch and display balance in background
+            fetchAndDisplayBalance();
         } else {
             statusText.setText(R.string.LightningConfig__not_connected);
             statusText.setVisibility(View.VISIBLE);
@@ -253,7 +265,81 @@ public class LightningConfigFragment extends Fragment {
             
             connectButton.setVisibility(View.VISIBLE);
             disconnectButton.setVisibility(View.GONE);
+            testButton.setVisibility(View.GONE);
+            balanceSection.setVisibility(View.GONE);
         }
+    }
+    
+    private void fetchAndDisplayBalance() {
+        new Thread(() -> {
+            try {
+                org.thoughtcrime.securesms.payments.engine.lightning.LightningBalance balance = 
+                    LightningUiInteractor.getBalanceBlocking(AppDependencies.getApplication());
+                if (balance != null) {
+                    String balanceStr = String.format(java.util.Locale.getDefault(), 
+                        "%s\n%s",
+                        getString(R.string.LightningConfig__send_balance, formatSats(balance.getSendBalanceSats())),
+                        getString(R.string.LightningConfig__receive_balance, formatSats(balance.getReceiveBalanceSats())));
+                    requireView().post(() -> {
+                        balanceText.setText(balanceStr);
+                    });
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to fetch balance", t);
+            }
+        }).start();
+    }
+    
+    private String formatSats(long sats) {
+        java.text.NumberFormat nf = java.text.NumberFormat.getInstance(java.util.Locale.getDefault());
+        nf.setGroupingUsed(true);
+        return nf.format(sats);
+    }
+    
+    private void testConnection() {
+        Toast.makeText(requireContext(), R.string.LightningConfig__testing_connection, Toast.LENGTH_SHORT).show();
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                boolean available = LightningUiInteractor.isAvailableBlocking(AppDependencies.getApplication());
+                org.thoughtcrime.securesms.payments.engine.lightning.LightningBalance balance = 
+                    LightningUiInteractor.getBalanceBlocking(AppDependencies.getApplication());
+                
+                requireView().post(() -> {
+                    setLoading(false);
+                    if (available) {
+                        String message = getString(R.string.LightningConfig__connection_successful);
+                        if (balance != null) {
+                            message += "\n" + getString(R.string.LightningConfig__send_balance, formatSats(balance.getSendBalanceSats()));
+                            message += "\n" + getString(R.string.LightningConfig__receive_balance, formatSats(balance.getReceiveBalanceSats()));
+                        }
+                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.LightningConfig__test_connection)
+                            .setMessage(message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show();
+                        
+                        // Update balance display
+                        if (balance != null) {
+                            String balanceStr = String.format(java.util.Locale.getDefault(), 
+                                "%s\n%s",
+                                getString(R.string.LightningConfig__send_balance, formatSats(balance.getSendBalanceSats())),
+                                getString(R.string.LightningConfig__receive_balance, formatSats(balance.getReceiveBalanceSats())));
+                            balanceText.setText(balanceStr);
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), R.string.LightningConfig__connection_failed, Toast.LENGTH_LONG).show();
+                    }
+                });
+            } catch (Throwable t) {
+                Log.w(TAG, "Test connection failed", t);
+                requireView().post(() -> {
+                    setLoading(false);
+                    Toast.makeText(requireContext(), R.string.LightningConfig__connection_failed, Toast.LENGTH_LONG).show();
+                });
+            }
+        }).start();
     }
 
     private void connect() {
@@ -508,6 +594,7 @@ public class LightningConfigFragment extends Fragment {
         spinner.setVisibility(loading ? View.VISIBLE : View.GONE);
         connectButton.setEnabled(!loading);
         disconnectButton.setEnabled(!loading);
+        testButton.setEnabled(!loading);
         nodeTypeSelector.setEnabled(!loading);
     }
 }

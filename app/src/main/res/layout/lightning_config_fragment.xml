@@ -377,6 +377,45 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <!-- Test Connection Button -->
+            <Button
+                android:id="@+id/lightning_test_button"
+                style="@style/Signal.Widget.Button.Large.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/LightningConfig__test_connection"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Balance Display -->
+            <LinearLayout
+                android:id="@+id/lightning_balance_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/LightningConfig__balance"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lightning_balance_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="?colorPrimary"
+                    tools:text="1,234 sats" />
+
+            </LinearLayout>
+
             <!-- LNI Attribution -->
             <TextView
                 android:layout_width="match_parent"
