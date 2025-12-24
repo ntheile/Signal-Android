@@ -5,22 +5,41 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.signal.core.util.logging.Log
 
+// Import LNI library types
+import lni.LightningNodeInterface
+import lni.CreateInvoiceParams as LniCreateInvoiceParams
+import lni.PayInvoiceParams as LniPayInvoiceParams
+import lni.InvoiceType as LniInvoiceType
+import lni.NodeInfo
+import lni.Transaction
+import lni.PayInvoiceResponse
+import lni.TransactionStatus
+
+// Import LNI node implementations
+import lni.LndNode as LniLndNode
+import lni.LndConfig
+import lni.StrikeNode as LniStrikeNode
+import lni.StrikeConfig
+import lni.BlinkNode as LniBlinkNode
+import lni.BlinkConfig
+import lni.NwcNode as LniNwcNode
+import lni.NwcConfig
+
 /**
  * Lightning Engine that provides a unified interface for Lightning payments.
  * 
  * This engine manages the connection to a Lightning node and provides
  * methods for creating invoices, paying invoices, and checking balances.
  * 
- * The implementation supports multiple backends through the LightningNode interface,
- * modeled after the LNI (Lightning Node Interface) library.
+ * The implementation uses the LNI (Lightning Node Interface) library which
+ * provides a standard interface to connect to multiple Lightning node
+ * implementations.
  * 
- * Currently implemented backends:
- * - NWC (Nostr Wallet Connect) - Simple HTTP/WebSocket based protocol
- * 
- * Future backends (can be added via LNI library integration):
+ * Supported backends via LNI:
  * - LND
  * - CLN (Core Lightning)
  * - Phoenixd
+ * - NWC (Nostr Wallet Connect)
  * - Strike
  * - Blink
  * - Speed
@@ -36,7 +55,7 @@ class LightningEngine(private val appContext: Context) {
     private val configStore by lazy { LightningConfigStore(appContext) }
     
     @Volatile
-    private var node: LightningNode? = null
+    private var node: LightningNodeInterface? = null
 
     /**
      * Check if a Lightning node is configured.
@@ -48,7 +67,8 @@ class LightningEngine(private val appContext: Context) {
      */
     suspend fun isAvailable(): Boolean = withContext(Dispatchers.IO) {
         try {
-            getOrCreateNode()?.isAvailable() ?: false
+            val n = getOrCreateNode() ?: return@withContext false
+            n.getInfo().isSuccess
         } catch (e: Throwable) {
             Log.w(TAG, "Lightning node not available", e)
             false
@@ -95,10 +115,18 @@ class LightningEngine(private val appContext: Context) {
     suspend fun getBalance(): LightningBalance = withContext(Dispatchers.IO) {
         try {
             val n = getOrCreateNode() ?: return@withContext LightningBalance(0, 0)
-            val info = n.getInfo()
-            LightningBalance(
-                sendBalanceSats = info.sendBalanceMsat / 1000,
-                receiveBalanceSats = info.receiveBalanceMsat / 1000
+            val infoResult = n.getInfo()
+            infoResult.fold(
+                onSuccess = { info ->
+                    LightningBalance(
+                        sendBalanceSats = info.maxPayableSat ?: info.balanceSat ?: 0,
+                        receiveBalanceSats = info.maxReceivableSat ?: 0
+                    )
+                },
+                onFailure = {
+                    Log.w(TAG, "Failed to get Lightning balance", it)
+                    LightningBalance(0, 0)
+                }
             )
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to get Lightning balance", e)
@@ -112,13 +140,14 @@ class LightningEngine(private val appContext: Context) {
     suspend fun createInvoice(amountSats: Long, description: String? = null): Result<String> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
-            val params = CreateInvoiceParams(
-                invoiceType = InvoiceType.BOLT11,
+            val params = LniCreateInvoiceParams(
+                invoiceType = LniInvoiceType.Bolt11,
                 amountMsats = amountSats * 1000,
                 description = description
             )
-            val tx = n.createInvoice(params).getOrThrow()
-            tx.invoice
+            val txResult = n.createInvoice(params)
+            val tx = txResult.getOrThrow()
+            tx.paymentRequest ?: throw IllegalStateException("Invoice creation failed: no payment request returned")
         }
     }
 
@@ -128,15 +157,16 @@ class LightningEngine(private val appContext: Context) {
     suspend fun payInvoice(invoice: String, feeLimitSats: Long? = null): Result<LightningPaymentResult> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
-            val params = PayInvoiceParams(
+            val params = LniPayInvoiceParams(
                 invoice = invoice,
-                feeLimitMsat = feeLimitSats?.let { it * 1000 }
+                feeLimitPercentage = feeLimitSats?.let { 1.0f } // Use 1% fee limit if sats limit specified
             )
-            val response = n.payInvoice(params).getOrThrow()
+            val responseResult = n.payInvoice(params)
+            val response = responseResult.getOrThrow()
             LightningPaymentResult(
                 paymentHash = response.paymentHash,
-                preimage = response.preimage,
-                feeSats = response.feeMsats / 1000
+                preimage = response.preimage ?: "",
+                feeSats = (response.feeMsats ?: 0) / 1000
             )
         }
     }
@@ -147,13 +177,14 @@ class LightningEngine(private val appContext: Context) {
     suspend fun lookupPayment(paymentHash: String): Result<LightningPaymentStatus> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
-            val tx = n.lookupInvoice(paymentHash).getOrThrow()
+            val txResult = n.lookupInvoice(paymentHash)
+            val tx = txResult.getOrThrow()
             LightningPaymentStatus(
                 paymentHash = tx.paymentHash,
-                isPaid = tx.settledAt > 0,
-                amountSats = tx.amountMsats / 1000,
-                feesPaidSats = tx.feesPaid / 1000,
-                settledAt = if (tx.settledAt > 0) tx.settledAt * 1000 else null
+                isPaid = tx.status == TransactionStatus.Complete,
+                amountSats = (tx.amountMsats ?: 0) / 1000,
+                feesPaidSats = (tx.feeMsats ?: 0) / 1000,
+                settledAt = tx.settledAt?.let { it * 1000 }
             )
         }
     }
@@ -164,49 +195,53 @@ class LightningEngine(private val appContext: Context) {
     suspend fun listTransactions(limit: Int = 20): Result<List<LightningTx>> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
-            val transactions = n.listTransactions(0, limit).getOrThrow()
+            val params = lni.ListTransactionsParams(
+                from = 0,
+                limit = limit
+            )
+            val transactionsResult = n.listTransactions(params)
+            val transactions = transactionsResult.getOrThrow()
             transactions.map { tx ->
                 LightningTx(
                     paymentHash = tx.paymentHash,
-                    type = if (tx.type == "incoming") LightningTxType.RECEIVE else LightningTxType.SEND,
-                    amountSats = tx.amountMsats / 1000,
-                    feesPaidSats = tx.feesPaid / 1000,
-                    description = tx.description,
-                    createdAt = tx.createdAt * 1000,
-                    settledAt = if (tx.settledAt > 0) tx.settledAt * 1000 else null,
-                    isPaid = tx.settledAt > 0
+                    type = if (tx.type == lni.TransactionType.Incoming) LightningTxType.RECEIVE else LightningTxType.SEND,
+                    amountSats = (tx.amountMsats ?: 0) / 1000,
+                    feesPaidSats = (tx.feeMsats ?: 0) / 1000,
+                    description = tx.description ?: "",
+                    createdAt = (tx.createdAt ?: 0) * 1000,
+                    settledAt = tx.settledAt?.let { it * 1000 },
+                    isPaid = tx.status == TransactionStatus.Complete
                 )
             }
         }
     }
 
-    private fun getOrCreateNode(): LightningNode? {
+    private fun getOrCreateNode(): LightningNodeInterface? {
         node?.let { return it }
         
         val config = configStore.getConfig() ?: return null
         
-        val newNode = when (config.type) {
+        val newNode: LightningNodeInterface? = when (config.type) {
             LightningNodeType.NWC -> {
-                val nwcConfig = NwcNode.NwcConfig.fromUri(config.credential)
-                NwcNode(nwcConfig)
+                LniNwcNode(NwcConfig(uri = config.credential))
             }
             LightningNodeType.LND -> {
-                LndNode(
-                    baseUrl = config.url ?: throw IllegalStateException("LND requires URL"),
+                LniLndNode(LndConfig(
+                    url = config.url ?: throw IllegalStateException("LND requires URL"),
                     macaroon = config.credential
-                )
+                ))
             }
             LightningNodeType.STRIKE -> {
-                StrikeNode(apiKey = config.credential)
+                LniStrikeNode(StrikeConfig(apiKey = config.credential))
             }
             LightningNodeType.BLINK -> {
-                BlinkNode(apiKey = config.credential)
+                LniBlinkNode(BlinkConfig(apiKey = config.credential))
             }
-            // CLN, Phoenixd, Speed not yet implemented
+            // CLN, Phoenixd, Speed - can be added when LNI uniffi bindings are built
             LightningNodeType.CLN,
             LightningNodeType.PHOENIXD,
             LightningNodeType.SPEED -> {
-                Log.w(TAG, "Lightning node type not yet fully implemented: ${config.type}. Using placeholder.")
+                Log.w(TAG, "Lightning node type ${config.type} requires building LNI native bindings. Using placeholder.")
                 null
             }
         }

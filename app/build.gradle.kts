@@ -507,6 +507,7 @@ dependencies {
   implementation(project(":sticky-header-grid"))
   implementation(project(":photoview"))
   implementation(project(":core-ui"))
+  implementation(project(":lni"))
 
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.fragment.compose)
