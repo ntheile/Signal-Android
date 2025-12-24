@@ -15,10 +15,26 @@ object LightningUiInteractor {
     private const val TAG = "LightningUiInteractor"
 
     /**
-     * Check if a Lightning node is configured.
+     * Check if a Lightning node is configured AND enabled.
+     * This is the primary check to determine if Lightning should be used for payments.
      */
     @JvmStatic
     fun isConfigured(context: Context): Boolean {
+        return try {
+            // Check if Lightning is enabled globally AND has a configuration
+            org.thoughtcrime.securesms.keyvalue.SignalStore.payments.lightningEnabled() &&
+            LightningEngineProvider.get(context).isConfigured()
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to check Lightning configuration", e)
+            false
+        }
+    }
+    
+    /**
+     * Check if a Lightning node has a configuration file (ignores enabled flag).
+     */
+    @JvmStatic
+    fun hasConfiguration(context: Context): Boolean {
         return try {
             LightningEngineProvider.get(context).isConfigured()
         } catch (e: Throwable) {

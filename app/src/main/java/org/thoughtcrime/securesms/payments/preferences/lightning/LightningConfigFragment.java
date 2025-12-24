@@ -231,10 +231,12 @@ public class LightningConfigFragment extends Fragment {
     }
 
     private void updateUiState() {
-        boolean isConfigured = LightningUiInteractor.isConfigured(AppDependencies.getApplication());
+        // Use hasConfiguration to check if there's a saved config (ignores enabled flag)
+        boolean hasConfig = LightningUiInteractor.hasConfiguration(AppDependencies.getApplication());
+        boolean isEnabled = SignalStore.payments().lightningEnabled();
         LightningNodeType nodeType = LightningUiInteractor.getConfiguredNodeType(AppDependencies.getApplication());
         
-        if (isConfigured && nodeType != null) {
+        if (hasConfig && isEnabled && nodeType != null) {
             statusText.setText(getString(R.string.LightningConfig__connected_to, nodeType.name()));
             statusText.setVisibility(View.VISIBLE);
             
