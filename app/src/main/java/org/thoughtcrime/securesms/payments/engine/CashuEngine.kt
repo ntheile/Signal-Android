@@ -367,7 +367,7 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
   
   override suspend fun lightningAvailable(): Boolean = withContext(Dispatchers.IO) {
     try {
-      SignalStore.payments.lightningEnabled() && lightningEngine.isAvailable()
+      SignalStore.payments().lightningEnabled() && lightningEngine.isAvailable()
     } catch (e: Throwable) {
       Log.w(TAG, "Lightning availability check failed", e)
       false

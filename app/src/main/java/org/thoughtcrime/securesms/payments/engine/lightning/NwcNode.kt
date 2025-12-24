@@ -253,6 +253,18 @@ class NwcNode(private val config: NwcConfig) : LightningNode {
         }
     }
     
+    /**
+     * Build the NWC proxy URL for HTTP-based implementations.
+     * 
+     * LIMITATIONS:
+     * - This is a simplified HTTP-based implementation designed to work with
+     *   NWC HTTP proxies like Alby's NWC service.
+     * - Full NWC implementations use Nostr WebSocket relays with encrypted events.
+     * - For production use with native Nostr protocol, consider integrating the
+     *   full LNI library which provides complete NWC support.
+     * 
+     * @see <a href="https://github.com/lightning-node-interface/lni">LNI Library</a>
+     */
     private fun buildNwcProxyUrl(method: String): String {
         // Use the relay URL as the base, appending the NWC method
         // This works with NWC HTTP proxies like those from Alby
