@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Lightning Configuration Fragment -->
+    <string name="LightningConfig__title">Lightning Node</string>
+    <string name="LightningConfig__header">Connect Lightning Node</string>
+    <string name="LightningConfig__description">Connect to your Lightning node for direct payments. You can use Nostr Wallet Connect (NWC) for easy setup. More connection options coming soon via the LNI library.</string>
+    <string name="LightningConfig__nwc_uri_hint">Nostr Wallet Connect URI</string>
+    <string name="LightningConfig__nwc_help">Paste your NWC URI starting with nostr+walletconnect://. You can get this from wallets like Alby, Umbrel, or any NWC-compatible wallet.</string>
+    <string name="LightningConfig__connect">Connect</string>
+    <string name="LightningConfig__disconnect">Disconnect</string>
+    <string name="LightningConfig__connected_to">Connected to %1$s</string>
+    <string name="LightningConfig__not_connected">Not connected</string>
+    <string name="LightningConfig__please_enter_nwc_uri">Please enter a NWC URI</string>
+    <string name="LightningConfig__invalid_nwc_uri">Invalid NWC URI. It should start with nostr+walletconnect://</string>
+    <string name="LightningConfig__connected_successfully">Lightning node connected successfully!</string>
+    <string name="LightningConfig__connection_failed">Failed to connect to Lightning node. Please check your NWC URI and try again.</string>
+    <string name="LightningConfig__configuration_failed">Failed to save Lightning configuration</string>
+    <string name="LightningConfig__disconnected">Lightning node disconnected</string>
+    <string name="LightningConfig__disconnect_failed">Failed to disconnect Lightning node</string>
+    <string name="LightningConfig__powered_by_lni">Powered by Lightning Node Interface (LNI)</string>
+    
+    <!-- Lightning Payment -->
+    <string name="LightningPayment__pay_with_lightning">Pay with Lightning</string>
+    <string name="LightningPayment__receive_via_lightning">Receive via Lightning</string>
+    <string name="LightningPayment__lightning_balance">Lightning Balance</string>
+    <string name="LightningPayment__create_invoice">Create Invoice</string>
+    <string name="LightningPayment__pay_invoice">Pay Invoice</string>
+    <string name="LightningPayment__payment_successful">Lightning payment successful!</string>
+    <string name="LightningPayment__payment_failed">Lightning payment failed</string>
+</resources>

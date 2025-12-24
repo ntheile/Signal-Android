@@ -36,6 +36,8 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
     private const val CASHU_ACTIVE_MINT = "cashu_active_mint"
     private const val CASHU_KNOWN_MINTS = "cashu_known_mints"
     private const val CASHU_ENABLED = "cashu_enabled"
+    private const val LIGHTNING_ENABLED = "lightning_enabled"
+    private const val LIGHTNING_PREFERRED = "lightning_preferred"
     private const val PAYMENTS_ENTROPY = "payments_entropy"
     private const val MOB_LEDGER = "mob_ledger"
     private const val PAYMENTS_CURRENT_CURRENCY = "payments_current_currency"
@@ -141,6 +143,43 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
    */
   fun cashuEnabled(): Boolean {
     return org.thoughtcrime.securesms.BuildConfig.DEBUG || getBoolean(CASHU_ENABLED, false)
+  }
+
+  /**
+   * Check if Lightning payments are enabled.
+   * Lightning can be used alongside Cashu for direct node payments.
+   */
+  fun lightningEnabled(): Boolean {
+    return getBoolean(LIGHTNING_ENABLED, false)
+  }
+
+  /**
+   * Set Lightning payments enabled state.
+   */
+  @WorkerThread
+  fun setLightningEnabled(enabled: Boolean) {
+    store.beginWrite()
+      .putBoolean(LIGHTNING_ENABLED, enabled)
+      .commit()
+  }
+
+  /**
+   * Check if Lightning is preferred over Cashu for withdrawals.
+   * When true, the app will prefer using direct Lightning payments
+   * instead of Cashu melting when both are available.
+   */
+  fun lightningPreferred(): Boolean {
+    return getBoolean(LIGHTNING_PREFERRED, false)
+  }
+
+  /**
+   * Set whether Lightning is preferred over Cashu for withdrawals.
+   */
+  @WorkerThread
+  fun setLightningPreferred(preferred: Boolean) {
+    store.beginWrite()
+      .putBoolean(LIGHTNING_PREFERRED, preferred)
+      .commit()
   }
 
   val paymentsAvailability: PaymentsAvailability

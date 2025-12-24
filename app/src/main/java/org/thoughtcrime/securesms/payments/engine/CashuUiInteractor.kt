@@ -70,5 +70,59 @@ object CashuUiInteractor {
       emptyList()
     }
   }
+  
+  // Lightning integration methods
+  
+  /**
+   * Check if direct Lightning node is available.
+   */
+  @JvmStatic
+  fun lightningAvailableBlocking(context: Context): Boolean = runBlocking {
+    runCatching {
+      PaymentsEngineProvider.get(context).lightningAvailable()
+    }.getOrElse { throwable ->
+      org.signal.core.util.logging.Log.w(TAG, "Failed to check Lightning availability", throwable)
+      false
+    }
+  }
+  
+  /**
+   * Get Lightning node balance (separate from Cashu).
+   */
+  @JvmStatic
+  fun getLightningBalanceBlocking(context: Context): LightningBalance? = runBlocking {
+    runCatching {
+      PaymentsEngineProvider.get(context).getLightningBalance()
+    }.getOrElse { throwable ->
+      org.signal.core.util.logging.Log.w(TAG, "Failed to get Lightning balance", throwable)
+      null
+    }
+  }
+  
+  /**
+   * Pay a Lightning invoice directly via the connected node.
+   */
+  @JvmStatic
+  fun payLightningInvoiceBlocking(context: Context, invoice: String, feeLimitSats: Long? = null): LightningPayment? = runBlocking {
+    runCatching {
+      PaymentsEngineProvider.get(context).payLightningInvoice(invoice, feeLimitSats).getOrNull()
+    }.getOrElse { throwable ->
+      org.signal.core.util.logging.Log.w(TAG, "Failed to pay Lightning invoice", throwable)
+      null
+    }
+  }
+  
+  /**
+   * Create a Lightning invoice directly via the connected node.
+   */
+  @JvmStatic
+  fun createLightningInvoiceBlocking(context: Context, amountSats: Long, description: String? = null): String? = runBlocking {
+    runCatching {
+      PaymentsEngineProvider.get(context).createLightningInvoice(amountSats, description).getOrNull()
+    }.getOrElse { throwable ->
+      org.signal.core.util.logging.Log.w(TAG, "Failed to create Lightning invoice", throwable)
+      null
+    }
+  }
 }
 

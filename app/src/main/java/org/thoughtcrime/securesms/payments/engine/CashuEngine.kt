@@ -359,4 +359,54 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
   }
 
   fun getCdkWalletUnsafe(): Wallet? = wallet
+  
+  // Lightning integration via LNI library
+  private val lightningEngine by lazy { 
+    org.thoughtcrime.securesms.payments.engine.lightning.LightningEngineProvider.get(appContext) 
+  }
+  
+  override suspend fun lightningAvailable(): Boolean = withContext(Dispatchers.IO) {
+    try {
+      SignalStore.payments.lightningEnabled() && lightningEngine.isAvailable()
+    } catch (e: Throwable) {
+      Log.w(TAG, "Lightning availability check failed", e)
+      false
+    }
+  }
+  
+  override suspend fun getLightningBalance(): LightningBalance = withContext(Dispatchers.IO) {
+    try {
+      val balance = lightningEngine.getBalance()
+      LightningBalance(
+        sendBalanceSats = balance.sendBalanceSats,
+        receiveBalanceSats = balance.receiveBalanceSats
+      )
+    } catch (e: Throwable) {
+      Log.w(TAG, "Failed to get Lightning balance", e)
+      LightningBalance(0, 0)
+    }
+  }
+  
+  override suspend fun payLightningInvoice(invoice: String, feeLimitSats: Long?): Result<LightningPayment> = withContext(Dispatchers.IO) {
+    runCatching {
+      if (!lightningAvailable()) {
+        throw IllegalStateException("Lightning not available")
+      }
+      val result = lightningEngine.payInvoice(invoice, feeLimitSats).getOrThrow()
+      LightningPayment(
+        paymentHash = result.paymentHash,
+        preimage = result.preimage,
+        feeSats = result.feeSats
+      )
+    }
+  }
+  
+  override suspend fun createLightningInvoice(amountSats: Long, description: String?): Result<String> = withContext(Dispatchers.IO) {
+    runCatching {
+      if (!lightningAvailable()) {
+        throw IllegalStateException("Lightning not available")
+      }
+      lightningEngine.createInvoice(amountSats, description).getOrThrow()
+    }
+  }
 }
