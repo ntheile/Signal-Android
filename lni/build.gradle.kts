@@ -21,38 +21,16 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.jetbrains.kotlin.android)
+    id("signal-library")
 }
-
-val signalBuildToolsVersion: String by rootProject.extra
-val signalCompileSdkVersion: String by rootProject.extra
-val signalMinSdkVersion: Int by rootProject.extra
-val signalNdkVersion: String by rootProject.extra
-val signalJavaVersion: JavaVersion by rootProject.extra
-val signalKotlinJvmTarget: String by rootProject.extra
 
 android {
     namespace = "org.lni"
-    compileSdkVersion = signalCompileSdkVersion
-    buildToolsVersion = signalBuildToolsVersion
-    ndkVersion = signalNdkVersion
 
     defaultConfig {
-        minSdk = signalMinSdkVersion
-        
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
-    }
-
-    compileOptions {
-        sourceCompatibility = signalJavaVersion
-        targetCompatibility = signalJavaVersion
-    }
-
-    kotlinOptions {
-        jvmTarget = signalKotlinJvmTarget
     }
 
     sourceSets {
