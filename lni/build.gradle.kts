@@ -49,7 +49,6 @@ dependencies {
     
     // Kotlin coroutines for async operations
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
 }
 
 // Task to clone or update the LNI repository
