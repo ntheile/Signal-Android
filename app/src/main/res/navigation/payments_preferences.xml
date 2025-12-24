@@ -120,7 +120,20 @@
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
 
+        <action
+            android:id="@+id/action_paymentsHome_to_lightningConfig"
+            app:destination="@id/lightningConfig"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/lightningConfig"
+        android:name="org.thoughtcrime.securesms.payments.preferences.lightning.LightningConfigFragment"
+        tools:layout="@layout/lightning_config_fragment" />
 
     <fragment
         android:id="@+id/paymentsAllActivity"

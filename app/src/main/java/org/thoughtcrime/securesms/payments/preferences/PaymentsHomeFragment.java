@@ -522,7 +522,10 @@ public class PaymentsHomeFragment extends LoggingFragment {
   }
 
   private boolean onMenuItemSelected(@NonNull MenuItem item) {
-    if (item.getItemId() == R.id.payments_home_fragment_menu_transfer_to_exchange) {
+    if (item.getItemId() == R.id.payments_home_fragment_menu_lightning_config) {
+      SafeNavigation.safeNavigate(NavHostFragment.findNavController(this), R.id.action_paymentsHome_to_lightningConfig);
+      return true;
+    } else if (item.getItemId() == R.id.payments_home_fragment_menu_transfer_to_exchange) {
       if (viewModel.isEnclaveFailurePresent()) {
         showUpdateIsRequiredDialog();
       } else {

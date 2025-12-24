@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Menu item for Payments Home -->
+    <string name="PaymentsHomeFragment__lightning_node">Lightning Node</string>
+    
     <!-- Lightning Configuration Fragment -->
     <string name="LightningConfig__title">Lightning Node</string>
     <string name="LightningConfig__header">Connect Lightning Node</string>
