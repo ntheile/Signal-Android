@@ -9,6 +9,7 @@ package lni
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.URL
+import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
@@ -39,7 +40,7 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
             val sslContext = SSLContext.getInstance("TLS")
             sslContext.init(null, trustAllCerts, java.security.SecureRandom())
             connection.sslSocketFactory = sslContext.socketFactory
-            connection.hostnameVerifier = { _, _ -> true }
+            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
         }
         
         return connection
