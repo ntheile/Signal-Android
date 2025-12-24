@@ -19,6 +19,8 @@ import org.signal.core.util.logging.Log;
 import org.thoughtcrime.securesms.LoggingFragment;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.dependencies.AppDependencies;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningPaymentResult;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.permissions.Permissions;
 import org.thoughtcrime.securesms.util.ViewUtil;
 import org.thoughtcrime.securesms.util.navigation.SafeNavigation;
@@ -76,20 +78,51 @@ public final class PaymentsTransferFragment extends LoggingFragment {
 
     Toast.makeText(requireContext(), R.string.PaymentsPayInvoice__requesting_quote, Toast.LENGTH_SHORT).show();
 
-    // Background thread to request melt quote
+    // Background thread to process payment
     new Thread(() -> {
       try {
-        org.thoughtcrime.securesms.payments.engine.MeltQuote quote = org.thoughtcrime.securesms.payments.engine.CashuUiInteractor.requestMeltQuoteBlocking(AppDependencies.getApplication(), invoice);
-        if (quote == null) throw new RuntimeException("No quote");
-        Bundle args = PayInvoiceConfirmFragment.argsFromQuote(quote);
-        requireView().post(() -> SafeNavigation.safeNavigate(Navigation.findNavController(requireView()), R.id.action_paymentsTransfer_to_payInvoiceConfirm, args));
+        // Check if Lightning node is configured - use it directly for payments
+        if (LightningUiInteractor.isConfigured(AppDependencies.getApplication())) {
+          // Pay directly via Lightning node
+          LightningPaymentResult result = LightningUiInteractor.payInvoiceBlocking(
+              AppDependencies.getApplication(), invoice, null);
+          
+          if (result != null) {
+            requireView().post(() -> {
+              Toast.makeText(requireContext(), R.string.LightningPayment__payment_successful, Toast.LENGTH_SHORT).show();
+              // Navigate back to payments home
+              Navigation.findNavController(requireView()).popBackStack();
+              // Notify home to refresh activity
+              getParentFragmentManager().setFragmentResult("cashu_history_changed", new Bundle());
+            });
+          } else {
+            // Lightning payment failed, fallback to Cashu melt
+            payViaCashuMelt(invoice);
+          }
+        } else {
+          // Use Cashu melt (original flow)
+          payViaCashuMelt(invoice);
+        }
       } catch (Throwable t) {
+        Log.w(TAG, "Payment failed", t);
         requireView().post(() -> Toast.makeText(requireContext(), R.string.PaymentsPayInvoice__unable_to_pay, Toast.LENGTH_LONG).show());
       }
     }).start();
 
     return true;
   }
+  
+  private void payViaCashuMelt(String invoice) {
+    try {
+      org.thoughtcrime.securesms.payments.engine.MeltQuote quote = org.thoughtcrime.securesms.payments.engine.CashuUiInteractor.requestMeltQuoteBlocking(AppDependencies.getApplication(), invoice);
+      if (quote == null) throw new RuntimeException("No quote");
+      Bundle args = PayInvoiceConfirmFragment.argsFromQuote(quote);
+      requireView().post(() -> SafeNavigation.safeNavigate(Navigation.findNavController(requireView()), R.id.action_paymentsTransfer_to_payInvoiceConfirm, args));
+    } catch (Throwable t) {
+      requireView().post(() -> Toast.makeText(requireContext(), R.string.PaymentsPayInvoice__unable_to_pay, Toast.LENGTH_LONG).show());
+    }
+  }
+
 
   private void scanQrCode() {
     Permissions.with(this)
