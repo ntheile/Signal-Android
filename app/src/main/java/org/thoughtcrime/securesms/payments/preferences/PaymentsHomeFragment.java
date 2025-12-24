@@ -138,6 +138,7 @@ public class PaymentsHomeFragment extends LoggingFragment {
       requireActivity().finish();
     });
 
+    toolbar.inflateMenu(R.menu.payments_home_fragment_menu);
     toolbar.setOnMenuItemClickListener(this::onMenuItemSelected);
 
     addMoney.setOnClickListener(v -> {
