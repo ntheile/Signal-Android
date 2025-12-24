@@ -190,11 +190,23 @@ class LightningEngine(private val appContext: Context) {
                 val nwcConfig = NwcNode.NwcConfig.fromUri(config.credential)
                 NwcNode(nwcConfig)
             }
-            // Future: Add other node types here
-            // LightningNodeType.LND -> LndNode(config)
-            // LightningNodeType.CLN -> ClnNode(config)
-            else -> {
-                Log.w(TAG, "Unsupported Lightning node type: ${config.type}")
+            LightningNodeType.LND -> {
+                LndNode(
+                    baseUrl = config.url ?: throw IllegalStateException("LND requires URL"),
+                    macaroon = config.credential
+                )
+            }
+            LightningNodeType.STRIKE -> {
+                StrikeNode(apiKey = config.credential)
+            }
+            LightningNodeType.BLINK -> {
+                BlinkNode(apiKey = config.credential)
+            }
+            // CLN, Phoenixd, Speed not yet implemented
+            LightningNodeType.CLN,
+            LightningNodeType.PHOENIXD,
+            LightningNodeType.SPEED -> {
+                Log.w(TAG, "Lightning node type not yet fully implemented: ${config.type}. Using placeholder.")
                 null
             }
         }
