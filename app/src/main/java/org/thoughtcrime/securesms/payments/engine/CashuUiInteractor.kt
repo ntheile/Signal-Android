@@ -23,8 +23,13 @@ object CashuUiInteractor {
 
   @JvmStatic
   fun requestMeltQuoteBlocking(context: Context, invoiceBolt11: String): MeltQuote? = runBlocking {
+    org.signal.core.util.logging.Log.d(TAG, "requestMeltQuoteBlocking: invoice=${invoiceBolt11.take(30)}...")
     runCatching {
-      PaymentsEngineProvider.get(context).requestMeltQuote(invoiceBolt11).getOrNull()
+      val result = PaymentsEngineProvider.get(context).requestMeltQuote(invoiceBolt11)
+      if (result.isFailure) {
+        org.signal.core.util.logging.Log.w(TAG, "requestMeltQuote failed", result.exceptionOrNull())
+      }
+      result.getOrNull()
     }.getOrElse { throwable ->
       org.signal.core.util.logging.Log.w(TAG, "Failed to request melt quote", throwable)
       null

@@ -82,12 +82,17 @@ public final class PaymentsTransferFragment extends LoggingFragment {
     new Thread(() -> {
       try {
         // Check if Lightning node is configured - use it directly for payments
-        if (LightningUiInteractor.isConfigured(AppDependencies.getApplication())) {
+        boolean lightningConfigured = LightningUiInteractor.isConfigured(AppDependencies.getApplication());
+        Log.i(TAG, "next: lightningConfigured=" + lightningConfigured);
+        
+        if (lightningConfigured) {
+          Log.i(TAG, "next: attempting Lightning payment");
           // Pay directly via Lightning node
           LightningPaymentResult result = LightningUiInteractor.payInvoiceBlocking(
               AppDependencies.getApplication(), invoice, null);
           
           if (result != null) {
+            Log.i(TAG, "next: Lightning payment succeeded");
             requireView().post(() -> {
               Toast.makeText(requireContext(), R.string.LightningPayment__payment_successful, Toast.LENGTH_SHORT).show();
               // Navigate back to payments home
@@ -97,10 +102,12 @@ public final class PaymentsTransferFragment extends LoggingFragment {
             });
           } else {
             // Lightning payment failed, fallback to Cashu melt
+            Log.i(TAG, "next: Lightning payment failed, falling back to Cashu melt");
             payViaCashuMelt(invoice);
           }
         } else {
           // Use Cashu melt (original flow)
+          Log.i(TAG, "next: Lightning not configured, using Cashu melt");
           payViaCashuMelt(invoice);
         }
       } catch (Throwable t) {
@@ -113,12 +120,18 @@ public final class PaymentsTransferFragment extends LoggingFragment {
   }
   
   private void payViaCashuMelt(String invoice) {
+    Log.i(TAG, "payViaCashuMelt: starting melt flow for invoice=" + invoice.substring(0, Math.min(30, invoice.length())) + "...");
     try {
       org.thoughtcrime.securesms.payments.engine.MeltQuote quote = org.thoughtcrime.securesms.payments.engine.CashuUiInteractor.requestMeltQuoteBlocking(AppDependencies.getApplication(), invoice);
-      if (quote == null) throw new RuntimeException("No quote");
+      if (quote == null) {
+        Log.w(TAG, "payViaCashuMelt: quote is null");
+        throw new RuntimeException("No quote");
+      }
+      Log.i(TAG, "payViaCashuMelt: got quote, amount=" + quote.getAmountSats() + " fee=" + quote.getFeeSats());
       Bundle args = PayInvoiceConfirmFragment.argsFromQuote(quote);
       requireView().post(() -> SafeNavigation.safeNavigate(Navigation.findNavController(requireView()), R.id.action_paymentsTransfer_to_payInvoiceConfirm, args));
     } catch (Throwable t) {
+      Log.w(TAG, "payViaCashuMelt: failed", t);
       requireView().post(() -> Toast.makeText(requireContext(), R.string.PaymentsPayInvoice__unable_to_pay, Toast.LENGTH_LONG).show());
     }
   }

@@ -149,9 +149,12 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
   }
 
   override suspend fun requestMintQuote(amountSats: Long): Result<MintQuote> = withContext(Dispatchers.IO) {
-    ensureInitialized()
+    Log.d(TAG, "requestMintQuote: amountSats=$amountSats")
     runCatching {
+      ensureInitialized()
+      Log.d(TAG, "requestMintQuote: wallet initialized, calling mintQuote...")
       val cdkQuote = wallet!!.mintQuote(Amount(amountSats.toULong()), "Signal top-up") as org.cashudevkit.MintQuote
+      Log.d(TAG, "requestMintQuote: got CDK quote, id=${cdkQuote.id}, request=${cdkQuote.request.take(30)}...")
       val activeMint = currentMintUrl ?: try { SignalStore.payments.getActiveMint() } catch (_: Throwable) { DEFAULT_MINT_URL }
       val quote = MintQuote(
         mintUrl = activeMint,
@@ -164,7 +167,10 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
       )
       // Record as pending so watcher can auto-mint when paid
       recordPendingMint(quote)
+      Log.i(TAG, "requestMintQuote: success, invoice=${quote.invoiceBolt11?.take(30)}...")
       quote
+    }.onFailure { e ->
+      Log.e(TAG, "requestMintQuote FAILED", e)
     }
   }
 
@@ -310,12 +316,15 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
 
   // Lightning withdrawal (melt) with real fields
   override suspend fun requestMeltQuote(invoiceBolt11: String): Result<MeltQuote> = withContext(Dispatchers.IO) {
-    ensureInitialized()
+    Log.d(TAG, "requestMeltQuote: invoice=${invoiceBolt11.take(30)}...")
     runCatching {
+      ensureInitialized()
+      Log.d(TAG, "requestMeltQuote: wallet initialized, calling meltQuote...")
       val cdkQuote = wallet!!.meltQuote(invoiceBolt11, null) as org.cashudevkit.MeltQuote
       val amountSats = (cdkQuote.amount as Amount).value.toLong()
       val feeReserveSats = (cdkQuote.feeReserve as Amount).value.toLong()
       val mintForQuote = currentMintUrl ?: try { SignalStore.payments.getActiveMint() } catch (_: Throwable) { DEFAULT_MINT_URL }
+      Log.d(TAG, "requestMeltQuote: amount=$amountSats, fee=$feeReserveSats, mint=$mintForQuote")
       val res = MeltQuote(
         amountSats = amountSats,
         feeSats = feeReserveSats,
@@ -329,7 +338,10 @@ class CashuEngine(private val appContext: Context) : PaymentsEngine {
         meltQuoteMintCache[res.id!!] = mintForQuote
       }
       meltQuoteMintCache[res.invoiceBolt11] = mintForQuote
+      Log.i(TAG, "requestMeltQuote: success, id=${res.id}")
       res
+    }.onFailure { e ->
+      Log.e(TAG, "requestMeltQuote FAILED", e)
     }
   }
 

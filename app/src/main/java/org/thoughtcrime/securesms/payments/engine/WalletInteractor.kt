@@ -12,20 +12,17 @@ import org.thoughtcrime.securesms.payments.engine.lightning.LightningPaymentResu
 
 /**
  * Unified wallet interactor that routes between Cashu and Lightning
- * based on user configuration and preferences.
+ * based on user configuration.
  * 
  * This provides a single entry point for wallet operations that:
- * 1. Checks if Lightning is configured and preferred
- * 2. Falls back to Cashu if Lightning is unavailable
+ * 1. Tries Lightning first if configured
+ * 2. Falls back to Cashu if Lightning fails or is unavailable
  * 3. Can use both for combined balance views
  * 
- * Usage:
- * - If user has configured Lightning node and set it as preferred:
- *   - Payments go directly via Lightning (faster, lower fees for larger amounts)
- * - If user only has Cashu enabled:
- *   - Payments use Cashu melt/mint for Lightning interop
- * - If both are available:
- *   - User can choose, or auto-route based on amount/fees
+ * Routing strategy:
+ * - Try Lightning first (direct, faster for larger amounts)
+ * - Fall back to Cashu (via melt/mint) if Lightning fails or not configured
+ * - Cashu tokens can be sent/received directly for ecash transfers
  */
 object WalletInteractor {
     private const val TAG = "WalletInteractor"
@@ -34,14 +31,12 @@ object WalletInteractor {
      * Wallet mode based on current configuration.
      */
     enum class WalletMode {
-        /** Only Cashu (ecash) available */
+        /** Only Cashu (ecash) available - use melt/mint for Lightning interop */
         CASHU_ONLY,
-        /** Only Lightning node available (rare - usually Cashu is also enabled) */
+        /** Only Lightning node available */
         LIGHTNING_ONLY,
-        /** Both available, user prefers Lightning for withdrawals */
-        BOTH_PREFER_LIGHTNING,
-        /** Both available, user prefers Cashu for privacy */
-        BOTH_PREFER_CASHU,
+        /** Both available - try Lightning first, fall back to Cashu */
+        BOTH,
         /** No wallet configured */
         NONE
     }
@@ -85,17 +80,18 @@ object WalletInteractor {
         } catch (e: Throwable) {
             false
         }
-        val lightningPreferred = SignalStore.payments.lightningPreferred()
+        
+        Log.d(TAG, "getWalletMode: cashuEnabled=$cashuEnabled, lightningEnabled=$lightningEnabled, lightningConfigured=$lightningConfigured")
 
-        return when {
+        val mode = when {
             !cashuEnabled && !lightningConfigured -> WalletMode.NONE
-            cashuEnabled && !lightningConfigured -> WalletMode.CASHU_ONLY
+            cashuEnabled && lightningConfigured && lightningEnabled -> WalletMode.BOTH
             !cashuEnabled && lightningConfigured && lightningEnabled -> WalletMode.LIGHTNING_ONLY
-            cashuEnabled && lightningConfigured && lightningEnabled && lightningPreferred -> WalletMode.BOTH_PREFER_LIGHTNING
-            cashuEnabled && lightningConfigured && lightningEnabled -> WalletMode.BOTH_PREFER_CASHU
             cashuEnabled -> WalletMode.CASHU_ONLY
             else -> WalletMode.NONE
         }
+        Log.d(TAG, "getWalletMode: result=$mode")
+        return mode
     }
 
     /**
@@ -107,12 +103,12 @@ object WalletInteractor {
     }
 
     /**
-     * Check if Lightning is available and should be used.
+     * Check if Lightning is available and should be tried first.
      */
     @JvmStatic
     fun shouldUseLightning(context: Context): Boolean {
         val mode = getWalletMode(context)
-        return mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH_PREFER_LIGHTNING
+        return mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH
     }
 
     /**
@@ -134,7 +130,7 @@ object WalletInteractor {
         var lightningReceive = 0L
 
         // Get Cashu balance if available
-        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH_PREFER_CASHU, WalletMode.BOTH_PREFER_LIGHTNING)) {
+        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH)) {
             cashuSats = try {
                 PaymentsEngineProvider.get(context).getBalance().spendableSats
             } catch (e: Throwable) {
@@ -144,7 +140,7 @@ object WalletInteractor {
         }
 
         // Get Lightning balance if available
-        if (mode in listOf(WalletMode.LIGHTNING_ONLY, WalletMode.BOTH_PREFER_CASHU, WalletMode.BOTH_PREFER_LIGHTNING)) {
+        if (mode in listOf(WalletMode.LIGHTNING_ONLY, WalletMode.BOTH)) {
             try {
                 val lnBalance = LightningEngineProvider.get(context).getBalance()
                 lightningSend = lnBalance.sendBalanceSats
@@ -165,9 +161,7 @@ object WalletInteractor {
     /**
      * Pay a Lightning invoice using the best available method.
      * 
-     * Routes based on:
-     * 1. If Lightning is preferred and available -> use direct Lightning
-     * 2. Otherwise -> use Cashu melt
+     * Strategy: Try Lightning first, fall back to Cashu melt.
      */
     @JvmStatic
     fun payInvoiceBlocking(context: Context, invoice: String): PaymentResult = runBlocking {
@@ -176,27 +170,37 @@ object WalletInteractor {
 
     /**
      * Pay a Lightning invoice using the best available method.
+     * 
+     * Strategy:
+     * 1. If Lightning is available -> try Lightning first
+     * 2. If Lightning fails or unavailable -> fall back to Cashu melt
      */
     suspend fun payInvoice(context: Context, invoice: String): PaymentResult = withContext(Dispatchers.IO) {
         val mode = getWalletMode(context)
+        Log.d(TAG, "payInvoice: mode=$mode")
 
-        // Try Lightning first if preferred
-        if (mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH_PREFER_LIGHTNING) {
+        // Try Lightning first if available
+        if (mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH) {
             val lightningResult = tryPayViaLightning(context, invoice)
             if (lightningResult is PaymentResult.Success) {
+                Log.i(TAG, "Payment succeeded via Lightning")
                 return@withContext lightningResult
             }
-            // If Lightning failed and we have Cashu, fall back
-            if (mode == WalletMode.BOTH_PREFER_LIGHTNING) {
-                Log.i(TAG, "Lightning payment failed, falling back to Cashu melt")
-            } else {
-                return@withContext lightningResult // No fallback available
+            // If Lightning-only, no fallback available
+            if (mode == WalletMode.LIGHTNING_ONLY) {
+                return@withContext lightningResult
             }
+            // Fall back to Cashu
+            Log.i(TAG, "Lightning payment failed, falling back to Cashu melt")
         }
 
-        // Use Cashu melt
-        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH_PREFER_CASHU, WalletMode.BOTH_PREFER_LIGHTNING)) {
-            return@withContext tryPayViaCashuMelt(context, invoice)
+        // Use Cashu melt (either as primary for CASHU_ONLY or fallback for BOTH)
+        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH)) {
+            val cashuResult = tryPayViaCashuMelt(context, invoice)
+            if (cashuResult is PaymentResult.Success) {
+                Log.i(TAG, "Payment succeeded via Cashu melt")
+            }
+            return@withContext cashuResult
         }
 
         PaymentResult.Failure("No wallet configured")
@@ -251,37 +255,59 @@ object WalletInteractor {
     /**
      * Create an invoice/receive request using the best available method.
      * 
-     * Routes based on:
-     * 1. If Lightning is preferred and available -> create Lightning invoice
-     * 2. Otherwise -> create Cashu mint quote (returns bolt11)
+     * Strategy: Try Lightning first, fall back to Cashu mint quote.
      */
     suspend fun createReceiveRequest(context: Context, amountSats: Long, memo: String? = null): String? = withContext(Dispatchers.IO) {
         val mode = getWalletMode(context)
+        Log.d(TAG, "createReceiveRequest: mode=$mode, amountSats=$amountSats")
 
-        // Try Lightning first if preferred
-        if (mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH_PREFER_LIGHTNING) {
+        // Try Lightning first if available
+        if (mode == WalletMode.LIGHTNING_ONLY || mode == WalletMode.BOTH) {
+            Log.d(TAG, "Attempting Lightning invoice creation...")
             try {
-                val invoice = LightningEngineProvider.get(context)
+                val result = LightningEngineProvider.get(context)
                     .createInvoice(amountSats, memo)
-                    .getOrNull()
-                if (invoice != null) return@withContext invoice
+                Log.d(TAG, "Lightning createInvoice result: isSuccess=${result.isSuccess}, isFailure=${result.isFailure}")
+                val invoice = result.getOrNull()
+                if (invoice != null && invoice.isNotEmpty()) {
+                    Log.i(TAG, "Created Lightning invoice successfully")
+                    return@withContext invoice
+                } else {
+                    Log.w(TAG, "Lightning invoice returned null/empty, exception: ${result.exceptionOrNull()?.message}")
+                }
             } catch (e: Throwable) {
-                Log.w(TAG, "Lightning invoice creation failed", e)
+                Log.w(TAG, "Lightning invoice creation threw exception", e)
             }
             
             // If Lightning-only, return null on failure
             if (mode == WalletMode.LIGHTNING_ONLY) {
+                Log.w(TAG, "Lightning-only mode, no fallback available")
                 return@withContext null
             }
+            Log.i(TAG, "Lightning invoice failed, falling back to Cashu mint quote")
         }
 
-        // Use Cashu mint quote
-        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH_PREFER_CASHU, WalletMode.BOTH_PREFER_LIGHTNING)) {
+        // Use Cashu mint quote (either as primary for CASHU_ONLY or fallback for BOTH)
+        if (mode in listOf(WalletMode.CASHU_ONLY, WalletMode.BOTH)) {
             try {
-                val quote = PaymentsEngineProvider.get(context)
+                Log.d(TAG, "Attempting Cashu mint quote for $amountSats sats")
+                val quoteResult = PaymentsEngineProvider.get(context)
                     .requestMintQuote(amountSats)
-                    .getOrNull()
-                return@withContext quote?.invoiceBolt11
+                
+                if (quoteResult.isFailure) {
+                    Log.w(TAG, "Cashu mint quote failed with exception", quoteResult.exceptionOrNull())
+                }
+                
+                val quote = quoteResult.getOrNull()
+                Log.d(TAG, "Cashu mint quote result: quote=$quote, invoice=${quote?.invoiceBolt11?.take(30)}...")
+                if (quote != null && !quote.invoiceBolt11.isNullOrEmpty()) {
+                    Log.i(TAG, "Created Cashu mint quote with invoice")
+                    return@withContext quote.invoiceBolt11
+                } else if (quote != null) {
+                    Log.w(TAG, "Cashu mint quote returned but no invoice: id=${quote.id}, mintUrl=${quote.mintUrl}")
+                } else {
+                    Log.w(TAG, "Cashu mint quote returned null (Result was failure=${quoteResult.isFailure})")
+                }
             } catch (e: Throwable) {
                 Log.w(TAG, "Cashu mint quote failed", e)
             }
@@ -322,7 +348,7 @@ object WalletInteractor {
 
     /**
      * Import a Cashu token.
-     * This is Cashu-specific.
+     * This is Cashu-specific but available when both wallets are configured.
      */
     @JvmStatic
     fun importCashuTokenBlocking(context: Context, token: String): Boolean = runBlocking {
@@ -331,6 +357,7 @@ object WalletInteractor {
 
     /**
      * Import a Cashu token.
+     * Available in CASHU_ONLY and BOTH modes.
      */
     suspend fun importCashuToken(context: Context, token: String): Boolean = withContext(Dispatchers.IO) {
         val mode = getWalletMode(context)

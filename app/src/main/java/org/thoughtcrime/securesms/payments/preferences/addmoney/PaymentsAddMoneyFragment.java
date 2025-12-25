@@ -24,7 +24,6 @@ import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.qr.QrView;
 import org.thoughtcrime.securesms.dependencies.AppDependencies;
 import org.thoughtcrime.securesms.keyvalue.SignalStore;
-import org.thoughtcrime.securesms.payments.engine.MintQuote;
 import org.thoughtcrime.securesms.payments.engine.MintWatcher;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.payments.preferences.cashu.CashuMintQuoteUiHelper;
@@ -169,24 +168,25 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
         View progressBar = view.findViewById(R.id.cashu_invoice_progress);
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
-        // Cashu mint quote flow
+        // Cashu mint quote flow - uses WalletInteractor for routing
         new Thread(() -> {
           String text;
           try {
-            MintQuote quote = CashuMintQuoteUiHelper.requestMintQuote(requireContext(), sats);
-            if (quote != null && quote.getInvoiceBolt11() != null && !quote.getInvoiceBolt11().isEmpty()) {
-              text = quote.getInvoiceBolt11();
-            } else if (quote != null) {
-              text = "cashu:mint-quote?mint=" + quote.getMintUrl() + "&amount=" + quote.getAmountSats() + "&total=" + quote.getTotalSats();
-            } else {
-              text = "cashu:mint-quote:unavailable";
-            }
+            // Use unified routing: tries Lightning first if available, falls back to Cashu
+            text = CashuMintQuoteUiHelper.getReceiveInvoice(requireContext(), sats, "Signal payment");
+            Log.i(TAG, "Receive invoice created: " + (text.startsWith("lnbc") ? "Lightning" : "Cashu"));
           } catch (Throwable t) {
+            Log.e(TAG, "Failed to create receive invoice", t);
             text = "invoice:error";
           }
           final String qrText = text;
           requireActivity().runOnUiThread(() -> {
             if (progressBar != null) progressBar.setVisibility(View.GONE);
+            
+            if (qrText.startsWith("invoice:error") || qrText.startsWith("invoice:unavailable")) {
+              Toast.makeText(requireContext(), "Failed to create invoice", Toast.LENGTH_LONG).show();
+              return;
+            }
             
             View amountContainer = getView().findViewById(R.id.cashu_amount_container);
             if (amountContainer != null) amountContainer.setVisibility(View.GONE);
@@ -253,26 +253,24 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
           // Show immediate feedback while fetching invoice off main thread
           display.setText("Loading invoice...");
           qrImageView.setQrText("");
-          // Fetch the mint quote in a background thread to avoid NetworkOnMainThreadException
+          // Use unified routing: tries Lightning first, falls back to Cashu
           new Thread(() -> {
             String text;
             try {
-              MintQuote quote = CashuMintQuoteUiHelper.requestMintQuote(requireContext(), sats);
-              if (quote != null && quote.getInvoiceBolt11() != null && !quote.getInvoiceBolt11().isEmpty()) {
-                text = quote.getInvoiceBolt11();
-              } else if (quote != null) {
-                text = "cashu:mint-quote?mint=" + quote.getMintUrl() + "&amount=" + quote.getAmountSats() + "&total=" + quote.getTotalSats();
-              } else {
-                text = "cashu:mint-quote:unavailable";
-              }
+              text = CashuMintQuoteUiHelper.getReceiveInvoice(requireContext(), sats, null);
             } catch (Throwable t) {
-              text = "cashu:mint-quote:error";
+              text = "invoice:error";
             }
             final String qrText = text;
             requireActivity().runOnUiThread(() -> {
-              display.setText(qrText);
-              qrImageView.setQrText(qrText);
-              Toast.makeText(requireContext(), "Invoice ready", Toast.LENGTH_SHORT).show();
+              if (qrText.startsWith("invoice:")) {
+                display.setText("Failed to create invoice");
+                Toast.makeText(requireContext(), "Invoice creation failed", Toast.LENGTH_SHORT).show();
+              } else {
+                display.setText(qrText);
+                qrImageView.setQrText(qrText);
+                Toast.makeText(requireContext(), "Invoice ready", Toast.LENGTH_SHORT).show();
+              }
             });
           }).start();
         })
