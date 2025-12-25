@@ -45,6 +45,9 @@ class V2ConversationItemMediaViewHolder<Model : MappingModel<Model>>(
     // Try Cashu inline rendering on the media text body as well
     CashuTokenInlineRenderer.resetIfPresent(binding.textBridge)
     if (CashuTokenInlineRenderer.maybeAttachReceiveUi(binding.textBridge, conversationMessage)) return
+    // Try Lightning invoice inline rendering
+    LightningInvoiceInlineRenderer.resetIfPresent(binding.textBridge)
+    if (LightningInvoiceInlineRenderer.maybeAttachInvoiceUi(binding.textBridge, conversationMessage)) return
   }
 
   private fun updateMediaConstraints() {

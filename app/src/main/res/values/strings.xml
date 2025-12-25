@@ -93,8 +93,51 @@
     <!-- Text for a button prompting users to allow Signal access to their gallery storage -->
     <string name="AttachmentKeyboard_allow_access">Allow Access</string>
     <string name="AttachmentKeyboard_payment">Payment</string>
+    <!-- Button to request a Lightning payment from the conversation partner -->
+    <string name="AttachmentKeyboard_request_payment">Request</string>
     <!-- Text in a button that allows users to manage which media Signal has access to -->
     <string name="AttachmentKeyboard_manage">Manage</string>
+
+    <!-- RequestPaymentDialog -->
+    <!-- Title for the request payment dialog -->
+    <string name="RequestPaymentDialog_title">Request Payment</string>
+    <!-- Hint for the amount input field -->
+    <string name="RequestPaymentDialog_amount_hint">Amount in sats</string>
+    <!-- Error message when the entered amount is invalid -->
+    <string name="RequestPaymentDialog_invalid_amount">Please enter a valid amount</string>
+    <!-- Message when invoice is being created -->
+    <string name="RequestPaymentDialog_creating_invoice">Creating invoice…</string>
+    <!-- Message when invoice creation failed -->
+    <string name="RequestPaymentDialog_invoice_failed">Failed to create invoice</string>
+    <!-- Message when Lightning node is not configured -->
+    <string name="RequestPaymentDialog_lightning_not_configured">Lightning node not configured</string>
+    <!-- Message when invoice is sent successfully -->
+    <string name="RequestPaymentDialog_invoice_sent">Invoice sent!</string>
+
+    <!-- LightningInvoice inline message view -->
+    <!-- Direction text for sender: You requested payment from [name] -->
+    <string name="LightningInvoice_you_requested">You requested</string>
+    <!-- Direction text for receiver: [name] requested payment -->
+    <string name="LightningInvoice_s_requested">%1$s requested</string>
+    <!-- Pay button text -->
+    <string name="LightningInvoice_pay">Pay Invoice</string>
+    <!-- Status when invoice was paid -->
+    <string name="LightningInvoice_paid">Paid ✓</string>
+    <!-- Status when payment failed -->
+    <string name="LightningInvoice_payment_failed">Payment failed</string>
+    <!-- Status when paying -->
+    <string name="LightningInvoice_paying">Paying…</string>
+    <!-- Label for unknown amount invoice -->
+    <string name="LightningInvoice_invoice">Lightning Invoice</string>
+    <!-- Format for displaying sats amount -->
+    <string name="LightningInvoice_sats_format">⚡ %1$s sats</string>
+    <!-- Check status button for sender -->
+    <string name="LightningInvoice_check_status">Check Status</string>
+    <!-- Status when checking if invoice was paid -->
+    <string name="LightningInvoice_checking">Checking…</string>
+    <!-- Status when invoice is pending payment -->
+    <string name="LightningInvoice_pending">Pending</string>
+
     <!-- Option in menu to select more photos that Signal will have access to -->
     <string name="AttachmentKeyboard_select_more_photos">Select more photos</string>
     <!-- Option in menu to go to settings -->

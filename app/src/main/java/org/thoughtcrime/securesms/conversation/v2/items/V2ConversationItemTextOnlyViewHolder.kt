@@ -285,6 +285,38 @@ open class V2ConversationItemTextOnlyViewHolder<Model : MappingModel<Model>>(
       return
     }
 
+    // Lightning Invoice: try inline rendering for BOLT11 invoices
+    LightningInvoiceInlineRenderer.resetIfPresent(binding)
+    if (LightningInvoiceInlineRenderer.maybeAttachInvoiceUi(binding, conversationMessage)) {
+      presentDate()
+      presentDeliveryStatus()
+      presentFooterBackground()
+      presentFooterExpiry()
+      presentFooterEndPadding()
+      presentAlert()
+      presentSender()
+      presentSenderNameColor()
+      presentSenderNameBackground()
+      presentReactions()
+
+      bodyBubbleDrawable.setCorners(shapeDelegate.cornersLTR)
+      if (binding.body.isJumbomoji) {
+        bodyBubbleDrawable.setLocalChatColors(transparentChatColors)
+      } else if (binding.isIncoming) {
+        bodyBubbleDrawable.setLocalChatColors(ChatColors.forColor(ChatColors.Id.NotSet, themeDelegate.getBodyBubbleColor(conversationMessage)))
+      } else {
+        bodyBubbleDrawable.clearLocalChatColors()
+      }
+
+      binding.reply.setBackgroundColor(themeDelegate.getReplyIconBackgroundColor())
+
+      itemView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        topMargin = shape.topPadding.toInt()
+        bottomMargin = shape.bottomPadding.toInt()
+      }
+      return
+    }
+
     presentBody()
     presentDate()
     presentDeliveryStatus()

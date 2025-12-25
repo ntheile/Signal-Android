@@ -53,6 +53,7 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
     private const val PAYMENT_LOCK_TIMESTAMP = "mob_payments_payment_lock_timestamp"
     private const val PAYMENT_LOCK_SKIP_COUNT = "mob_payments_payment_lock_skip_count"
     private const val SHOW_SAVE_RECOVERY_PHRASE = "mob_show_save_recovery_phrase"
+    private const val LIGHTNING_INVOICE_PAID_PREFIX = "lightning_invoice_paid_"
 
     private val LARGE_BALANCE_THRESHOLD = Money.mobileCoin(BigDecimal.valueOf(500))
   }
@@ -121,6 +122,23 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
     if (current.add(url)) {
       store.beginWrite().putString(CASHU_KNOWN_MINTS, current.joinToString("|")) .commit()
     }
+  }
+
+  /**
+   * Mark a Lightning invoice as paid.
+   * Uses a hash of the invoice to create a unique key.
+   */
+  fun setInvoicePaid(invoice: String) {
+    val key = LIGHTNING_INVOICE_PAID_PREFIX + invoice.hashCode()
+    store.beginWrite().putBoolean(key, true).commit()
+  }
+
+  /**
+   * Check if a Lightning invoice has been marked as paid.
+   */
+  fun isInvoicePaid(invoice: String): Boolean {
+    val key = LIGHTNING_INVOICE_PAID_PREFIX + invoice.hashCode()
+    return store.getBoolean(key, false)
   }
 
   fun confirmMnemonic(confirmed: Boolean) {

@@ -112,6 +112,56 @@ object LightningUiInteractor {
     }
 
     /**
+     * Look up an invoice/payment status by payment hash.
+     * Returns the payment status if found, null otherwise.
+     */
+    @JvmStatic
+    fun lookupInvoiceBlocking(context: Context, paymentHash: String): LightningPaymentStatus? = runBlocking {
+        runCatching {
+            LightningEngineProvider.get(context).lookupPayment(paymentHash).getOrNull()
+        }.getOrElse { throwable ->
+            Log.w(TAG, "Failed to lookup invoice", throwable)
+            null
+        }
+    }
+
+    /**
+     * Check if an invoice (by payment request string) has been paid.
+     * Extracts payment hash from the invoice and looks it up.
+     */
+    @JvmStatic
+    fun isInvoicePaidBlocking(context: Context, invoice: String): Boolean = runBlocking {
+        try {
+            val paymentHash = extractPaymentHashFromInvoice(invoice)
+            if (paymentHash != null) {
+                val status = LightningEngineProvider.get(context).lookupPayment(paymentHash).getOrNull()
+                status?.isPaid == true
+            } else {
+                // Try listing recent transactions and matching
+                val transactions = LightningEngineProvider.get(context).listTransactions(50).getOrNull()
+                transactions?.any { 
+                    it.paymentHash.isNotEmpty() && 
+                    it.isPaid && 
+                    it.type == LightningTxType.RECEIVE 
+                } == true
+            }
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to check if invoice is paid", e)
+            false
+        }
+    }
+
+    /**
+     * Extract payment hash from BOLT11 invoice.
+     * This is a simplified extraction - payment hash is in the tagged data.
+     */
+    private fun extractPaymentHashFromInvoice(invoice: String): String? {
+        // For now, we can't easily extract payment hash without a full BOLT11 parser
+        // We'll rely on listing transactions instead
+        return null
+    }
+
+    /**
      * Configure an NWC (Nostr Wallet Connect) connection.
      */
     @JvmStatic

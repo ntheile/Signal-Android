@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/lightning_invoice_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp">
+
+    <org.thoughtcrime.securesms.components.emoji.EmojiTextView
+        android:id="@+id/lightning_invoice_direction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/Signal.Text.BodyMedium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Alex requested"
+        tools:textColor="@color/core_grey_60" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/lightning_invoice_amount_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:minWidth="180dp"
+        android:background="@drawable/rounded_rectangle_secondary_18"
+        android:paddingStart="16dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lightning_invoice_direction">
+
+        <ImageView
+            android:id="@+id/lightning_invoice_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/symbol_flash_24"
+            app:tint="@color/signal_colorOnSurface"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/lightning_invoice_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:gravity="center_vertical"
+            android:textAppearance="@style/Signal.Text.TitleLarge"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/lightning_invoice_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="⚡ 1,000 sats" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/lightning_invoice_inprogress"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:id="@+id/lightning_invoice_action_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="180dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lightning_invoice_amount_layout">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/lightning_invoice_pay_button"
+            style="@style/Widget.Signal.Button.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minWidth="180dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:text="@string/LightningInvoice_pay"
+            app:icon="@drawable/symbol_flash_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/lightning_invoice_refresh_button"
+            style="@style/Signal.Widget.Button.Small.Secondary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minWidth="180dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:text="@string/LightningInvoice_check_status"
+            android:visibility="gone"
+            app:icon="@drawable/symbol_refresh_24"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
+
+        <android.widget.ProgressBar
+            android:id="@+id/lightning_invoice_spinner"
+            style="@style/Widget.Material3.CircularProgressIndicator.ExtraSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <org.thoughtcrime.securesms.components.emoji.EmojiTextView
+        android:id="@+id/lightning_invoice_status"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textAppearance="@style/TextAppearance.Signal.Body2"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@id/lightning_invoice_amount_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lightning_invoice_action_container"
+        tools:text="Paid"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
