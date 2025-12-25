@@ -1,70 +1,52 @@
 /**
- * LND Node Implementation
+ * LND (Lightning Network Daemon) Node Implementation
  * 
- * This is a Kotlin implementation that mirrors the LNI Rust library's LndNode.
- * When uniffi bindings are built, this can be replaced with the native implementation.
+ * This is a wrapper around the native LNI Rust library's LndNode.
+ * It delegates to the UniFFI-generated bindings and converts between
+ * the wrapper types and native types.
  */
 package lni
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
-import javax.net.ssl.HostnameVerifier
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManager
-import javax.net.ssl.X509TrustManager
-import java.security.cert.X509Certificate
-import org.json.JSONObject
-import org.json.JSONArray
+
+// Import native LNI types
+import uniffi.lni.LndNode as NativeLndNode
+import uniffi.lni.LndConfig as NativeLndConfig
+import uniffi.lni.CreateInvoiceParams as NativeCreateInvoiceParams
+import uniffi.lni.PayInvoiceParams as NativePayInvoiceParams
+import uniffi.lni.ListTransactionsParams as NativeListTransactionsParams
+import uniffi.lni.LookupInvoiceParams as NativeLookupInvoiceParams
+import uniffi.lni.CreateOfferParams as NativeCreateOfferParams
+import uniffi.lni.InvoiceType as NativeInvoiceType
+import uniffi.lni.ApiException
 
 class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
-    private fun createConnection(endpoint: String): HttpsURLConnection {
-        val url = URL("${config.url}$endpoint")
-        val connection = url.openConnection() as HttpsURLConnection
-        
-        // Add macaroon header (hex encoded)
-        connection.setRequestProperty("Grpc-Metadata-macaroon", config.macaroon)
-        connection.setRequestProperty("Content-Type", "application/json")
-        connection.connectTimeout = (config.httpTimeout ?: 120) * 1000
-        connection.readTimeout = (config.httpTimeout ?: 120) * 1000
-        
-        // Accept invalid certs if configured (for self-signed certs)
-        if (config.acceptInvalidCerts == true) {
-            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-            })
-            val sslContext = SSLContext.getInstance("TLS")
-            sslContext.init(null, trustAllCerts, java.security.SecureRandom())
-            connection.sslSocketFactory = sslContext.socketFactory
-            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
-        }
-        
-        return connection
+    private val nativeNode: NativeLndNode by lazy {
+        NativeLndNode(NativeLndConfig(
+            url = config.url,
+            macaroon = config.macaroon,
+            socks5Proxy = config.socks5Proxy ?: "",
+            acceptInvalidCerts = config.acceptInvalidCerts,
+            httpTimeout = config.httpTimeout
+        ))
     }
     
     override suspend fun getInfo(): Result<NodeInfo> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/getinfo")
-            connection.requestMethod = "GET"
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(response)
-            
+            val info = nativeNode.getInfo()
             Result.success(NodeInfo(
-                alias = json.optString("alias"),
-                pubkey = json.optString("identity_pubkey"),
-                network = json.optString("chains")?.let { 
-                    try { JSONArray(it).optJSONObject(0)?.optString("network") } catch (e: Exception) { null }
-                },
-                blockHeight = json.optLong("block_height"),
-                balanceSat = null, // Need to call /v1/balance/channels for this
-                maxPayableSat = null,
-                maxReceivableSat = null
+                alias = info.alias,
+                pubkey = info.pubkey,
+                network = info.network,
+                blockHeight = info.blockHeight,
+                balanceSat = info.sendBalanceMsat?.let { it / 1000 },
+                maxPayableSat = info.sendBalanceMsat?.let { it / 1000 },
+                maxReceivableSat = info.receiveBalanceMsat?.let { it / 1000 }
             ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -72,38 +54,26 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
     override suspend fun createInvoice(params: CreateInvoiceParams): Result<Transaction> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/invoices")
-            connection.requestMethod = "POST"
-            connection.doOutput = true
-            
-            val body = JSONObject().apply {
-                params.amountMsats?.let { put("value_msat", it) }
-                params.description?.let { put("memo", it) }
-                params.expiry?.let { put("expiry", it) }
-            }
-            
-            connection.outputStream.use { os ->
-                os.write(body.toString().toByteArray())
-            }
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(response)
-            
-            Result.success(Transaction(
-                paymentHash = json.optString("r_hash"),
-                paymentRequest = json.optString("payment_request"),
+            val nativeParams = NativeCreateInvoiceParams(
+                invoiceType = when (params.invoiceType) {
+                    InvoiceType.Bolt11 -> NativeInvoiceType.BOLT11
+                    InvoiceType.Bolt12 -> NativeInvoiceType.BOLT12
+                },
                 amountMsats = params.amountMsats,
-                feeMsats = null,
-                status = TransactionStatus.Pending,
-                type = TransactionType.Incoming,
-                createdAt = System.currentTimeMillis() / 1000,
-                settledAt = null,
                 description = params.description,
-                preimage = null,
-                bolt11 = json.optString("payment_request"),
-                bolt12 = null,
-                offer = null
-            ))
+                expiry = params.expiry,
+                descriptionHash = params.descriptionHash,
+                offer = null,
+                rPreimage = null,
+                isBlinded = false,
+                isKeysend = false,
+                isAmp = false,
+                isPrivate = false
+            )
+            val tx = nativeNode.createInvoice(nativeParams)
+            Result.success(tx.toWrapperTransaction())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -111,40 +81,27 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
     override suspend fun payInvoice(params: PayInvoiceParams): Result<PayInvoiceResponse> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/channels/transactions")
-            connection.requestMethod = "POST"
-            connection.doOutput = true
-            
-            val body = JSONObject().apply {
-                put("payment_request", params.invoice)
-                params.feeLimitPercentage?.let { 
-                    put("fee_limit", JSONObject().apply {
-                        put("percent", it.toInt())
-                    })
-                }
-                params.amountMsats?.let { put("amt_msat", it) }
-                params.allowSelfPayment?.let { put("allow_self_payment", it) }
-            }
-            
-            connection.outputStream.use { os ->
-                os.write(body.toString().toByteArray())
-            }
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(response)
-            
-            val status = when (json.optString("status")) {
-                "SUCCEEDED" -> TransactionStatus.Complete
-                "FAILED" -> TransactionStatus.Failed
-                else -> TransactionStatus.Pending
-            }
-            
+            val nativeParams = NativePayInvoiceParams(
+                invoice = params.invoice,
+                feeLimitMsat = null,
+                feeLimitPercentage = params.feeLimitPercentage?.toDouble(),
+                timeoutSeconds = null,
+                amountMsats = params.amountMsats,
+                maxParts = null,
+                firstHopPubkey = null,
+                lastHopPubkey = null,
+                allowSelfPayment = params.allowSelfPayment ?: false,
+                isAmp = false
+            )
+            val response = nativeNode.payInvoice(nativeParams)
             Result.success(PayInvoiceResponse(
-                paymentHash = json.optString("payment_hash"),
-                preimage = json.optString("payment_preimage"),
-                feeMsats = json.optLong("fee_msat"),
-                status = status
+                paymentHash = response.paymentHash,
+                preimage = response.preimage,
+                feeMsats = response.feeMsats,
+                status = TransactionStatus.Complete
             ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -152,34 +109,14 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
     override suspend fun lookupInvoice(paymentHash: String): Result<Transaction> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/invoice/$paymentHash")
-            connection.requestMethod = "GET"
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(response)
-            
-            val state = json.optString("state")
-            val status = when (state) {
-                "SETTLED" -> TransactionStatus.Complete
-                "CANCELED" -> TransactionStatus.Failed
-                else -> TransactionStatus.Pending
-            }
-            
-            Result.success(Transaction(
-                paymentHash = json.optString("r_hash"),
-                paymentRequest = json.optString("payment_request"),
-                amountMsats = json.optLong("value_msat"),
-                feeMsats = null,
-                status = status,
-                type = TransactionType.Incoming,
-                createdAt = json.optLong("creation_date"),
-                settledAt = json.optLong("settle_date"),
-                description = json.optString("memo"),
-                preimage = json.optString("r_preimage"),
-                bolt11 = json.optString("payment_request"),
-                bolt12 = null,
-                offer = null
-            ))
+            val nativeParams = NativeLookupInvoiceParams(
+                paymentHash = paymentHash,
+                search = null
+            )
+            val tx = nativeNode.lookupInvoice(nativeParams)
+            Result.success(tx.toWrapperTransaction())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -187,40 +124,16 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
     override suspend fun listTransactions(params: ListTransactionsParams): Result<List<Transaction>> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/invoices?num_max_invoices=${params.limit}&index_offset=${params.from}")
-            connection.requestMethod = "GET"
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            val json = JSONObject(response)
-            val invoices = json.optJSONArray("invoices") ?: JSONArray()
-            
-            val transactions = (0 until invoices.length()).map { i ->
-                val inv = invoices.getJSONObject(i)
-                val state = inv.optString("state")
-                val status = when (state) {
-                    "SETTLED" -> TransactionStatus.Complete
-                    "CANCELED" -> TransactionStatus.Failed
-                    else -> TransactionStatus.Pending
-                }
-                
-                Transaction(
-                    paymentHash = inv.optString("r_hash"),
-                    paymentRequest = inv.optString("payment_request"),
-                    amountMsats = inv.optLong("value_msat"),
-                    feeMsats = null,
-                    status = status,
-                    type = TransactionType.Incoming,
-                    createdAt = inv.optLong("creation_date"),
-                    settledAt = inv.optLong("settle_date"),
-                    description = inv.optString("memo"),
-                    preimage = inv.optString("r_preimage"),
-                    bolt11 = inv.optString("payment_request"),
-                    bolt12 = null,
-                    offer = null
-                )
-            }
-            
-            Result.success(transactions)
+            val nativeParams = NativeListTransactionsParams(
+                from = params.from.toLong(),
+                limit = params.limit.toLong(),
+                paymentHash = params.paymentHash,
+                search = null
+            )
+            val transactions = nativeNode.listTransactions(nativeParams)
+            Result.success(transactions.map { it.toWrapperTransaction() })
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -228,31 +141,67 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
     
     override suspend fun decode(str: String): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val connection = createConnection("/v1/payreq/$str")
-            connection.requestMethod = "GET"
-            
-            val response = connection.inputStream.bufferedReader().use { it.readText() }
-            Result.success(response)
+            val decoded = nativeNode.decode(str)
+            Result.success(decoded)
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
     }
     
-    // BOLT 12 methods - LND doesn't natively support BOLT 12 yet
-    override suspend fun createOffer(params: CreateOfferParams): Result<Offer> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by LND"))
+    // BOLT 12 methods
+    override suspend fun createOffer(params: CreateOfferParams): Result<Offer> = withContext(Dispatchers.IO) {
+        try {
+            val nativeParams = NativeCreateOfferParams(
+                description = params.description,
+                amountMsats = params.amountMsats
+            )
+            val offer = nativeNode.createOffer(nativeParams)
+            Result.success(offer.toWrapperOffer())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun getOffer(search: String?): Result<Offer> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by LND"))
+    override suspend fun getOffer(search: String?): Result<Offer> = withContext(Dispatchers.IO) {
+        try {
+            val offer = nativeNode.getOffer(search)
+            Result.success(offer.toWrapperOffer())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun payOffer(offer: String, amountMsats: Long, payerNote: String?): Result<PayInvoiceResponse> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by LND"))
+    override suspend fun payOffer(offer: String, amountMsats: Long, payerNote: String?): Result<PayInvoiceResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = nativeNode.payOffer(offer, amountMsats, payerNote)
+            Result.success(PayInvoiceResponse(
+                paymentHash = response.paymentHash,
+                preimage = response.preimage,
+                feeMsats = response.feeMsats,
+                status = TransactionStatus.Complete
+            ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun listOffers(search: String?): Result<List<Offer>> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by LND"))
+    override suspend fun listOffers(search: String?): Result<List<Offer>> = withContext(Dispatchers.IO) {
+        try {
+            val offers = nativeNode.listOffers(search)
+            Result.success(offers.map { it.toWrapperOffer() })
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
     override suspend fun onInvoiceEvents(params: OnInvoiceEventParams, callback: OnInvoiceEventCallback) {
@@ -287,4 +236,44 @@ class LndNode(private val config: LndConfig) : LightningNodeInterface {
         // Timeout
         callback.failure(null)
     }
+}
+
+// Extension functions to convert native types to wrapper types
+private fun uniffi.lni.Transaction.toWrapperTransaction(): Transaction {
+    // Infer status from settledAt: if > 0 then complete, otherwise pending
+    val status = if (this.settledAt > 0) TransactionStatus.Complete else TransactionStatus.Pending
+    
+    // type is a String in native bindings ("incoming" or "outgoing")
+    val txType = when (this.type.lowercase()) {
+        "incoming" -> TransactionType.Incoming
+        "outgoing" -> TransactionType.Outgoing
+        else -> TransactionType.Incoming
+    }
+    
+    return Transaction(
+        paymentHash = this.paymentHash,
+        paymentRequest = this.invoice,
+        amountMsats = this.amountMsats,
+        feeMsats = this.feesPaid,
+        status = status,
+        type = txType,
+        createdAt = this.createdAt,
+        settledAt = if (this.settledAt > 0) this.settledAt else null,
+        description = this.description.ifEmpty { null },
+        preimage = this.preimage.ifEmpty { null },
+        bolt11 = this.invoice.ifEmpty { null },
+        bolt12 = null,
+        offer = null
+    )
+}
+
+private fun uniffi.lni.Offer.toWrapperOffer(): Offer {
+    return Offer(
+        offerId = this.offerId,
+        offer = this.bolt12,
+        active = this.active ?: false,
+        singleUse = this.singleUse ?: false,
+        description = this.label,
+        amountMsats = this.amountMsats
+    )
 }

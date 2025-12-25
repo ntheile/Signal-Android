@@ -18,6 +18,7 @@ import androidx.navigation.Navigation;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
+import org.signal.core.util.logging.Log;
 import org.thoughtcrime.securesms.LoggingFragment;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.qr.QrView;
@@ -30,6 +31,8 @@ import org.thoughtcrime.securesms.payments.preferences.cashu.CashuMintQuoteUiHel
 import org.thoughtcrime.securesms.util.views.LearnMoreTextView;
 
 public final class PaymentsAddMoneyFragment extends LoggingFragment {
+
+  private static final String TAG = Log.tag(PaymentsAddMoneyFragment.class);
 
   public PaymentsAddMoneyFragment() {
     super(R.layout.payments_add_money_fragment);
@@ -46,15 +49,28 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
     View              qrBorder                 = view.findViewById(R.id.payments_add_money_qr_border);
     EditText          amountInput              = view.findViewById(R.id.cashu_amount_input);
     View              getInvoiceButton         = view.findViewById(R.id.cashu_get_invoice_button);
+    View              lightningConfigButton    = view.findViewById(R.id.lightning_config_button);
 
     info.setLearnMoreVisible(true);
     info.setLink(getString(R.string.PaymentsAddMoneyFragment__learn_more__information));
 
     toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());
 
-    // Cashu/Lightning path: inline UI (amount input + button -> show QR)
-    if (SignalStore.payments().cashuEnabled()) {
+    // Check if Lightning is configured - use it exclusively, no Cashu fallback
+    boolean lightningConfigured = LightningUiInteractor.isConfigured(AppDependencies.getApplication());
+    Log.i(TAG, "PaymentsAddMoney: Lightning configured = " + lightningConfigured);
+    
+    // Lightning-only path when configured
+    if (lightningConfigured) {
       qrBorder.setVisibility(View.GONE);
+      if (lightningConfigButton != null) lightningConfigButton.setVisibility(View.GONE);
+      
+      // Update button text to indicate Lightning
+      if (getInvoiceButton instanceof android.widget.Button) {
+        ((android.widget.Button) getInvoiceButton).setText("⚡ Get Lightning Invoice");
+      }
+      info.setText("Create a Lightning invoice to receive funds directly to your connected node.");
+      
       getInvoiceButton.setOnClickListener(v -> {
         String vtext = amountInput.getText() != null ? amountInput.getText().toString().trim() : "";
         final long sats;
@@ -74,54 +90,104 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
           imm.hideSoftInputFromWindow(amountInput.getWindowToken(), 0);
         }
         
-        // Show spinner before starting background task
         View progressBar = view.findViewById(R.id.cashu_invoice_progress);
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
-        // Fetch in background - prefer Lightning node if configured
+        // Use Lightning exclusively - no Cashu fallback
         new Thread(() -> {
           String text;
-          boolean usedLightning = false;
           try {
-            // Check if Lightning node is configured - use it directly for invoice creation
-            if (LightningUiInteractor.isConfigured(AppDependencies.getApplication())) {
-              String lightningInvoice = LightningUiInteractor.createInvoiceBlocking(
-                  AppDependencies.getApplication(), sats, "Signal payment");
-              if (lightningInvoice != null && !lightningInvoice.isEmpty()) {
-                text = lightningInvoice;
-                usedLightning = true;
-              } else {
-                // Fallback to Cashu mint quote
-                MintQuote quote = CashuMintQuoteUiHelper.requestMintQuote(requireContext(), sats);
-                if (quote != null && quote.getInvoiceBolt11() != null && !quote.getInvoiceBolt11().isEmpty()) {
-                  text = quote.getInvoiceBolt11();
-                } else if (quote != null) {
-                  text = "cashu:mint-quote?mint=" + quote.getMintUrl() + "&amount=" + quote.getAmountSats() + "&total=" + quote.getTotalSats();
-                } else {
-                  text = "cashu:mint-quote:unavailable";
-                }
-              }
+            Log.i(TAG, "Creating Lightning invoice for " + sats + " sats");
+            String lightningInvoice = LightningUiInteractor.createInvoiceBlocking(
+                AppDependencies.getApplication(), sats, "Signal payment");
+            if (lightningInvoice != null && !lightningInvoice.isEmpty()) {
+              text = lightningInvoice;
+              Log.i(TAG, "Lightning invoice created successfully");
             } else {
-              // Use Cashu mint quote (original flow)
-              MintQuote quote = CashuMintQuoteUiHelper.requestMintQuote(requireContext(), sats);
-              if (quote != null && quote.getInvoiceBolt11() != null && !quote.getInvoiceBolt11().isEmpty()) {
-                text = quote.getInvoiceBolt11();
-              } else if (quote != null) {
-                text = "cashu:mint-quote?mint=" + quote.getMintUrl() + "&amount=" + quote.getAmountSats() + "&total=" + quote.getTotalSats();
-              } else {
-                text = "cashu:mint-quote:unavailable";
-              }
+              text = "error:lightning_invoice_failed";
+              Log.e(TAG, "Lightning invoice creation returned null");
+            }
+          } catch (Throwable t) {
+            Log.e(TAG, "Lightning invoice creation error", t);
+            text = "error:" + t.getMessage();
+          }
+          final String qrText = text;
+          requireActivity().runOnUiThread(() -> {
+            if (progressBar != null) progressBar.setVisibility(View.GONE);
+            
+            if (qrText.startsWith("error:")) {
+              Toast.makeText(requireContext(), "Failed to create invoice: " + qrText.substring(6), Toast.LENGTH_LONG).show();
+              return;
+            }
+            
+            View amountContainer = getView().findViewById(R.id.cashu_amount_container);
+            if (amountContainer != null) amountContainer.setVisibility(View.GONE);
+            qrBorder.setVisibility(View.VISIBLE);
+            TextView walletLabel = getView().findViewById(R.id.payments_add_money_your_wallet_address);
+            if (walletLabel != null) walletLabel.setText("⚡ Lightning Invoice");
+            walletAddressAbbreviated.setText(qrText);
+            qrImageView.setQrText(qrText);
+            info.setText("Pay this Lightning invoice to add funds to your wallet.");
+          });
+        }).start();
+      });
+      
+      copyAddress.setOnClickListener(v -> copyAddressToClipboard(walletAddressAbbreviated.getText().toString()));
+      return;
+    }
+    
+    // Cashu path (only when Lightning is NOT configured)
+    if (SignalStore.payments().cashuEnabled()) {
+      qrBorder.setVisibility(View.GONE);
+      
+      // Show "Connect Lightning Node" button since Lightning is not configured
+      if (lightningConfigButton != null) {
+        lightningConfigButton.setVisibility(View.VISIBLE);
+        lightningConfigButton.setOnClickListener(v -> {
+          Navigation.findNavController(v).navigate(R.id.action_paymentsAddMoney_to_lightningConfig);
+        });
+      }
+      
+      getInvoiceButton.setOnClickListener(v -> {
+        String vtext = amountInput.getText() != null ? amountInput.getText().toString().trim() : "";
+        final long sats;
+        try { sats = Long.parseLong(vtext); } catch (Throwable t) {
+          Toast.makeText(requireContext(), "Invalid amount", Toast.LENGTH_SHORT).show();
+          return;
+        }
+        if (sats <= 0L) {
+          Toast.makeText(requireContext(), "Invalid amount", Toast.LENGTH_SHORT).show();
+          return;
+        }
+        
+        InputMethodManager imm = (InputMethodManager) 
+            requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+          imm.hideSoftInputFromWindow(amountInput.getWindowToken(), 0);
+        }
+        
+        View progressBar = view.findViewById(R.id.cashu_invoice_progress);
+        if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+        
+        // Cashu mint quote flow
+        new Thread(() -> {
+          String text;
+          try {
+            MintQuote quote = CashuMintQuoteUiHelper.requestMintQuote(requireContext(), sats);
+            if (quote != null && quote.getInvoiceBolt11() != null && !quote.getInvoiceBolt11().isEmpty()) {
+              text = quote.getInvoiceBolt11();
+            } else if (quote != null) {
+              text = "cashu:mint-quote?mint=" + quote.getMintUrl() + "&amount=" + quote.getAmountSats() + "&total=" + quote.getTotalSats();
+            } else {
+              text = "cashu:mint-quote:unavailable";
             }
           } catch (Throwable t) {
             text = "invoice:error";
           }
           final String qrText = text;
-          final boolean lightningUsed = usedLightning;
           requireActivity().runOnUiThread(() -> {
-            // Hide spinner when done
             if (progressBar != null) progressBar.setVisibility(View.GONE);
             
-            // Hide amount input and button after we have a quote
             View amountContainer = getView().findViewById(R.id.cashu_amount_container);
             if (amountContainer != null) amountContainer.setVisibility(View.GONE);
             qrBorder.setVisibility(View.VISIBLE);
@@ -129,14 +195,8 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
             if (walletLabel != null) walletLabel.setText("Your lightning invoice");
             walletAddressAbbreviated.setText(qrText);
             qrImageView.setQrText(qrText);
-            if (lightningUsed) {
-              info.setText("Pay this invoice directly to your Lightning node.");
-            } else {
-              info.setText("To add funds, pay this lightning invoice.");
-            }
-            // Notify home to refresh recent activity
+            info.setText("To add funds, pay this lightning invoice.");
             getParentFragmentManager().setFragmentResult("cashu_history_changed", new Bundle());
-
           });
         }).start();
       });

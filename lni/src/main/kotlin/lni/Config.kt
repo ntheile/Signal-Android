@@ -12,8 +12,8 @@ data class LndConfig(
     val url: String,
     val macaroon: String,
     val socks5Proxy: String? = null,
-    val acceptInvalidCerts: Boolean? = false,
-    val httpTimeout: Int? = 120
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
@@ -23,8 +23,8 @@ data class ClnConfig(
     val url: String,
     val rune: String,
     val socks5Proxy: String? = null,
-    val acceptInvalidCerts: Boolean? = false,
-    val httpTimeout: Int? = 120
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
@@ -34,16 +34,18 @@ data class PhoenixdConfig(
     val url: String,
     val password: String,
     val socks5Proxy: String? = null,
-    val acceptInvalidCerts: Boolean? = false,
-    val httpTimeout: Int? = 120
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
  * NWC (Nostr Wallet Connect) configuration
  */
 data class NwcConfig(
-    val uri: String,
-    val httpTimeout: Int? = 120
+    val nwcUri: String,
+    val socks5Proxy: String? = null,
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
@@ -53,8 +55,8 @@ data class StrikeConfig(
     val apiKey: String,
     val baseUrl: String? = "https://api.strike.me/v1",
     val socks5Proxy: String? = null,
-    val acceptInvalidCerts: Boolean? = false,
-    val httpTimeout: Int? = 120
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
@@ -63,7 +65,9 @@ data class StrikeConfig(
 data class BlinkConfig(
     val apiKey: String,
     val baseUrl: String? = "https://api.blink.sv/graphql",
-    val httpTimeout: Int? = 120
+    val socks5Proxy: String? = null,
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )
 
 /**
@@ -72,5 +76,7 @@ data class BlinkConfig(
 data class SpeedConfig(
     val apiKey: String,
     val baseUrl: String? = "https://api.tryspeed.com/v1",
-    val httpTimeout: Int? = 120
+    val socks5Proxy: String? = null,
+    val acceptInvalidCerts: Boolean? = true,
+    val httpTimeout: Long? = 120L
 )

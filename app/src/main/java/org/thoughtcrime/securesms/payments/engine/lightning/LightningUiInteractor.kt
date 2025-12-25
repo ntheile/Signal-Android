@@ -22,8 +22,10 @@ object LightningUiInteractor {
     fun isConfigured(context: Context): Boolean {
         return try {
             // Check if Lightning is enabled globally AND has a configuration
-            org.thoughtcrime.securesms.keyvalue.SignalStore.payments.lightningEnabled() &&
-            LightningEngineProvider.get(context).isConfigured()
+            val lightningEnabled = org.thoughtcrime.securesms.keyvalue.SignalStore.payments.lightningEnabled()
+            val hasConfig = LightningEngineProvider.get(context).isConfigured()
+            Log.d(TAG, "Lightning check: enabled=$lightningEnabled, hasConfig=$hasConfig")
+            lightningEnabled && hasConfig
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to check Lightning configuration", e)
             false
@@ -74,10 +76,24 @@ object LightningUiInteractor {
      */
     @JvmStatic
     fun createInvoiceBlocking(context: Context, amountSats: Long, description: String? = null): String? = runBlocking {
-        runCatching {
-            LightningEngineProvider.get(context).createInvoice(amountSats, description).getOrNull()
-        }.getOrElse { throwable ->
-            Log.w(TAG, "Failed to create Lightning invoice", throwable)
+        try {
+            Log.i(TAG, "createInvoiceBlocking: Creating invoice for $amountSats sats")
+            val engine = LightningEngineProvider.get(context)
+            Log.i(TAG, "createInvoiceBlocking: Engine type = ${engine.getConfiguredNodeType()}")
+            
+            val result = engine.createInvoice(amountSats, description)
+            result.fold(
+                onSuccess = { invoice ->
+                    Log.i(TAG, "createInvoiceBlocking: Success! Invoice length = ${invoice.length}")
+                    invoice
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "createInvoiceBlocking: Failed - ${error.message}", error)
+                    null
+                }
+            )
+        } catch (throwable: Throwable) {
+            Log.e(TAG, "createInvoiceBlocking: Exception", throwable)
             null
         }
     }

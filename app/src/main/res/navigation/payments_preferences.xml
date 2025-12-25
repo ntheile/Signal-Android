@@ -189,7 +189,17 @@
     <fragment
         android:id="@+id/paymentsAddMoney"
         android:name="org.thoughtcrime.securesms.payments.preferences.addmoney.PaymentsAddMoneyFragment"
-        tools:layout="@layout/payments_add_money_fragment" />
+        tools:layout="@layout/payments_add_money_fragment">
+
+        <action
+            android:id="@+id/action_paymentsAddMoney_to_lightningConfig"
+            app:destination="@id/lightningConfig"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/setCurrency"

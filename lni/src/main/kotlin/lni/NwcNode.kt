@@ -1,80 +1,51 @@
 /**
  * NWC (Nostr Wallet Connect) Node Implementation
  * 
- * This is a Kotlin implementation that mirrors the LNI Rust library's NwcNode.
- * NWC uses the Nostr protocol for wallet communication.
- * 
- * When uniffi bindings are built, this can be replaced with the native implementation
- * that uses the full Nostr WebSocket protocol.
+ * This is a wrapper around the native LNI Rust library's NwcNode.
+ * It delegates to the UniFFI-generated bindings and converts between
+ * the wrapper types and native types.
  */
 package lni
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.net.URL
-import java.net.URI
-import javax.net.ssl.HttpsURLConnection
-import org.json.JSONObject
-import org.json.JSONArray
-import java.security.MessageDigest
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
+
+// Import native LNI types
+import uniffi.lni.NwcNode as NativeNwcNode
+import uniffi.lni.NwcConfig as NativeNwcConfig
+import uniffi.lni.CreateInvoiceParams as NativeCreateInvoiceParams
+import uniffi.lni.PayInvoiceParams as NativePayInvoiceParams
+import uniffi.lni.ListTransactionsParams as NativeListTransactionsParams
+import uniffi.lni.LookupInvoiceParams as NativeLookupInvoiceParams
+import uniffi.lni.CreateOfferParams as NativeCreateOfferParams
+import uniffi.lni.InvoiceType as NativeInvoiceType
+import uniffi.lni.ApiException
 
 class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
     
-    private val pubkey: String
-    private val relayUrl: String
-    private val secret: String
-    
-    init {
-        // Parse NWC URI: nostr+walletconnect://pubkey?relay=...&secret=...
-        val uri = URI(config.uri.replace("nostr+walletconnect://", "https://"))
-        pubkey = uri.host ?: ""
-        
-        val params = uri.query?.split("&")?.associate {
-            val (key, value) = it.split("=", limit = 2)
-            key to java.net.URLDecoder.decode(value, "UTF-8")
-        } ?: emptyMap()
-        
-        relayUrl = params["relay"] ?: ""
-        secret = params["secret"] ?: ""
+    private val nativeNode: NativeNwcNode by lazy {
+        NativeNwcNode(NativeNwcConfig(
+            nwcUri = config.nwcUri,
+            socks5Proxy = config.socks5Proxy ?: "",
+            acceptInvalidCerts = config.acceptInvalidCerts,
+            httpTimeout = config.httpTimeout
+        ))
     }
-    
-    // NWC HTTP proxy approach - works with some services like Alby
-    // For full Nostr protocol support, use the LNI native library
     
     override suspend fun getInfo(): Result<NodeInfo> = withContext(Dispatchers.IO) {
         try {
-            // NWC get_info is not widely supported, try get_balance instead
-            val balanceResult = executeNwcMethod("get_balance", JSONObject())
-            
-            balanceResult.fold(
-                onSuccess = { response ->
-                    val balanceMsats = response.optLong("balance")
-                    Result.success(NodeInfo(
-                        alias = "NWC Wallet",
-                        pubkey = pubkey,
-                        network = "mainnet",
-                        blockHeight = null,
-                        balanceSat = balanceMsats / 1000,
-                        maxPayableSat = balanceMsats / 1000,
-                        maxReceivableSat = null
-                    ))
-                },
-                onFailure = {
-                    // Fallback - just return basic info
-                    Result.success(NodeInfo(
-                        alias = "NWC Wallet",
-                        pubkey = pubkey,
-                        network = "mainnet",
-                        blockHeight = null,
-                        balanceSat = null,
-                        maxPayableSat = null,
-                        maxReceivableSat = null
-                    ))
-                }
-            )
+            val info = nativeNode.getInfo()
+            Result.success(NodeInfo(
+                alias = info.alias,
+                pubkey = info.pubkey,
+                network = info.network,
+                blockHeight = info.blockHeight,
+                balanceSat = info.sendBalanceMsat?.let { it / 1000 },
+                maxPayableSat = info.sendBalanceMsat?.let { it / 1000 },
+                maxReceivableSat = info.receiveBalanceMsat?.let { it / 1000 }
+            ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -82,37 +53,26 @@ class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
     
     override suspend fun createInvoice(params: CreateInvoiceParams): Result<Transaction> = withContext(Dispatchers.IO) {
         try {
-            val requestParams = JSONObject().apply {
-                params.amountMsats?.let { put("amount", it) }
-                params.description?.let { put("description", it) }
-                params.expiry?.let { put("expiry", it) }
-            }
-            
-            val result = executeNwcMethod("make_invoice", requestParams)
-            
-            result.fold(
-                onSuccess = { response ->
-                    val invoice = response.optString("invoice")
-                    val paymentHash = response.optString("payment_hash")
-                    
-                    Result.success(Transaction(
-                        paymentHash = paymentHash,
-                        paymentRequest = invoice,
-                        amountMsats = params.amountMsats,
-                        feeMsats = null,
-                        status = TransactionStatus.Pending,
-                        type = TransactionType.Incoming,
-                        createdAt = System.currentTimeMillis() / 1000,
-                        settledAt = null,
-                        description = params.description,
-                        preimage = null,
-                        bolt11 = invoice,
-                        bolt12 = null,
-                        offer = null
-                    ))
+            val nativeParams = NativeCreateInvoiceParams(
+                invoiceType = when (params.invoiceType) {
+                    InvoiceType.Bolt11 -> NativeInvoiceType.BOLT11
+                    InvoiceType.Bolt12 -> NativeInvoiceType.BOLT12
                 },
-                onFailure = { Result.failure(it) }
+                amountMsats = params.amountMsats,
+                description = params.description,
+                expiry = params.expiry,
+                descriptionHash = params.descriptionHash,
+                offer = null,
+                rPreimage = null,
+                isBlinded = false,
+                isKeysend = false,
+                isAmp = false,
+                isPrivate = false
             )
+            val tx = nativeNode.createInvoice(nativeParams)
+            Result.success(tx.toWrapperTransaction())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -120,26 +80,27 @@ class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
     
     override suspend fun payInvoice(params: PayInvoiceParams): Result<PayInvoiceResponse> = withContext(Dispatchers.IO) {
         try {
-            val requestParams = JSONObject().apply {
-                put("invoice", params.invoice)
-                params.amountMsats?.let { put("amount", it) }
-            }
-            
-            val result = executeNwcMethod("pay_invoice", requestParams)
-            
-            result.fold(
-                onSuccess = { response ->
-                    val preimage = response.optString("preimage")
-                    
-                    Result.success(PayInvoiceResponse(
-                        paymentHash = "",
-                        preimage = preimage,
-                        feeMsats = null,
-                        status = TransactionStatus.Complete
-                    ))
-                },
-                onFailure = { Result.failure(it) }
+            val nativeParams = NativePayInvoiceParams(
+                invoice = params.invoice,
+                feeLimitMsat = null,
+                feeLimitPercentage = params.feeLimitPercentage?.toDouble(),
+                timeoutSeconds = null,
+                amountMsats = params.amountMsats,
+                maxParts = null,
+                firstHopPubkey = null,
+                lastHopPubkey = null,
+                allowSelfPayment = params.allowSelfPayment ?: false,
+                isAmp = false
             )
+            val response = nativeNode.payInvoice(nativeParams)
+            Result.success(PayInvoiceResponse(
+                paymentHash = response.paymentHash,
+                preimage = response.preimage,
+                feeMsats = response.feeMsats,
+                status = TransactionStatus.Complete
+            ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -147,35 +108,14 @@ class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
     
     override suspend fun lookupInvoice(paymentHash: String): Result<Transaction> = withContext(Dispatchers.IO) {
         try {
-            val requestParams = JSONObject().apply {
-                put("payment_hash", paymentHash)
-            }
-            
-            val result = executeNwcMethod("lookup_invoice", requestParams)
-            
-            result.fold(
-                onSuccess = { response ->
-                    val paidAt = response.optLong("paid_at")
-                    val status = if (paidAt > 0) TransactionStatus.Complete else TransactionStatus.Pending
-                    
-                    Result.success(Transaction(
-                        paymentHash = paymentHash,
-                        paymentRequest = response.optString("invoice"),
-                        amountMsats = response.optLong("amount"),
-                        feeMsats = null,
-                        status = status,
-                        type = TransactionType.Incoming,
-                        createdAt = response.optLong("created_at"),
-                        settledAt = if (paidAt > 0) paidAt else null,
-                        description = response.optString("description"),
-                        preimage = response.optString("preimage"),
-                        bolt11 = response.optString("invoice"),
-                        bolt12 = null,
-                        offer = null
-                    ))
-                },
-                onFailure = { Result.failure(it) }
+            val nativeParams = NativeLookupInvoiceParams(
+                paymentHash = paymentHash,
+                search = null
             )
+            val tx = nativeNode.lookupInvoice(nativeParams)
+            Result.success(tx.toWrapperTransaction())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
@@ -183,69 +123,84 @@ class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
     
     override suspend fun listTransactions(params: ListTransactionsParams): Result<List<Transaction>> = withContext(Dispatchers.IO) {
         try {
-            val requestParams = JSONObject().apply {
-                put("from", params.from)
-                put("limit", params.limit)
-            }
-            
-            val result = executeNwcMethod("list_transactions", requestParams)
-            
-            result.fold(
-                onSuccess = { response ->
-                    val txns = response.optJSONArray("transactions") ?: JSONArray()
-                    
-                    val transactions = (0 until txns.length()).map { i ->
-                        val tx = txns.getJSONObject(i)
-                        val paidAt = tx.optLong("paid_at")
-                        val status = if (paidAt > 0) TransactionStatus.Complete else TransactionStatus.Pending
-                        val typeStr = tx.optString("type")
-                        val type = if (typeStr == "incoming") TransactionType.Incoming else TransactionType.Outgoing
-                        
-                        Transaction(
-                            paymentHash = tx.optString("payment_hash"),
-                            paymentRequest = tx.optString("invoice"),
-                            amountMsats = tx.optLong("amount"),
-                            feeMsats = tx.optLong("fees_paid"),
-                            status = status,
-                            type = type,
-                            createdAt = tx.optLong("created_at"),
-                            settledAt = if (paidAt > 0) paidAt else null,
-                            description = tx.optString("description"),
-                            preimage = tx.optString("preimage"),
-                            bolt11 = tx.optString("invoice"),
-                            bolt12 = null,
-                            offer = null
-                        )
-                    }
-                    
-                    Result.success(transactions)
-                },
-                onFailure = { Result.failure(it) }
+            val nativeParams = NativeListTransactionsParams(
+                from = params.from.toLong(),
+                limit = params.limit.toLong(),
+                paymentHash = params.paymentHash,
+                search = null
             )
+            val transactions = nativeNode.listTransactions(nativeParams)
+            Result.success(transactions.map { it.toWrapperTransaction() })
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
         } catch (e: Exception) {
             Result.failure(ApiError.Http(e.message ?: "Unknown error"))
         }
     }
     
-    override suspend fun decode(str: String): Result<String> {
-        return Result.failure(ApiError.Api("Decode not supported by NWC"))
+    override suspend fun decode(str: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val decoded = nativeNode.decode(str)
+            Result.success(decoded)
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    // BOLT 12 methods - NWC doesn't support BOLT 12 yet
-    override suspend fun createOffer(params: CreateOfferParams): Result<Offer> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by NWC"))
+    // BOLT 12 methods
+    override suspend fun createOffer(params: CreateOfferParams): Result<Offer> = withContext(Dispatchers.IO) {
+        try {
+            val nativeParams = NativeCreateOfferParams(
+                description = params.description,
+                amountMsats = params.amountMsats
+            )
+            val offer = nativeNode.createOffer(nativeParams)
+            Result.success(offer.toWrapperOffer())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun getOffer(search: String?): Result<Offer> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by NWC"))
+    override suspend fun getOffer(search: String?): Result<Offer> = withContext(Dispatchers.IO) {
+        try {
+            val offer = nativeNode.getOffer(search)
+            Result.success(offer.toWrapperOffer())
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun payOffer(offer: String, amountMsats: Long, payerNote: String?): Result<PayInvoiceResponse> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by NWC"))
+    override suspend fun payOffer(offer: String, amountMsats: Long, payerNote: String?): Result<PayInvoiceResponse> = withContext(Dispatchers.IO) {
+        try {
+            val response = nativeNode.payOffer(offer, amountMsats, payerNote)
+            Result.success(PayInvoiceResponse(
+                paymentHash = response.paymentHash,
+                preimage = response.preimage,
+                feeMsats = response.feeMsats,
+                status = TransactionStatus.Complete
+            ))
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
-    override suspend fun listOffers(search: String?): Result<List<Offer>> {
-        return Result.failure(ApiError.Api("BOLT 12 offers not supported by NWC"))
+    override suspend fun listOffers(search: String?): Result<List<Offer>> = withContext(Dispatchers.IO) {
+        try {
+            val offers = nativeNode.listOffers(search)
+            Result.success(offers.map { it.toWrapperOffer() })
+        } catch (e: ApiException) {
+            Result.failure(ApiError.Api(e.message ?: "Unknown API error"))
+        } catch (e: Exception) {
+            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
+        }
     }
     
     override suspend fun onInvoiceEvents(params: OnInvoiceEventParams, callback: OnInvoiceEventCallback) {
@@ -280,29 +235,44 @@ class NwcNode(private val config: NwcConfig) : LightningNodeInterface {
         // Timeout
         callback.failure(null)
     }
+}
+
+// Extension functions to convert native types to wrapper types
+private fun uniffi.lni.Transaction.toWrapperTransaction(): Transaction {
+    // Infer status from settledAt: if > 0 then complete, otherwise pending
+    val status = if (this.settledAt > 0) TransactionStatus.Complete else TransactionStatus.Pending
     
-    /**
-     * Execute an NWC method.
-     * 
-     * NOTE: This is a simplified implementation. The full NWC protocol uses
-     * Nostr WebSocket connections with encrypted messages. This implementation
-     * works with some services (like Alby) that support HTTP-based NWC proxies.
-     * 
-     * For full NWC protocol support, the LNI native library should be used.
-     */
-    private suspend fun executeNwcMethod(method: String, params: JSONObject): Result<JSONObject> = withContext(Dispatchers.IO) {
-        try {
-            // This is a placeholder - full NWC requires Nostr WebSocket protocol
-            // The LNI Rust library handles this properly with the nostr crate
-            
-            // For now, return an error indicating full NWC is not supported
-            // Users should configure a different node type or use the native LNI library
-            Result.failure(ApiError.Api(
-                "Full NWC protocol requires native LNI library. " +
-                "Build LNI with: ./gradlew :lni:buildRust"
-            ))
-        } catch (e: Exception) {
-            Result.failure(ApiError.Http(e.message ?: "Unknown error"))
-        }
+    // type is a String in native bindings ("incoming" or "outgoing")
+    val txType = when (this.type.lowercase()) {
+        "incoming" -> TransactionType.Incoming
+        "outgoing" -> TransactionType.Outgoing
+        else -> TransactionType.Incoming
     }
+    
+    return Transaction(
+        paymentHash = this.paymentHash,
+        paymentRequest = this.invoice,
+        amountMsats = this.amountMsats,
+        feeMsats = this.feesPaid,
+        status = status,
+        type = txType,
+        createdAt = this.createdAt,
+        settledAt = if (this.settledAt > 0) this.settledAt else null,
+        description = this.description.ifEmpty { null },
+        preimage = this.preimage.ifEmpty { null },
+        bolt11 = this.invoice.ifEmpty { null },
+        bolt12 = null,
+        offer = null
+    )
+}
+
+private fun uniffi.lni.Offer.toWrapperOffer(): Offer {
+    return Offer(
+        offerId = this.offerId,
+        offer = this.bolt12,
+        active = this.active ?: false,
+        singleUse = this.singleUse ?: false,
+        description = this.label,
+        amountMsats = this.amountMsats
+    )
 }

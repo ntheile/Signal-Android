@@ -219,34 +219,50 @@ class LightningEngine(private val appContext: Context) {
     private fun getOrCreateNode(): LightningNodeInterface? {
         node?.let { return it }
         
-        val config = configStore.getConfig() ?: return null
+        val config = configStore.getConfig()
+        if (config == null) {
+            Log.w(TAG, "getOrCreateNode: No config found")
+            return null
+        }
         
-        val newNode: LightningNodeInterface? = when (config.type) {
-            LightningNodeType.NWC -> {
-                LniNwcNode(NwcConfig(uri = config.credential))
+        Log.i(TAG, "getOrCreateNode: Creating node for type ${config.type}")
+        
+        val newNode: LightningNodeInterface? = try {
+            when (config.type) {
+                LightningNodeType.NWC -> {
+                    Log.i(TAG, "Creating NwcNode")
+                    LniNwcNode(NwcConfig(nwcUri = config.credential))
+                }
+                LightningNodeType.LND -> {
+                    Log.i(TAG, "Creating LndNode with url=${config.url}")
+                    LniLndNode(LndConfig(
+                        url = config.url ?: throw IllegalStateException("LND requires URL"),
+                        macaroon = config.credential
+                    ))
+                }
+                LightningNodeType.STRIKE -> {
+                    Log.i(TAG, "Creating StrikeNode")
+                    LniStrikeNode(StrikeConfig(apiKey = config.credential))
+                }
+                LightningNodeType.BLINK -> {
+                    Log.i(TAG, "Creating BlinkNode")
+                    LniBlinkNode(BlinkConfig(apiKey = config.credential))
+                }
+                // CLN, Phoenixd, Speed - can be added when LNI uniffi bindings are built
+                LightningNodeType.CLN,
+                LightningNodeType.PHOENIXD,
+                LightningNodeType.SPEED -> {
+                    Log.w(TAG, "Lightning node type ${config.type} requires building LNI native bindings. Using placeholder.")
+                    null
+                }
             }
-            LightningNodeType.LND -> {
-                LniLndNode(LndConfig(
-                    url = config.url ?: throw IllegalStateException("LND requires URL"),
-                    macaroon = config.credential
-                ))
-            }
-            LightningNodeType.STRIKE -> {
-                LniStrikeNode(StrikeConfig(apiKey = config.credential))
-            }
-            LightningNodeType.BLINK -> {
-                LniBlinkNode(BlinkConfig(apiKey = config.credential))
-            }
-            // CLN, Phoenixd, Speed - can be added when LNI uniffi bindings are built
-            LightningNodeType.CLN,
-            LightningNodeType.PHOENIXD,
-            LightningNodeType.SPEED -> {
-                Log.w(TAG, "Lightning node type ${config.type} requires building LNI native bindings. Using placeholder.")
-                null
-            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to create node for type ${config.type}", e)
+            null
         }
         
         node = newNode
+        Log.i(TAG, "getOrCreateNode: Created node = ${newNode?.javaClass?.simpleName}")
         return newNode
     }
 }
