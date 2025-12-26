@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    
+    <!-- Large welcome screen logo - Signal bubble with lightning bolt -->
+    
+    <!-- Outer glow/shadow effect -->
+    <path
+        android:fillColor="#1A008CFF"
+        android:pathData="M100,20
+            C55,20 20,52 20,92
+            C20,116 30,137 48,152
+            L48,180
+            L72,165
+            C80,168 90,170 100,170
+            C145,170 180,138 180,98
+            C180,52 145,20 100,20
+            Z"/>
+    
+    <!-- Main speech bubble (white) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M100,28
+            C58,28 28,58 28,95
+            C28,117 37,136 53,150
+            L53,173
+            L74,160
+            C82,163 91,165 100,165
+            C142,165 172,135 172,98
+            C172,58 142,28 100,28
+            Z"/>
+    
+    <!-- Lightning bolt (Venmo blue) -->
+    <path
+        android:fillColor="#008CFF"
+        android:pathData="M110,55
+            L85,100
+            L100,100
+            L92,145
+            L125,90
+            L108,90
+            L120,55
+            Z"/>
+    
+    <!-- Bitcoin/Cashu orange accent dot -->
+    <path
+        android:fillColor="#F7931A"
+        android:pathData="M145,50
+            m-8,0
+            a8,8 0,1 1,16 0
+            a8,8 0,1 1,-16 0"/>
+            
+</vector>

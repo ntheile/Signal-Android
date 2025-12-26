@@ -5,9 +5,13 @@
 
 package org.thoughtcrime.securesms.registration.ui.link
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -113,12 +118,19 @@ class RegisterLinkDeviceQrFragment : ComposeFragment() {
   @Composable
   override fun FragmentContent() {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     RegisterLinkDeviceQrScreen(
       state = state,
       onRetryQrCode = viewModel::restartProvisioningSocket,
       onErrorDismiss = viewModel::clearErrors,
-      onCancel = { findNavController().popBackStack() }
+      onCancel = { findNavController().popBackStack() },
+      onCopyLink = { url ->
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Signal Link Device URL", url)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(context, "Link copied to clipboard", Toast.LENGTH_SHORT).show()
+      }
     )
   }
 }
@@ -129,18 +141,38 @@ private fun RegisterLinkDeviceQrScreen(
   state: RegisterLinkDeviceQrViewModel.RegisterLinkDeviceState,
   onRetryQrCode: () -> Unit = {},
   onErrorDismiss: () -> Unit = {},
-  onCancel: () -> Unit = {}
+  onCancel: () -> Unit = {},
+  onCopyLink: (String) -> Unit = {}
 ) {
   // TODO [link-device] use actual design
   RegistrationScreen(
     title = "Scan this code with your phone",
     subtitle = null,
     bottomContent = {
-      TextButton(
-        onClick = onCancel,
-        modifier = Modifier.align(Alignment.Center)
+      Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
       ) {
-        Text(text = stringResource(android.R.string.cancel))
+        // Copy link button - useful for same-device linking
+        if (state.provisioningUrl != null) {
+          Buttons.MediumTonal(
+            onClick = { onCopyLink(state.provisioningUrl) }
+          ) {
+            Icon(
+              painter = painterResource(R.drawable.symbol_copy_android_24),
+              contentDescription = null,
+              modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = "Copy link")
+          }
+          Spacer(modifier = Modifier.height(8.dp))
+        }
+        TextButton(
+          onClick = onCancel
+        ) {
+          Text(text = stringResource(android.R.string.cancel))
+        }
       }
     }
   ) {
