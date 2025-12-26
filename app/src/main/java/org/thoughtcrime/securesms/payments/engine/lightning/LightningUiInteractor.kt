@@ -127,38 +127,18 @@ object LightningUiInteractor {
 
     /**
      * Check if an invoice (by payment request string) has been paid.
-     * Extracts payment hash from the invoice and looks it up.
+     * Looks up the invoice by the payment request string and checks its status.
      */
     @JvmStatic
     fun isInvoicePaidBlocking(context: Context, invoice: String): Boolean = runBlocking {
         try {
-            val paymentHash = extractPaymentHashFromInvoice(invoice)
-            if (paymentHash != null) {
-                val status = LightningEngineProvider.get(context).lookupPayment(paymentHash).getOrNull()
-                status?.isPaid == true
-            } else {
-                // Try listing recent transactions and matching
-                val transactions = LightningEngineProvider.get(context).listTransactions(50).getOrNull()
-                transactions?.any { 
-                    it.paymentHash.isNotEmpty() && 
-                    it.isPaid && 
-                    it.type == LightningTxType.RECEIVE 
-                } == true
-            }
+            // Use the new lookupInvoiceByRequest that matches the exact invoice string
+            val status = LightningEngineProvider.get(context).lookupInvoiceByRequest(invoice).getOrNull()
+            status?.isPaid == true
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to check if invoice is paid", e)
             false
         }
-    }
-
-    /**
-     * Extract payment hash from BOLT11 invoice.
-     * This is a simplified extraction - payment hash is in the tagged data.
-     */
-    private fun extractPaymentHashFromInvoice(invoice: String): String? {
-        // For now, we can't easily extract payment hash without a full BOLT11 parser
-        // We'll rely on listing transactions instead
-        return null
     }
 
     /**

@@ -190,6 +190,44 @@ class LightningEngine(private val appContext: Context) {
     }
 
     /**
+     * Look up the status of an invoice by the payment request (BOLT11 invoice string).
+     * This is useful when you have the invoice but not the payment hash.
+     */
+    suspend fun lookupInvoiceByRequest(invoiceRequest: String): Result<LightningPaymentStatus> = withContext(Dispatchers.IO) {
+        runCatching {
+            val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
+            // Use decode to get the payment hash from the invoice, then look it up
+            val decoded = n.decode(invoiceRequest).getOrNull()
+            Log.d(TAG, "Decoded invoice result: $decoded")
+            
+            // Try to look up by searching for the invoice directly using the native API
+            // The search parameter in LookupInvoiceParams should match against payment request
+            val native = when (n) {
+                is lni.NwcNode -> {
+                    // NWC doesn't support looking up created invoices by request string
+                    // We need to use decode + lookupInvoice by hash
+                    null
+                }
+                else -> null
+            }
+            
+            // For most backends, we'll need to list transactions and filter
+            val transactions = n.listTransactions(lni.ListTransactionsParams(from = 0, limit = 50)).getOrThrow()
+            val matchingTx = transactions.find { tx ->
+                tx.paymentRequest?.equals(invoiceRequest, ignoreCase = true) == true
+            } ?: throw IllegalStateException("Invoice not found")
+            
+            LightningPaymentStatus(
+                paymentHash = matchingTx.paymentHash,
+                isPaid = matchingTx.status == TransactionStatus.Complete,
+                amountSats = (matchingTx.amountMsats ?: 0) / 1000,
+                feesPaidSats = (matchingTx.feeMsats ?: 0) / 1000,
+                settledAt = matchingTx.settledAt?.let { it * 1000 }
+            )
+        }
+    }
+
+    /**
      * List recent Lightning transactions.
      */
     suspend fun listTransactions(limit: Int = 20): Result<List<LightningTx>> = withContext(Dispatchers.IO) {

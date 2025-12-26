@@ -94,7 +94,7 @@
     <string name="AttachmentKeyboard_allow_access">Allow Access</string>
     <string name="AttachmentKeyboard_payment">Payment</string>
     <!-- Button to request a Lightning payment from the conversation partner -->
-    <string name="AttachmentKeyboard_request_payment">Request</string>
+    <string name="AttachmentKeyboard_request_payment">Request ₿</string>
     <!-- Text in a button that allows users to manage which media Signal has access to -->
     <string name="AttachmentKeyboard_manage">Manage</string>
 
