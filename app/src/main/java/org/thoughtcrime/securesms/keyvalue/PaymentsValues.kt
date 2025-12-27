@@ -54,6 +54,11 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
     private const val PAYMENT_LOCK_SKIP_COUNT = "mob_payments_payment_lock_skip_count"
     private const val SHOW_SAVE_RECOVERY_PHRASE = "mob_show_save_recovery_phrase"
     private const val LIGHTNING_INVOICE_PAID_PREFIX = "lightning_invoice_paid_"
+    private const val LIGHTNING_INVOICE_HASH_PREFIX = "lightning_invoice_hash_"
+    private const val SIGMO_PENDING_REQUESTS = "sigmo_pending_requests"
+    private const val SIGMO_REQUEST_INVOICE_PREFIX = "sigmo_request_invoice_"
+    private const val SIGMO_REQUEST_STATUS_PREFIX = "sigmo_request_status_"
+    private const val SIGMO_RESPONDED_PREFIX = "sigmo_responded_"
 
     private val LARGE_BALANCE_THRESHOLD = Money.mobileCoin(BigDecimal.valueOf(500))
   }
@@ -139,6 +144,178 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
   fun isInvoicePaid(invoice: String): Boolean {
     val key = LIGHTNING_INVOICE_PAID_PREFIX + invoice.hashCode()
     return store.getBoolean(key, false)
+  }
+  
+  /**
+   * Store the payment hash for an invoice we created.
+   * This allows us to look up the invoice status efficiently.
+   */
+  fun setInvoicePaymentHash(invoice: String, paymentHash: String) {
+    val key = LIGHTNING_INVOICE_HASH_PREFIX + invoice.hashCode()
+    store.beginWrite().putString(key, paymentHash).commit()
+  }
+  
+  /**
+   * Get the payment hash for an invoice we created.
+   * Returns null if no payment hash was stored.
+   */
+  fun getInvoicePaymentHash(invoice: String): String? {
+    val key = LIGHTNING_INVOICE_HASH_PREFIX + invoice.hashCode()
+    return store.getString(key, null)
+  }
+
+  // ============================================================================
+  // Sigmo Payment Flow Tracking
+  // ============================================================================
+
+  /**
+   * Payment flow status for sigmo: protocol.
+   */
+  enum class SigmoFlowStatus {
+    PENDING,      // Request sent, waiting for invoice
+    INVOICE_RECEIVED,  // Invoice received, ready to pay
+    PAID,         // Payment completed
+    FAILED        // Something went wrong
+  }
+
+  /**
+   * Data class for a pending sigmo payment request.
+   */
+  data class SigmoPaymentFlow(
+    val requestId: String,
+    val recipientId: String,
+    val amountMsats: Long,
+    val threadId: Long,
+    val requestMessageId: Long,
+    val status: SigmoFlowStatus,
+    val invoice: String? = null,
+    val invoiceMessageId: Long? = null
+  )
+
+  /**
+   * Store a new sigmo payment request.
+   */
+  fun storeSigmoRequest(
+    requestId: String,
+    recipientId: String,
+    amountMsats: Long,
+    threadId: Long,
+    requestMessageId: Long
+  ) {
+    // Store the flow data as JSON-like pipe-separated string
+    val data = "$recipientId|$amountMsats|$threadId|$requestMessageId|${SigmoFlowStatus.PENDING.name}||"
+    val key = SIGMO_REQUEST_STATUS_PREFIX + requestId
+    store.beginWrite().putString(key, data).commit()
+    
+    // Add to list of pending requests
+    val pending = getPendingRequestIds().toMutableSet()
+    pending.add(requestId)
+    store.beginWrite().putString(SIGMO_PENDING_REQUESTS, pending.joinToString("|")).commit()
+  }
+
+  /**
+   * Get all pending request IDs.
+   */
+  private fun getPendingRequestIds(): Set<String> {
+    val raw = store.getString(SIGMO_PENDING_REQUESTS, "") ?: ""
+    return raw.split("|").filter { it.isNotBlank() }.toSet()
+  }
+
+  /**
+   * Get a sigmo payment flow by request ID.
+   */
+  fun getSigmoFlow(requestId: String): SigmoPaymentFlow? {
+    val key = SIGMO_REQUEST_STATUS_PREFIX + requestId
+    val data = store.getString(key, null) ?: return null
+    val parts = data.split("|")
+    if (parts.size < 5) return null
+    
+    return try {
+      SigmoPaymentFlow(
+        requestId = requestId,
+        recipientId = parts[0],
+        amountMsats = parts[1].toLong(),
+        threadId = parts[2].toLong(),
+        requestMessageId = parts[3].toLong(),
+        status = SigmoFlowStatus.valueOf(parts[4]),
+        invoice = parts.getOrNull(5)?.takeIf { it.isNotBlank() },
+        invoiceMessageId = parts.getOrNull(6)?.toLongOrNull()
+      )
+    } catch (e: Exception) {
+      null
+    }
+  }
+
+  /**
+   * Find a pending sigmo request for a given recipient and amount.
+   * This is used when an invoice comes in to match it to the original request.
+   */
+  fun findPendingSigmoRequest(recipientId: String, amountSats: Long): SigmoPaymentFlow? {
+    val amountMsats = amountSats * 1000
+    return getPendingRequestIds()
+      .mapNotNull { getSigmoFlow(it) }
+      .find { 
+        it.recipientId == recipientId && 
+        it.amountMsats == amountMsats && 
+        it.status == SigmoFlowStatus.PENDING
+      }
+  }
+
+  /**
+   * Update a sigmo flow with the received invoice.
+   */
+  fun updateSigmoFlowWithInvoice(requestId: String, invoice: String, invoiceMessageId: Long) {
+    val flow = getSigmoFlow(requestId) ?: return
+    val data = "${flow.recipientId}|${flow.amountMsats}|${flow.threadId}|${flow.requestMessageId}|${SigmoFlowStatus.INVOICE_RECEIVED.name}|$invoice|$invoiceMessageId"
+    val key = SIGMO_REQUEST_STATUS_PREFIX + requestId
+    store.beginWrite().putString(key, data).commit()
+  }
+
+  /**
+   * Mark a sigmo flow as paid.
+   */
+  fun markSigmoFlowPaid(requestId: String) {
+    val flow = getSigmoFlow(requestId) ?: return
+    val data = "${flow.recipientId}|${flow.amountMsats}|${flow.threadId}|${flow.requestMessageId}|${SigmoFlowStatus.PAID.name}|${flow.invoice ?: ""}|${flow.invoiceMessageId ?: ""}"
+    val key = SIGMO_REQUEST_STATUS_PREFIX + requestId
+    store.beginWrite().putString(key, data).commit()
+    
+    // Also mark the invoice as paid
+    flow.invoice?.let { setInvoicePaid(it) }
+  }
+
+  /**
+   * Get the sigmo flow associated with a specific message ID (either request or invoice message).
+   */
+  fun getSigmoFlowByMessageId(messageId: Long): SigmoPaymentFlow? {
+    return getPendingRequestIds()
+      .mapNotNull { getSigmoFlow(it) }
+      .find { it.requestMessageId == messageId || it.invoiceMessageId == messageId }
+  }
+  
+  /**
+   * Mark that we've responded to an incoming sigmo request with an invoice.
+   * Uses the request_id from the original request.
+   */
+  fun markSigmoRequestResponded(requestId: String, invoice: String) {
+    val key = SIGMO_RESPONDED_PREFIX + requestId
+    store.beginWrite().putString(key, invoice).commit()
+  }
+  
+  /**
+   * Check if we've already responded to an incoming sigmo request.
+   */
+  fun hasSigmoRequestBeenResponded(requestId: String): Boolean {
+    val key = SIGMO_RESPONDED_PREFIX + requestId
+    return store.getString(key, null) != null
+  }
+  
+  /**
+   * Get the invoice we sent in response to a sigmo request.
+   */
+  fun getSigmoResponseInvoice(requestId: String): String? {
+    val key = SIGMO_RESPONDED_PREFIX + requestId
+    return store.getString(key, null)
   }
 
   fun confirmMnemonic(confirmed: Boolean) {

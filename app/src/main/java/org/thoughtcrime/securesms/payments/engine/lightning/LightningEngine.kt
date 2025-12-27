@@ -26,6 +26,14 @@ import lni.NwcNode as LniNwcNode
 import lni.NwcConfig
 
 /**
+ * Result from creating a Lightning invoice, includes both the invoice string and payment hash.
+ */
+data class InvoiceResult(
+    val paymentRequest: String,
+    val paymentHash: String
+)
+
+/**
  * Lightning Engine that provides a unified interface for Lightning payments.
  * 
  * This engine manages the connection to a Lightning node and provides
@@ -136,8 +144,17 @@ class LightningEngine(private val appContext: Context) {
 
     /**
      * Create a Lightning invoice for receiving payments.
+     * Returns just the invoice string for backward compatibility.
      */
     suspend fun createInvoice(amountSats: Long, description: String? = null): Result<String> = withContext(Dispatchers.IO) {
+        createInvoiceWithHash(amountSats, description).map { it.paymentRequest }
+    }
+    
+    /**
+     * Create a Lightning invoice for receiving payments.
+     * Returns both the invoice string and payment hash for tracking.
+     */
+    suspend fun createInvoiceWithHash(amountSats: Long, description: String? = null): Result<InvoiceResult> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
             val params = LniCreateInvoiceParams(
@@ -147,7 +164,11 @@ class LightningEngine(private val appContext: Context) {
             )
             val txResult = n.createInvoice(params)
             val tx = txResult.getOrThrow()
-            tx.paymentRequest ?: throw IllegalStateException("Invoice creation failed: no payment request returned")
+            val paymentRequest = tx.paymentRequest ?: throw IllegalStateException("Invoice creation failed: no payment request returned")
+            InvoiceResult(
+                paymentRequest = paymentRequest,
+                paymentHash = tx.paymentHash
+            )
         }
     }
 
@@ -192,26 +213,34 @@ class LightningEngine(private val appContext: Context) {
     /**
      * Look up the status of an invoice by the payment request (BOLT11 invoice string).
      * This is useful when you have the invoice but not the payment hash.
+     * 
+     * Uses decode to extract payment hash, then lookupInvoice for efficient lookup.
      */
     suspend fun lookupInvoiceByRequest(invoiceRequest: String): Result<LightningPaymentStatus> = withContext(Dispatchers.IO) {
         runCatching {
             val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
-            // Use decode to get the payment hash from the invoice, then look it up
+            
+            // Decode the invoice to extract payment hash
             val decoded = n.decode(invoiceRequest).getOrNull()
             Log.d(TAG, "Decoded invoice result: $decoded")
             
-            // Try to look up by searching for the invoice directly using the native API
-            // The search parameter in LookupInvoiceParams should match against payment request
-            val native = when (n) {
-                is lni.NwcNode -> {
-                    // NWC doesn't support looking up created invoices by request string
-                    // We need to use decode + lookupInvoice by hash
-                    null
-                }
-                else -> null
+            // Try to extract payment_hash from decoded JSON
+            val paymentHash = decoded?.let { extractPaymentHashFromDecoded(it) }
+            
+            if (paymentHash != null) {
+                // Use efficient lookupInvoice by payment hash
+                val tx = n.lookupInvoice(paymentHash).getOrThrow()
+                return@runCatching LightningPaymentStatus(
+                    paymentHash = tx.paymentHash,
+                    isPaid = tx.status == TransactionStatus.Complete,
+                    amountSats = (tx.amountMsats ?: 0) / 1000,
+                    feesPaidSats = (tx.feeMsats ?: 0) / 1000,
+                    settledAt = tx.settledAt?.let { it * 1000 }
+                )
             }
             
-            // For most backends, we'll need to list transactions and filter
+            // Fallback: list transactions and filter
+            Log.d(TAG, "Falling back to list transactions for invoice lookup")
             val transactions = n.listTransactions(lni.ListTransactionsParams(from = 0, limit = 50)).getOrThrow()
             val matchingTx = transactions.find { tx ->
                 tx.paymentRequest?.equals(invoiceRequest, ignoreCase = true) == true
@@ -224,6 +253,31 @@ class LightningEngine(private val appContext: Context) {
                 feesPaidSats = (matchingTx.feeMsats ?: 0) / 1000,
                 settledAt = matchingTx.settledAt?.let { it * 1000 }
             )
+        }
+    }
+    
+    /**
+     * Extract payment hash from decoded invoice JSON.
+     * The decode function returns JSON with payment_hash field.
+     */
+    private fun extractPaymentHashFromDecoded(decoded: String): String? {
+        return try {
+            // Try common JSON patterns for payment hash
+            val patterns = listOf(
+                """"payment_hash"\s*:\s*"([a-fA-F0-9]+)"""".toRegex(),
+                """"paymentHash"\s*:\s*"([a-fA-F0-9]+)"""".toRegex(),
+                """"r_hash"\s*:\s*"([a-fA-F0-9]+)"""".toRegex()
+            )
+            for (pattern in patterns) {
+                val match = pattern.find(decoded)
+                if (match != null) {
+                    return match.groupValues[1]
+                }
+            }
+            null
+        } catch (e: Exception) {
+            Log.w(TAG, "Failed to extract payment hash from decoded invoice", e)
+            null
         }
     }
 

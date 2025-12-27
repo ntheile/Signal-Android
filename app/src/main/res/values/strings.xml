@@ -95,6 +95,8 @@
     <string name="AttachmentKeyboard_payment">Payment</string>
     <!-- Button to request a Lightning payment from the conversation partner -->
     <string name="AttachmentKeyboard_request_payment">Request ₿</string>
+    <!-- Button to send Bitcoin/Lightning payment to the conversation partner -->
+    <string name="AttachmentKeyboard_send_bitcoin">Send ₿</string>
     <!-- Text in a button that allows users to manage which media Signal has access to -->
     <string name="AttachmentKeyboard_manage">Manage</string>
 
@@ -113,6 +115,18 @@
     <string name="RequestPaymentDialog_lightning_not_configured">Lightning node not configured</string>
     <!-- Message when invoice is sent successfully -->
     <string name="RequestPaymentDialog_invoice_sent">Invoice sent!</string>
+
+    <!-- SendBitcoinDialog -->
+    <!-- Title for the send bitcoin dialog -->
+    <string name="SendBitcoinDialog_title">Send ₿</string>
+    <!-- Hint for the amount input field -->
+    <string name="SendBitcoinDialog_amount_hint">Amount in sats</string>
+    <!-- Error message when the entered amount is invalid -->
+    <string name="SendBitcoinDialog_invalid_amount">Please enter a valid amount</string>
+    <!-- Message when payment request is sent -->
+    <string name="SendBitcoinDialog_request_sent">Requesting invoice from %1$s…</string>
+    <!-- Message when Lightning node is not configured -->
+    <string name="SendBitcoinDialog_lightning_not_configured">Lightning node not configured</string>
 
     <!-- LightningInvoice inline message view -->
     <!-- Direction text for sender: You requested payment from [name] -->
@@ -137,6 +151,46 @@
     <string name="LightningInvoice_checking">Checking…</string>
     <!-- Status when invoice is pending payment -->
     <string name="LightningInvoice_pending">Pending</string>
+
+    <!-- SigmoRequest inline message view (Send ₿ flow) -->
+    <!-- Title for outgoing sigmo request (you want to send) -->
+    <string name="SigmoRequest_you_want_to_send">You want to send</string>
+    <!-- Title for incoming sigmo request (someone wants to send you) -->
+    <string name="SigmoRequest_wants_to_send_you">Wants to send you</string>
+    <!-- Direction text for outgoing: Sending to [name] -->
+    <string name="SigmoRequest_sending_to">Sending to %1$s</string>
+    <!-- Direction text for incoming: From [name] -->
+    <string name="SigmoRequest_from">From %1$s</string>
+    <!-- Status while waiting for invoice -->
+    <string name="SigmoRequest_waiting_for_invoice">Waiting for invoice…</string>
+    <!-- Status when invoice has been received -->
+    <string name="SigmoRequest_invoice_received">Invoice received</string>
+    <!-- Status while generating invoice -->
+    <string name="SigmoRequest_generating_invoice">Generating invoice…</string>
+    <!-- Direction text for outgoing invoice: Invoice for [name] -->
+    <string name="SigmoRequest_invoice_for">Invoice for %1$s</string>
+    <!-- Direction text for incoming invoice: Invoice from [name] -->
+    <string name="SigmoRequest_invoice_from">Invoice from %1$s</string>
+    <!-- Status when invoice is ready -->
+    <string name="SigmoRequest_invoice_ready">Invoice ready</string>
+    <!-- Status prompting user to tap to pay -->
+    <string name="SigmoRequest_tap_to_pay">Tap to pay</string>
+    <!-- Status when invoice has been sent -->
+    <string name="SigmoRequest_invoice_sent">Invoice sent</string>
+    <!-- Status when payment has been received -->
+    <string name="SigmoRequest_payment_received">Payment received! ✓</string>
+    <!-- Status when payment is pending -->
+    <string name="SigmoRequest_pending">Pending</string>
+    <!-- Direction text when pending: Pending sending [name] -->
+    <string name="SigmoRequest_pending_sending">Pending sending %1$s</string>
+    <!-- Direction text after payment is complete: You sent to [name] -->
+    <string name="SigmoRequest_you_sent_to">You sent to %1$s</string>
+    <!-- Direction text for receiver: Pending from [name] -->
+    <string name="SigmoRequest_pending_from">Pending from %1$s</string>
+    <!-- Direction text for receiver after payment: Received from [name] -->
+    <string name="SigmoRequest_received_from">Received from %1$s</string>
+    <!-- Status when waiting for payment -->
+    <string name="SigmoRequest_waiting_for_payment">Waiting for payment</string>
 
     <!-- Option in menu to select more photos that Signal will have access to -->
     <string name="AttachmentKeyboard_select_more_photos">Select more photos</string>

@@ -97,6 +97,32 @@ object LightningUiInteractor {
             null
         }
     }
+    
+    /**
+     * Create a Lightning invoice and return both the invoice string and payment hash.
+     */
+    @JvmStatic
+    fun createInvoiceWithHashBlocking(context: Context, amountSats: Long, description: String? = null): InvoiceResult? = runBlocking {
+        try {
+            Log.i(TAG, "createInvoiceWithHashBlocking: Creating invoice for $amountSats sats")
+            val engine = LightningEngineProvider.get(context)
+            
+            val result = engine.createInvoiceWithHash(amountSats, description)
+            result.fold(
+                onSuccess = { invoiceResult ->
+                    Log.i(TAG, "createInvoiceWithHashBlocking: Success! Invoice length = ${invoiceResult.paymentRequest.length}, hash = ${invoiceResult.paymentHash.take(16)}...")
+                    invoiceResult
+                },
+                onFailure = { error ->
+                    Log.e(TAG, "createInvoiceWithHashBlocking: Failed - ${error.message}", error)
+                    null
+                }
+            )
+        } catch (throwable: Throwable) {
+            Log.e(TAG, "createInvoiceWithHashBlocking: Exception", throwable)
+            null
+        }
+    }
 
     /**
      * Pay a Lightning invoice.
@@ -127,13 +153,27 @@ object LightningUiInteractor {
 
     /**
      * Check if an invoice (by payment request string) has been paid.
-     * Looks up the invoice by the payment request string and checks its status.
+     * First checks for a stored payment hash for efficient lookup,
+     * then falls back to lookupInvoiceByRequest.
      */
     @JvmStatic
     fun isInvoicePaidBlocking(context: Context, invoice: String): Boolean = runBlocking {
         try {
-            // Use the new lookupInvoiceByRequest that matches the exact invoice string
+            // First, check if we have a stored payment hash for this invoice
+            val storedPaymentHash = org.thoughtcrime.securesms.keyvalue.SignalStore.payments.getInvoicePaymentHash(invoice)
+            
+            if (storedPaymentHash != null) {
+                Log.d(TAG, "Found stored payment hash for invoice, using direct lookup: ${storedPaymentHash.take(16)}...")
+                // Use direct lookup by payment hash - much more efficient
+                val status = LightningEngineProvider.get(context).lookupPayment(storedPaymentHash).getOrNull()
+                Log.d(TAG, "Lookup by payment hash result: isPaid=${status?.isPaid}")
+                return@runBlocking status?.isPaid == true
+            }
+            
+            // Fallback: Use lookupInvoiceByRequest that decodes and searches
+            Log.d(TAG, "No stored payment hash, falling back to lookupInvoiceByRequest")
             val status = LightningEngineProvider.get(context).lookupInvoiceByRequest(invoice).getOrNull()
+            Log.d(TAG, "lookupInvoiceByRequest result: isPaid=${status?.isPaid}")
             status?.isPaid == true
         } catch (e: Throwable) {
             Log.w(TAG, "Failed to check if invoice is paid", e)

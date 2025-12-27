@@ -49,8 +49,12 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
   private val lifecycleDisposable = LifecycleDisposable()
   private val removePaymentFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.PAYMENT }
   private val removeRequestPaymentFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.REQUEST_PAYMENT }
+  private val removeSendBitcoinFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.SEND_BITCOIN }
+  private val removeLightningPaymentFilters: Predicate<AttachmentKeyboardButton> = Predicate { button -> 
+    button != AttachmentKeyboardButton.REQUEST_PAYMENT && button != AttachmentKeyboardButton.SEND_BITCOIN
+  }
   private val removeAllPaymentFilters: Predicate<AttachmentKeyboardButton> = Predicate { button -> 
-    button != AttachmentKeyboardButton.PAYMENT && button != AttachmentKeyboardButton.REQUEST_PAYMENT 
+    button != AttachmentKeyboardButton.PAYMENT && button != AttachmentKeyboardButton.REQUEST_PAYMENT && button != AttachmentKeyboardButton.SEND_BITCOIN
   }
 
   @Suppress("ReplaceGetOrSet")
@@ -73,7 +77,7 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
           // Show all buttons initially
         }
         SignalStore.payments.paymentsAvailability.isSendAllowed -> {
-          filterAttachmentKeyboardButtons(removeRequestPaymentFilter)
+          filterAttachmentKeyboardButtons(removeLightningPaymentFilters)
         }
         lightningConfigured -> {
           filterAttachmentKeyboardButtons(removePaymentFilter)
@@ -155,7 +159,7 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
       !recipient.isGroup &&
       recipient.isRegistered
     
-    // Check if Lightning is configured for request payment feature
+    // Check if Lightning is configured for request payment and send bitcoin features
     val lightningConfigured = try {
       org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())
     } catch (e: Throwable) {
@@ -165,23 +169,24 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
     // Determine which buttons to show:
     // - PAYMENT: Show if paymentsAvailability.isSendAllowed and recipient criteria met
     // - REQUEST_PAYMENT: Show if Lightning is configured and recipient is 1:1 chat
-    val canRequestPayment = lightningConfigured && !recipient.isSelf && !recipient.isGroup && recipient.isRegistered
+    // - SEND_BITCOIN: Show if Lightning is configured and recipient is 1:1 chat
+    val canUseLightning = lightningConfigured && !recipient.isSelf && !recipient.isGroup && recipient.isRegistered
     
     when {
-      canSendPayments && canRequestPayment -> {
-        // Show both buttons
+      canSendPayments && canUseLightning -> {
+        // Show all buttons
         attachmentKeyboardView.filterAttachmentKeyboardButtons(null)
       }
-      canSendPayments && !canRequestPayment -> {
-        // Show only Payment, hide Request Payment
-        attachmentKeyboardView.filterAttachmentKeyboardButtons(removeRequestPaymentFilter)
+      canSendPayments && !canUseLightning -> {
+        // Show only Payment, hide Request Payment and Send Bitcoin
+        attachmentKeyboardView.filterAttachmentKeyboardButtons(removeLightningPaymentFilters)
       }
-      !canSendPayments && canRequestPayment -> {
-        // Show only Request Payment, hide Payment
+      !canSendPayments && canUseLightning -> {
+        // Show only Request Payment and Send Bitcoin, hide Payment
         attachmentKeyboardView.filterAttachmentKeyboardButtons(removePaymentFilter)
       }
       else -> {
-        // Hide both
+        // Hide all payment buttons
         attachmentKeyboardView.filterAttachmentKeyboardButtons(removeAllPaymentFilters)
       }
     }
