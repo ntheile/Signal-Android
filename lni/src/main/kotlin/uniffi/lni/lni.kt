@@ -661,6 +661,39 @@ internal open class UniffiForeignFutureStructVoid(
 internal interface UniffiForeignFutureCompleteVoid : com.sun.jna.Callback {
     fun callback(`callbackData`: Long,`result`: UniffiForeignFutureStructVoid.UniffiByValue,)
 }
+internal interface UniffiCallbackInterfaceLightningNodeMethod0 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod1 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod2 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod3 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod4 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`search`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod5 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`search`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod6 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod7 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod8 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod9 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`str`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
+internal interface UniffiCallbackInterfaceLightningNodeMethod10 : com.sun.jna.Callback {
+    fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`callback`: Pointer,`uniffiFutureCallback`: UniffiForeignFutureCompleteVoid,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,)
+}
 internal interface UniffiCallbackInterfaceOnInvoiceEventCallbackMethod0 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
 }
@@ -669,6 +702,52 @@ internal interface UniffiCallbackInterfaceOnInvoiceEventCallbackMethod1 : com.su
 }
 internal interface UniffiCallbackInterfaceOnInvoiceEventCallbackMethod2 : com.sun.jna.Callback {
     fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,)
+}
+@Structure.FieldOrder("getInfo", "createInvoice", "payInvoice", "createOffer", "getOffer", "listOffers", "payOffer", "lookupInvoice", "listTransactions", "decode", "onInvoiceEvents", "uniffiFree")
+internal open class UniffiVTableCallbackInterfaceLightningNode(
+    @JvmField internal var `getInfo`: UniffiCallbackInterfaceLightningNodeMethod0? = null,
+    @JvmField internal var `createInvoice`: UniffiCallbackInterfaceLightningNodeMethod1? = null,
+    @JvmField internal var `payInvoice`: UniffiCallbackInterfaceLightningNodeMethod2? = null,
+    @JvmField internal var `createOffer`: UniffiCallbackInterfaceLightningNodeMethod3? = null,
+    @JvmField internal var `getOffer`: UniffiCallbackInterfaceLightningNodeMethod4? = null,
+    @JvmField internal var `listOffers`: UniffiCallbackInterfaceLightningNodeMethod5? = null,
+    @JvmField internal var `payOffer`: UniffiCallbackInterfaceLightningNodeMethod6? = null,
+    @JvmField internal var `lookupInvoice`: UniffiCallbackInterfaceLightningNodeMethod7? = null,
+    @JvmField internal var `listTransactions`: UniffiCallbackInterfaceLightningNodeMethod8? = null,
+    @JvmField internal var `decode`: UniffiCallbackInterfaceLightningNodeMethod9? = null,
+    @JvmField internal var `onInvoiceEvents`: UniffiCallbackInterfaceLightningNodeMethod10? = null,
+    @JvmField internal var `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+) : Structure() {
+    class UniffiByValue(
+        `getInfo`: UniffiCallbackInterfaceLightningNodeMethod0? = null,
+        `createInvoice`: UniffiCallbackInterfaceLightningNodeMethod1? = null,
+        `payInvoice`: UniffiCallbackInterfaceLightningNodeMethod2? = null,
+        `createOffer`: UniffiCallbackInterfaceLightningNodeMethod3? = null,
+        `getOffer`: UniffiCallbackInterfaceLightningNodeMethod4? = null,
+        `listOffers`: UniffiCallbackInterfaceLightningNodeMethod5? = null,
+        `payOffer`: UniffiCallbackInterfaceLightningNodeMethod6? = null,
+        `lookupInvoice`: UniffiCallbackInterfaceLightningNodeMethod7? = null,
+        `listTransactions`: UniffiCallbackInterfaceLightningNodeMethod8? = null,
+        `decode`: UniffiCallbackInterfaceLightningNodeMethod9? = null,
+        `onInvoiceEvents`: UniffiCallbackInterfaceLightningNodeMethod10? = null,
+        `uniffiFree`: UniffiCallbackInterfaceFree? = null,
+    ): UniffiVTableCallbackInterfaceLightningNode(`getInfo`,`createInvoice`,`payInvoice`,`createOffer`,`getOffer`,`listOffers`,`payOffer`,`lookupInvoice`,`listTransactions`,`decode`,`onInvoiceEvents`,`uniffiFree`,), Structure.ByValue
+
+   internal fun uniffiSetValue(other: UniffiVTableCallbackInterfaceLightningNode) {
+        `getInfo` = other.`getInfo`
+        `createInvoice` = other.`createInvoice`
+        `payInvoice` = other.`payInvoice`
+        `createOffer` = other.`createOffer`
+        `getOffer` = other.`getOffer`
+        `listOffers` = other.`listOffers`
+        `payOffer` = other.`payOffer`
+        `lookupInvoice` = other.`lookupInvoice`
+        `listTransactions` = other.`listTransactions`
+        `decode` = other.`decode`
+        `onInvoiceEvents` = other.`onInvoiceEvents`
+        `uniffiFree` = other.`uniffiFree`
+    }
+
 }
 @Structure.FieldOrder("success", "pending", "failure", "uniffiFree")
 internal open class UniffiVTableCallbackInterfaceOnInvoiceEventCallback(
@@ -940,6 +1019,62 @@ internal open class UniffiVTableCallbackInterfaceOnInvoiceEventCallback(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // For large crates we prevent `MethodTooLargeException` (see #2340)
 // N.B. the name of the extension is very misleading, since it is 
 // rather `InterfaceTooLargeException`, caused by too many methods 
@@ -955,7 +1090,21 @@ internal open class UniffiVTableCallbackInterfaceOnInvoiceEventCallback(
 // when the library is loaded.
 internal interface IntegrityCheckingUniffiLib : Library {
     // Integrity check functions only
-    fun uniffi_lni_checksum_func_create_invoice(
+    fun uniffi_lni_checksum_func_create_blink_node(
+): Short
+fun uniffi_lni_checksum_func_create_cln_node(
+): Short
+fun uniffi_lni_checksum_func_create_invoice(
+): Short
+fun uniffi_lni_checksum_func_create_lnd_node(
+): Short
+fun uniffi_lni_checksum_func_create_nwc_node(
+): Short
+fun uniffi_lni_checksum_func_create_phoenixd_node(
+): Short
+fun uniffi_lni_checksum_func_create_speed_node(
+): Short
+fun uniffi_lni_checksum_func_create_strike_node(
 ): Short
 fun uniffi_lni_checksum_func_decode(
 ): Short
@@ -987,6 +1136,8 @@ fun uniffi_lni_checksum_method_blinknode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_blinknode_lookup_invoice(
 ): Short
+fun uniffi_lni_checksum_method_blinknode_on_invoice_events(
+): Short
 fun uniffi_lni_checksum_method_blinknode_pay_invoice(
 ): Short
 fun uniffi_lni_checksum_method_blinknode_pay_offer(
@@ -1007,9 +1158,33 @@ fun uniffi_lni_checksum_method_clnnode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_clnnode_lookup_invoice(
 ): Short
+fun uniffi_lni_checksum_method_clnnode_on_invoice_events(
+): Short
 fun uniffi_lni_checksum_method_clnnode_pay_invoice(
 ): Short
 fun uniffi_lni_checksum_method_clnnode_pay_offer(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_get_info(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_create_invoice(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_pay_invoice(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_create_offer(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_get_offer(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_list_offers(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_pay_offer(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_lookup_invoice(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_list_transactions(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_decode(
+): Short
+fun uniffi_lni_checksum_method_lightningnode_on_invoice_events(
 ): Short
 fun uniffi_lni_checksum_method_lndnode_create_invoice(
 ): Short
@@ -1026,6 +1201,8 @@ fun uniffi_lni_checksum_method_lndnode_list_offers(
 fun uniffi_lni_checksum_method_lndnode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_lndnode_lookup_invoice(
+): Short
+fun uniffi_lni_checksum_method_lndnode_on_invoice_events(
 ): Short
 fun uniffi_lni_checksum_method_lndnode_pay_invoice(
 ): Short
@@ -1047,9 +1224,17 @@ fun uniffi_lni_checksum_method_nwcnode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_nwcnode_lookup_invoice(
 ): Short
+fun uniffi_lni_checksum_method_nwcnode_on_invoice_events(
+): Short
 fun uniffi_lni_checksum_method_nwcnode_pay_invoice(
 ): Short
 fun uniffi_lni_checksum_method_nwcnode_pay_offer(
+): Short
+fun uniffi_lni_checksum_method_oninvoiceeventcallback_success(
+): Short
+fun uniffi_lni_checksum_method_oninvoiceeventcallback_pending(
+): Short
+fun uniffi_lni_checksum_method_oninvoiceeventcallback_failure(
 ): Short
 fun uniffi_lni_checksum_method_phoenixdnode_create_invoice(
 ): Short
@@ -1066,6 +1251,8 @@ fun uniffi_lni_checksum_method_phoenixdnode_list_offers(
 fun uniffi_lni_checksum_method_phoenixdnode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_phoenixdnode_lookup_invoice(
+): Short
+fun uniffi_lni_checksum_method_phoenixdnode_on_invoice_events(
 ): Short
 fun uniffi_lni_checksum_method_phoenixdnode_pay_invoice(
 ): Short
@@ -1087,6 +1274,8 @@ fun uniffi_lni_checksum_method_speednode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_speednode_lookup_invoice(
 ): Short
+fun uniffi_lni_checksum_method_speednode_on_invoice_events(
+): Short
 fun uniffi_lni_checksum_method_speednode_pay_invoice(
 ): Short
 fun uniffi_lni_checksum_method_speednode_pay_offer(
@@ -1107,6 +1296,8 @@ fun uniffi_lni_checksum_method_strikenode_list_transactions(
 ): Short
 fun uniffi_lni_checksum_method_strikenode_lookup_invoice(
 ): Short
+fun uniffi_lni_checksum_method_strikenode_on_invoice_events(
+): Short
 fun uniffi_lni_checksum_method_strikenode_pay_invoice(
 ): Short
 fun uniffi_lni_checksum_method_strikenode_pay_offer(
@@ -1124,12 +1315,6 @@ fun uniffi_lni_checksum_constructor_phoenixdnode_new(
 fun uniffi_lni_checksum_constructor_speednode_new(
 ): Short
 fun uniffi_lni_checksum_constructor_strikenode_new(
-): Short
-fun uniffi_lni_checksum_method_oninvoiceeventcallback_success(
-): Short
-fun uniffi_lni_checksum_method_oninvoiceeventcallback_pending(
-): Short
-fun uniffi_lni_checksum_method_oninvoiceeventcallback_failure(
 ): Short
 fun ffi_lni_uniffi_contract_version(
 ): Int
@@ -1169,6 +1354,7 @@ internal interface UniffiLib : Library {
             val lib = loadIndirect<UniffiLib>(componentName)
             // No need to check the contract version and checksums, since 
             // we already did that with `IntegrityCheckingUniffiLib` above.
+            uniffiCallbackInterfaceLightningNode.register(lib)
             uniffiCallbackInterfaceOnInvoiceEventCallback.register(lib)
             // Loading of library with integrity check done.
             lib
@@ -1181,11 +1367,7 @@ internal interface UniffiLib : Library {
     }
 
     // FFI functions
-    fun uniffi_lni_fn_clone_apierror(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
-): Pointer
-fun uniffi_lni_fn_free_apierror(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
-): Unit
-fun uniffi_lni_fn_clone_blinknode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+    fun uniffi_lni_fn_clone_blinknode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
 fun uniffi_lni_fn_free_blinknode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Unit
@@ -1206,6 +1388,8 @@ fun uniffi_lni_fn_method_blinknode_list_offers(`ptr`: Pointer,`search`: RustBuff
 fun uniffi_lni_fn_method_blinknode_list_transactions(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_blinknode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_blinknode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
 ): Long
 fun uniffi_lni_fn_method_blinknode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
@@ -1233,9 +1417,39 @@ fun uniffi_lni_fn_method_clnnode_list_transactions(`ptr`: Pointer,`params`: Rust
 ): Long
 fun uniffi_lni_fn_method_clnnode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_method_clnnode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
+): Long
 fun uniffi_lni_fn_method_clnnode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_clnnode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_clone_lightningnode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_free_lightningnode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+fun uniffi_lni_fn_init_callback_vtable_lightningnode(`vtable`: UniffiVTableCallbackInterfaceLightningNode,
+): Unit
+fun uniffi_lni_fn_method_lightningnode_get_info(`ptr`: Pointer,
+): Long
+fun uniffi_lni_fn_method_lightningnode_create_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_create_offer(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_get_offer(`ptr`: Pointer,`search`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_list_offers(`ptr`: Pointer,`search`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_list_transactions(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_decode(`ptr`: Pointer,`str`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lightningnode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
 ): Long
 fun uniffi_lni_fn_clone_lndnode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
@@ -1258,6 +1472,8 @@ fun uniffi_lni_fn_method_lndnode_list_offers(`ptr`: Pointer,`search`: RustBuffer
 fun uniffi_lni_fn_method_lndnode_list_transactions(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_lndnode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
+): Long
+fun uniffi_lni_fn_method_lndnode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
 ): Long
 fun uniffi_lni_fn_method_lndnode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
@@ -1285,10 +1501,24 @@ fun uniffi_lni_fn_method_nwcnode_list_transactions(`ptr`: Pointer,`params`: Rust
 ): Long
 fun uniffi_lni_fn_method_nwcnode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_method_nwcnode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
+): Long
 fun uniffi_lni_fn_method_nwcnode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_nwcnode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_clone_oninvoiceeventcallback(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_free_oninvoiceeventcallback(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+fun uniffi_lni_fn_init_callback_vtable_oninvoiceeventcallback(`vtable`: UniffiVTableCallbackInterfaceOnInvoiceEventCallback,
+): Unit
+fun uniffi_lni_fn_method_oninvoiceeventcallback_success(`ptr`: Pointer,`transaction`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+fun uniffi_lni_fn_method_oninvoiceeventcallback_pending(`ptr`: Pointer,`transaction`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
+fun uniffi_lni_fn_method_oninvoiceeventcallback_failure(`ptr`: Pointer,`transaction`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Unit
 fun uniffi_lni_fn_clone_phoenixdnode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
 fun uniffi_lni_fn_free_phoenixdnode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallStatus, 
@@ -1311,6 +1541,8 @@ fun uniffi_lni_fn_method_phoenixdnode_list_transactions(`ptr`: Pointer,`params`:
 ): Long
 fun uniffi_lni_fn_method_phoenixdnode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_method_phoenixdnode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
+): Long
 fun uniffi_lni_fn_method_phoenixdnode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_phoenixdnode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
@@ -1321,7 +1553,7 @@ fun uniffi_lni_fn_free_speednode(`ptr`: Pointer,uniffi_out_err: UniffiRustCallSt
 ): Unit
 fun uniffi_lni_fn_constructor_speednode_new(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
 ): Pointer
-fun uniffi_lni_fn_method_speednode_create_invoice(`ptr`: Pointer,`invoiceParams`: RustBuffer.ByValue,
+fun uniffi_lni_fn_method_speednode_create_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_speednode_create_offer(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
@@ -1337,7 +1569,9 @@ fun uniffi_lni_fn_method_speednode_list_transactions(`ptr`: Pointer,`params`: Ru
 ): Long
 fun uniffi_lni_fn_method_speednode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
-fun uniffi_lni_fn_method_speednode_pay_invoice(`ptr`: Pointer,`invoiceParams`: RustBuffer.ByValue,
+fun uniffi_lni_fn_method_speednode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
+): Long
+fun uniffi_lni_fn_method_speednode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_speednode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
 ): Long
@@ -1363,14 +1597,28 @@ fun uniffi_lni_fn_method_strikenode_list_transactions(`ptr`: Pointer,`params`: R
 ): Long
 fun uniffi_lni_fn_method_strikenode_lookup_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_method_strikenode_on_invoice_events(`ptr`: Pointer,`params`: RustBuffer.ByValue,`callback`: Pointer,
+): Long
 fun uniffi_lni_fn_method_strikenode_pay_invoice(`ptr`: Pointer,`params`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_method_strikenode_pay_offer(`ptr`: Pointer,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,
 ): Long
-fun uniffi_lni_fn_init_callback_vtable_oninvoiceeventcallback(`vtable`: UniffiVTableCallbackInterfaceOnInvoiceEventCallback,
-): Unit
+fun uniffi_lni_fn_func_create_blink_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_func_create_cln_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
 fun uniffi_lni_fn_func_create_invoice(`config`: RustBuffer.ByValue,`params`: RustBuffer.ByValue,
 ): Long
+fun uniffi_lni_fn_func_create_lnd_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_func_create_nwc_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_func_create_phoenixd_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_func_create_speed_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
+fun uniffi_lni_fn_func_create_strike_node(`config`: RustBuffer.ByValue,uniffi_out_err: UniffiRustCallStatus, 
+): Pointer
 fun uniffi_lni_fn_func_decode(`config`: RustBuffer.ByValue,`invoiceStr`: RustBuffer.ByValue,
 ): Long
 fun uniffi_lni_fn_func_get_info(`config`: RustBuffer.ByValue,
@@ -1379,7 +1627,7 @@ fun uniffi_lni_fn_func_list_transactions(`config`: RustBuffer.ByValue,`from`: Ru
 ): Long
 fun uniffi_lni_fn_func_lookup_invoice(`config`: RustBuffer.ByValue,`paymentHash`: RustBuffer.ByValue,`from`: RustBuffer.ByValue,`limit`: RustBuffer.ByValue,`search`: RustBuffer.ByValue,
 ): Long
-fun uniffi_lni_fn_func_on_invoice_events(`config`: RustBuffer.ByValue,`params`: RustBuffer.ByValue,`callback`: Long,
+fun uniffi_lni_fn_func_on_invoice_events(`config`: RustBuffer.ByValue,`params`: RustBuffer.ByValue,`callback`: Pointer,
 ): Long
 fun uniffi_lni_fn_func_pay_invoice(`config`: RustBuffer.ByValue,`params`: RustBuffer.ByValue,
 ): Long
@@ -1511,238 +1759,322 @@ private fun uniffiCheckContractApiVersion(lib: IntegrityCheckingUniffiLib) {
 }
 @Suppress("UNUSED_PARAMETER")
 private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
-    if (lib.uniffi_lni_checksum_func_create_invoice() != 59459.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_blink_node() != 17663.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_decode() != 18744.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_cln_node() != 2566.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_get_info() != 4165.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_invoice() != 17504.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_list_transactions() != 25996.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_lnd_node() != 38322.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_lookup_invoice() != 4690.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_nwc_node() != 906.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_on_invoice_events() != 21022.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_phoenixd_node() != 55373.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_func_pay_invoice() != 56853.toShort()) {
+    if (lib.uniffi_lni_checksum_func_create_speed_node() != 45583.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_create_strike_node() != 64378.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_decode() != 11646.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_get_info() != 59600.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_list_transactions() != 33214.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_lookup_invoice() != 23109.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_on_invoice_events() != 37516.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_func_pay_invoice() != 49062.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_lni_checksum_func_say_after_with_tokio() != 38516.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_create_invoice() != 31518.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_create_invoice() != 22694.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_create_offer() != 14271.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_create_offer() != 55502.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_decode() != 7684.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_decode() != 54938.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_get_info() != 39442.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_get_info() != 19853.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_get_offer() != 62090.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_get_offer() != 40807.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_list_offers() != 42660.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_list_offers() != 40534.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_list_transactions() != 20946.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_list_transactions() != 14532.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_lookup_invoice() != 35887.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_lookup_invoice() != 56830.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_pay_invoice() != 64500.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_on_invoice_events() != 56732.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_blinknode_pay_offer() != 32133.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_pay_invoice() != 6408.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_create_invoice() != 36818.toShort()) {
+    if (lib.uniffi_lni_checksum_method_blinknode_pay_offer() != 62903.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_create_offer() != 25980.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_create_invoice() != 60752.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_decode() != 3572.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_create_offer() != 25049.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_get_info() != 61317.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_decode() != 51992.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_get_offer() != 7445.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_get_info() != 36197.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_list_offers() != 64441.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_get_offer() != 28823.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_list_transactions() != 4544.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_list_offers() != 62186.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_lookup_invoice() != 56412.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_list_transactions() != 13281.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_pay_invoice() != 31517.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_lookup_invoice() != 54811.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_clnnode_pay_offer() != 24078.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_on_invoice_events() != 2775.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_create_invoice() != 7159.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_pay_invoice() != 54973.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_create_offer() != 17053.toShort()) {
+    if (lib.uniffi_lni_checksum_method_clnnode_pay_offer() != 54278.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_decode() != 48920.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_get_info() != 63939.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_get_info() != 6746.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_create_invoice() != 58493.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_get_offer() != 48411.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_pay_invoice() != 48894.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_list_offers() != 57520.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_create_offer() != 56287.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_list_transactions() != 40313.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_get_offer() != 42130.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_lookup_invoice() != 4930.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_list_offers() != 42685.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_pay_invoice() != 19323.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_pay_offer() != 26809.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_lndnode_pay_offer() != 21712.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_lookup_invoice() != 31149.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_create_invoice() != 19162.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_list_transactions() != 42286.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_create_offer() != 46677.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_decode() != 11638.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_decode() != 29349.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lightningnode_on_invoice_events() != 18613.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_get_info() != 53657.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_create_invoice() != 5254.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_get_offer() != 16057.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_create_offer() != 10647.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_list_offers() != 5425.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_decode() != 7091.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_list_transactions() != 55800.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_get_info() != 61919.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_lookup_invoice() != 27705.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_get_offer() != 60794.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_pay_invoice() != 36912.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_list_offers() != 33463.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_nwcnode_pay_offer() != 2588.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_list_transactions() != 55421.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_create_invoice() != 12635.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_lookup_invoice() != 28229.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_create_offer() != 186.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_on_invoice_events() != 32797.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_decode() != 53221.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_pay_invoice() != 32198.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_get_info() != 4350.toShort()) {
+    if (lib.uniffi_lni_checksum_method_lndnode_pay_offer() != 19259.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_get_offer() != 3392.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_create_invoice() != 51322.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_list_offers() != 38723.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_create_offer() != 538.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_list_transactions() != 13865.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_decode() != 7231.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_lookup_invoice() != 28966.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_get_info() != 65370.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_pay_invoice() != 9010.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_get_offer() != 14257.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_phoenixdnode_pay_offer() != 10981.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_list_offers() != 27006.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_create_invoice() != 17633.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_list_transactions() != 54832.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_create_offer() != 42802.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_lookup_invoice() != 35070.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_decode() != 60443.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_on_invoice_events() != 14842.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_get_info() != 7826.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_pay_invoice() != 58905.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_get_offer() != 21384.toShort()) {
+    if (lib.uniffi_lni_checksum_method_nwcnode_pay_offer() != 3796.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_list_offers() != 46166.toShort()) {
+    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_success() != 903.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_list_transactions() != 23083.toShort()) {
+    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_pending() != 1693.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_lookup_invoice() != 20032.toShort()) {
+    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_failure() != 16695.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_pay_invoice() != 53420.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_create_invoice() != 20327.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_speednode_pay_offer() != 26916.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_create_offer() != 39667.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_create_invoice() != 387.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_decode() != 20826.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_create_offer() != 162.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_get_info() != 1217.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_decode() != 31296.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_get_offer() != 28141.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_get_info() != 11424.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_list_offers() != 50531.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_get_offer() != 31883.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_list_transactions() != 13794.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_list_offers() != 20175.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_lookup_invoice() != 10729.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_list_transactions() != 46948.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_on_invoice_events() != 56570.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_lookup_invoice() != 12439.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_pay_invoice() != 33526.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_pay_invoice() != 12694.toShort()) {
+    if (lib.uniffi_lni_checksum_method_phoenixdnode_pay_offer() != 58136.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_lni_checksum_method_strikenode_pay_offer() != 39141.toShort()) {
+    if (lib.uniffi_lni_checksum_method_speednode_create_invoice() != 60705.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_create_offer() != 56380.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_decode() != 5102.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_get_info() != 30713.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_get_offer() != 32733.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_list_offers() != 1177.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_list_transactions() != 55207.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_lookup_invoice() != 48093.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_on_invoice_events() != 24545.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_pay_invoice() != 14288.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_speednode_pay_offer() != 33016.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_create_invoice() != 3038.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_create_offer() != 33487.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_decode() != 50868.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_get_info() != 10078.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_get_offer() != 7451.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_list_offers() != 48221.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_list_transactions() != 57423.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_lookup_invoice() != 33761.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_on_invoice_events() != 49487.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_pay_invoice() != 26323.toShort()) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_lni_checksum_method_strikenode_pay_offer() != 30630.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_lni_checksum_constructor_blinknode_new() != 49992.toShort()) {
@@ -1764,15 +2096,6 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_lni_checksum_constructor_strikenode_new() != 54374.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_success() != 903.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_pending() != 1693.toShort()) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
-    if (lib.uniffi_lni_checksum_method_oninvoiceeventcallback_failure() != 16695.toShort()) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
 }
@@ -1825,6 +2148,93 @@ internal suspend fun<T, F, E: kotlin.Exception> uniffiRustCallAsync(
         freeFunc(rustFuture)
     }
 }
+internal inline fun<T> uniffiTraitInterfaceCallAsync(
+    crossinline makeCall: suspend () -> T,
+    crossinline handleSuccess: (T) -> Unit,
+    crossinline handleError: (UniffiRustCallStatus.ByValue) -> Unit,
+): UniffiForeignFuture {
+    // Using `GlobalScope` is labeled as a "delicate API" and generally discouraged in Kotlin programs, since it breaks structured concurrency.
+    // However, our parent task is a Rust future, so we're going to need to break structure concurrency in any case.
+    //
+    // Uniffi does its best to support structured concurrency across the FFI.
+    // If the Rust future is dropped, `uniffiForeignFutureFreeImpl` is called, which will cancel the Kotlin coroutine if it's still running.
+    @OptIn(DelicateCoroutinesApi::class)
+    val job = GlobalScope.launch coroutineBlock@ {
+        // Note: it's important we call either `handleSuccess` or `handleError` exactly once.  Each
+        // call consumes an Arc reference, which means there should be no possibility of a double
+        // call.  The following code is structured so that will will never call both `handleSuccess`
+        // and `handleError`, even in the face of weird exceptions.
+        //
+        // In extreme circumstances we may not call either, for example if we fail to make the JNA
+        // call to `handleSuccess`.  This means we will leak the Arc reference, which is better than
+        // double-freeing it.
+        val callResult = try {
+            makeCall()
+        } catch(e: kotlin.Exception) {
+            handleError(
+                UniffiRustCallStatus.create(
+                    UNIFFI_CALL_UNEXPECTED_ERROR,
+                    FfiConverterString.lower(e.toString()),
+                )
+            )
+            return@coroutineBlock
+        }
+        handleSuccess(callResult)
+    }
+    val handle = uniffiForeignFutureHandleMap.insert(job)
+    return UniffiForeignFuture(handle, uniffiForeignFutureFreeImpl)
+}
+
+internal inline fun<T, reified E: Throwable> uniffiTraitInterfaceCallAsyncWithError(
+    crossinline makeCall: suspend () -> T,
+    crossinline handleSuccess: (T) -> Unit,
+    crossinline handleError: (UniffiRustCallStatus.ByValue) -> Unit,
+    crossinline lowerError: (E) -> RustBuffer.ByValue,
+): UniffiForeignFuture {
+    // See uniffiTraitInterfaceCallAsync for details on `DelicateCoroutinesApi`
+    @OptIn(DelicateCoroutinesApi::class)
+    val job = GlobalScope.launch coroutineBlock@ {
+        // See the note in uniffiTraitInterfaceCallAsync for details on `handleSuccess` and
+        // `handleError`.
+        val callResult = try {
+            makeCall()
+        } catch(e: kotlin.Exception) {
+            if (e is E) {
+                handleError(
+                    UniffiRustCallStatus.create(
+                        UNIFFI_CALL_ERROR,
+                        lowerError(e),
+                    )
+                )
+            } else {
+                handleError(
+                    UniffiRustCallStatus.create(
+                        UNIFFI_CALL_UNEXPECTED_ERROR,
+                        FfiConverterString.lower(e.toString()),
+                    )
+                )
+            }
+            return@coroutineBlock
+        }
+        handleSuccess(callResult)
+    }
+    val handle = uniffiForeignFutureHandleMap.insert(job)
+    return UniffiForeignFuture(handle, uniffiForeignFutureFreeImpl)
+}
+
+internal val uniffiForeignFutureHandleMap = UniffiHandleMap<Job>()
+
+internal object uniffiForeignFutureFreeImpl: UniffiForeignFutureFree {
+    override fun callback(handle: Long) {
+        val job = uniffiForeignFutureHandleMap.remove(handle)
+        if (!job.isCompleted) {
+            job.cancel()
+        }
+    }
+}
+
+// For testing
+public fun uniffiForeignFutureHandleCount() = uniffiForeignFutureHandleMap.size
 
 // Public interface members begin here.
 
@@ -2237,238 +2647,6 @@ public object FfiConverterString: FfiConverter<String, RustBuffer.ByValue> {
 //
 
 
-public interface ApiExceptionInterface {
-    
-    companion object
-}
-
-
-open class ApiException : kotlin.Exception, Disposable, AutoCloseable, ApiExceptionInterface {
-
-
-    constructor(pointer: Pointer) {
-        this.pointer = pointer
-        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
-    }
-
-    /**
-     * This constructor can be used to instantiate a fake object. Only used for tests. Any
-     * attempt to actually use an object constructed this way will fail as there is no
-     * connected Rust object.
-     */
-    @Suppress("UNUSED_PARAMETER")
-    constructor(noPointer: NoPointer) {
-        this.pointer = null
-        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
-    }
-
-    protected val pointer: Pointer?
-    protected val cleanable: UniffiCleaner.Cleanable
-
-    private val wasDestroyed = AtomicBoolean(false)
-    private val callCounter = AtomicLong(1)
-
-    override fun destroy() {
-        // Only allow a single call to this method.
-        // TODO: maybe we should log a warning if called more than once?
-        if (this.wasDestroyed.compareAndSet(false, true)) {
-            // This decrement always matches the initial count of 1 given at creation time.
-            if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
-            }
-        }
-    }
-
-    @Synchronized
-    override fun close() {
-        this.destroy()
-    }
-
-    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
-        // Check and increment the call counter, to keep the object alive.
-        // This needs a compare-and-set retry loop in case of concurrent updates.
-        do {
-            val c = this.callCounter.get()
-            if (c == 0L) {
-                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
-            }
-            if (c == Long.MAX_VALUE) {
-                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
-            }
-        } while (! this.callCounter.compareAndSet(c, c + 1L))
-        // Now we can safely do the method call without the pointer being freed concurrently.
-        try {
-            return block(this.uniffiClonePointer())
-        } finally {
-            // This decrement always matches the increment we performed above.
-            if (this.callCounter.decrementAndGet() == 0L) {
-                cleanable.clean()
-            }
-        }
-    }
-
-    // Use a static inner class instead of a closure so as not to accidentally
-    // capture `this` as part of the cleanable's action.
-    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
-        override fun run() {
-            pointer?.let { ptr ->
-                uniffiRustCall { status ->
-                    UniffiLib.INSTANCE.uniffi_lni_fn_free_apierror(ptr, status)
-                }
-            }
-        }
-    }
-
-    fun uniffiClonePointer(): Pointer {
-        return uniffiRustCall() { status ->
-            UniffiLib.INSTANCE.uniffi_lni_fn_clone_apierror(pointer!!, status)
-        }
-    }
-
-    
-
-    
-    
-    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<ApiException> {
-        override fun lift(error_buf: RustBuffer.ByValue): ApiException {
-            // Due to some mismatches in the ffi converter mechanisms, errors are a RustBuffer.
-            val bb = error_buf.asByteBuffer()
-            if (bb == null) {
-                throw InternalException("?")
-            }
-            return FfiConverterTypeApiError.read(bb)
-        }
-    }
-    
-}
-
-/**
- * @suppress
- */
-public object FfiConverterTypeApiError: FfiConverter<ApiException, Pointer> {
-
-    override fun lower(value: ApiException): Pointer {
-        return value.uniffiClonePointer()
-    }
-
-    override fun lift(value: Pointer): ApiException {
-        return ApiException(value)
-    }
-
-    override fun read(buf: ByteBuffer): ApiException {
-        // The Rust code always writes pointers as 8 bytes, and will
-        // fail to compile if they don't fit.
-        return lift(Pointer(buf.getLong()))
-    }
-
-    override fun allocationSize(value: ApiException) = 8UL
-
-    override fun write(value: ApiException, buf: ByteBuffer) {
-        // The Rust code always expects pointers written as 8 bytes,
-        // and will fail to compile if they don't fit.
-        buf.putLong(Pointer.nativeValue(lower(value)))
-    }
-}
-
-
-// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
-// to the live Rust struct on the other side of the FFI.
-//
-// Each instance implements core operations for working with the Rust `Arc<T>` and the
-// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
-//
-// There's some subtlety here, because we have to be careful not to operate on a Rust
-// struct after it has been dropped, and because we must expose a public API for freeing
-// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
-//
-//   * Each instance holds an opaque pointer to the underlying Rust struct.
-//     Method calls need to read this pointer from the object's state and pass it in to
-//     the Rust FFI.
-//
-//   * When an instance is no longer needed, its pointer should be passed to a
-//     special destructor function provided by the Rust FFI, which will drop the
-//     underlying Rust struct.
-//
-//   * Given an instance, calling code is expected to call the special
-//     `destroy` method in order to free it after use, either by calling it explicitly
-//     or by using a higher-level helper like the `use` method. Failing to do so risks
-//     leaking the underlying Rust struct.
-//
-//   * We can't assume that calling code will do the right thing, and must be prepared
-//     to handle Kotlin method calls executing concurrently with or even after a call to
-//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
-//
-//   * We must never allow Rust code to operate on the underlying Rust struct after
-//     the destructor has been called, and must never call the destructor more than once.
-//     Doing so may trigger memory unsafety.
-//
-//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
-//     is implemented to call the destructor when the Kotlin object becomes unreachable.
-//     This is done in a background thread. This is not a panacea, and client code should be aware that
-//      1. the thread may starve if some there are objects that have poorly performing
-//     `drop` methods or do significant work in their `drop` methods.
-//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
-//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
-//
-// If we try to implement this with mutual exclusion on access to the pointer, there is the
-// possibility of a race between a method call and a concurrent call to `destroy`:
-//
-//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
-//      before it can pass the pointer over the FFI to Rust.
-//    * Thread B calls `destroy` and frees the underlying Rust struct.
-//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
-//      a use-after-free.
-//
-// One possible solution would be to use a `ReadWriteLock`, with each method call taking
-// a read lock (and thus allowed to run concurrently) and the special `destroy` method
-// taking a write lock (and thus blocking on live method calls). However, we aim not to
-// generate methods with any hidden blocking semantics, and a `destroy` method that might
-// block if called incorrectly seems to meet that bar.
-//
-// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
-// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
-// has been called. These are updated according to the following rules:
-//
-//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
-//      The initial value for the flag is false.
-//
-//    * At the start of each method call, we atomically check the counter.
-//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
-//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
-//
-//    * At the end of each method call, we atomically decrement and check the counter.
-//      If it has reached zero then we destroy the underlying Rust struct.
-//
-//    * When `destroy` is called, we atomically flip the flag from false to true.
-//      If the flag was already true we silently fail.
-//      Otherwise we atomically decrement and check the counter.
-//      If it has reached zero then we destroy the underlying Rust struct.
-//
-// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
-// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
-//
-// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
-// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
-// of the underlying Rust code.
-//
-// This makes a cleaner a better alternative to _not_ calling `destroy()` as
-// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
-// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
-// thread may be starved, and the app will leak memory.
-//
-// In this case, `destroy`ing manually may be a better solution.
-//
-// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
-// with Rust peers are reclaimed:
-//
-// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
-// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
-// 3. The memory is reclaimed when the process terminates.
-//
-// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
-//
-
-
 public interface BlinkNodeInterface {
     
     suspend fun `createInvoice`(`params`: CreateInvoiceParams): Transaction
@@ -2486,6 +2664,8 @@ public interface BlinkNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -2752,6 +2932,27 @@ open class BlinkNode: Disposable, AutoCloseable, BlinkNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_blinknode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
@@ -2945,6 +3146,8 @@ public interface ClnNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -3211,6 +3414,27 @@ open class ClnNode: Disposable, AutoCloseable, ClnNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_clnnode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
@@ -3387,6 +3611,919 @@ public object FfiConverterTypeClnNode: FfiConverter<ClnNode, Pointer> {
 //
 
 
+/**
+ * The core LightningNode trait for polymorphic node operations.
+ * This trait is exported to UniFFI, allowing Kotlin/Swift to work with
+ * `Arc<dyn LightningNode>` directly without manual wrapper code.
+ */
+public interface LightningNode {
+    
+    suspend fun `getInfo`(): NodeInfo
+    
+    suspend fun `createInvoice`(`params`: CreateInvoiceParams): Transaction
+    
+    suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
+    
+    suspend fun `createOffer`(`params`: CreateOfferParams): Offer
+    
+    suspend fun `getOffer`(`search`: kotlin.String?): Offer
+    
+    suspend fun `listOffers`(`search`: kotlin.String?): List<Offer>
+    
+    suspend fun `payOffer`(`offer`: kotlin.String, `amountMsats`: kotlin.Long, `payerNote`: kotlin.String?): PayInvoiceResponse
+    
+    suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
+    
+    suspend fun `decode`(`str`: kotlin.String): kotlin.String
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
+    
+    companion object
+}
+
+/**
+ * The core LightningNode trait for polymorphic node operations.
+ * This trait is exported to UniFFI, allowing Kotlin/Swift to work with
+ * `Arc<dyn LightningNode>` directly without manual wrapper code.
+ */
+open class LightningNodeImpl: Disposable, AutoCloseable, LightningNode
+{
+
+    constructor(pointer: Pointer) {
+        this.pointer = pointer
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    /**
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noPointer: NoPointer) {
+        this.pointer = null
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    protected val pointer: Pointer?
+    protected val cleanable: UniffiCleaner.Cleanable
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the pointer being freed concurrently.
+        try {
+            return block(this.uniffiClonePointer())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
+        override fun run() {
+            pointer?.let { ptr ->
+                uniffiRustCall { status ->
+                    UniffiLib.INSTANCE.uniffi_lni_fn_free_lightningnode(ptr, status)
+                }
+            }
+        }
+    }
+
+    fun uniffiClonePointer(): Pointer {
+        return uniffiRustCall() { status ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_clone_lightningnode(pointer!!, status)
+        }
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `getInfo`() : NodeInfo {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_get_info(
+                thisPtr,
+                
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeNodeInfo.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `createInvoice`(`params`: CreateInvoiceParams) : Transaction {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_create_invoice(
+                thisPtr,
+                FfiConverterTypeCreateInvoiceParams.lower(`params`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeTransaction.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_pay_invoice(
+                thisPtr,
+                FfiConverterTypePayInvoiceParams.lower(`params`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypePayInvoiceResponse.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `createOffer`(`params`: CreateOfferParams) : Offer {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_create_offer(
+                thisPtr,
+                FfiConverterTypeCreateOfferParams.lower(`params`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeOffer.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `getOffer`(`search`: kotlin.String?) : Offer {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_get_offer(
+                thisPtr,
+                FfiConverterOptionalString.lower(`search`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeOffer.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `listOffers`(`search`: kotlin.String?) : List<Offer> {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_list_offers(
+                thisPtr,
+                FfiConverterOptionalString.lower(`search`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterSequenceTypeOffer.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `payOffer`(`offer`: kotlin.String, `amountMsats`: kotlin.Long, `payerNote`: kotlin.String?) : PayInvoiceResponse {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_pay_offer(
+                thisPtr,
+                FfiConverterString.lower(`offer`),FfiConverterLong.lower(`amountMsats`),FfiConverterOptionalString.lower(`payerNote`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypePayInvoiceResponse.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `lookupInvoice`(`params`: LookupInvoiceParams) : Transaction {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_lookup_invoice(
+                thisPtr,
+                FfiConverterTypeLookupInvoiceParams.lower(`params`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterTypeTransaction.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `listTransactions`(`params`: ListTransactionsParams) : List<Transaction> {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_list_transactions(
+                thisPtr,
+                FfiConverterTypeListTransactionsParams.lower(`params`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterSequenceTypeTransaction.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(ApiException::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `decode`(`str`: kotlin.String) : kotlin.String {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_decode(
+                thisPtr,
+                FfiConverterString.lower(`str`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterString.lift(it) },
+        // Error FFI converter
+        ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lightningnode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
+
+    
+    
+    companion object
+    
+}
+
+
+// Put the implementation in an object so we don't pollute the top-level namespace
+internal object uniffiCallbackInterfaceLightningNode {
+    internal object `getInfo`: UniffiCallbackInterfaceLightningNodeMethod0 {
+        override fun callback(`uniffiHandle`: Long,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`getInfo`(
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: NodeInfo ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypeNodeInfo.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `createInvoice`: UniffiCallbackInterfaceLightningNodeMethod1 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`createInvoice`(
+                    FfiConverterTypeCreateInvoiceParams.lift(`params`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: Transaction ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypeTransaction.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `payInvoice`: UniffiCallbackInterfaceLightningNodeMethod2 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`payInvoice`(
+                    FfiConverterTypePayInvoiceParams.lift(`params`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: PayInvoiceResponse ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypePayInvoiceResponse.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `createOffer`: UniffiCallbackInterfaceLightningNodeMethod3 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`createOffer`(
+                    FfiConverterTypeCreateOfferParams.lift(`params`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: Offer ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypeOffer.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `getOffer`: UniffiCallbackInterfaceLightningNodeMethod4 {
+        override fun callback(`uniffiHandle`: Long,`search`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`getOffer`(
+                    FfiConverterOptionalString.lift(`search`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: Offer ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypeOffer.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `listOffers`: UniffiCallbackInterfaceLightningNodeMethod5 {
+        override fun callback(`uniffiHandle`: Long,`search`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`listOffers`(
+                    FfiConverterOptionalString.lift(`search`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: List<Offer> ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterSequenceTypeOffer.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `payOffer`: UniffiCallbackInterfaceLightningNodeMethod6 {
+        override fun callback(`uniffiHandle`: Long,`offer`: RustBuffer.ByValue,`amountMsats`: Long,`payerNote`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`payOffer`(
+                    FfiConverterString.lift(`offer`),
+                    FfiConverterLong.lift(`amountMsats`),
+                    FfiConverterOptionalString.lift(`payerNote`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: PayInvoiceResponse ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypePayInvoiceResponse.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `lookupInvoice`: UniffiCallbackInterfaceLightningNodeMethod7 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`lookupInvoice`(
+                    FfiConverterTypeLookupInvoiceParams.lift(`params`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: Transaction ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterTypeTransaction.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `listTransactions`: UniffiCallbackInterfaceLightningNodeMethod8 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`listTransactions`(
+                    FfiConverterTypeListTransactionsParams.lift(`params`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: List<Transaction> ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterSequenceTypeTransaction.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `decode`: UniffiCallbackInterfaceLightningNodeMethod9 {
+        override fun callback(`uniffiHandle`: Long,`str`: RustBuffer.ByValue,`uniffiFutureCallback`: UniffiForeignFutureCompleteRustBuffer,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`decode`(
+                    FfiConverterString.lift(`str`),
+                )
+            }
+            val uniffiHandleSuccess = { returnValue: kotlin.String ->
+                val uniffiResult = UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                    FfiConverterString.lower(returnValue),
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructRustBuffer.UniffiByValue(
+                        RustBuffer.ByValue(),
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsyncWithError(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError,
+                    { e: ApiException -> FfiConverterTypeApiError.lower(e) }
+                )
+            )
+        }
+    }
+    internal object `onInvoiceEvents`: UniffiCallbackInterfaceLightningNodeMethod10 {
+        override fun callback(`uniffiHandle`: Long,`params`: RustBuffer.ByValue,`callback`: Pointer,`uniffiFutureCallback`: UniffiForeignFutureCompleteVoid,`uniffiCallbackData`: Long,`uniffiOutReturn`: UniffiForeignFuture,) {
+            val uniffiObj = FfiConverterTypeLightningNode.handleMap.get(uniffiHandle)
+            val makeCall = suspend { ->
+                uniffiObj.`onInvoiceEvents`(
+                    FfiConverterTypeOnInvoiceEventParams.lift(`params`),
+                    FfiConverterTypeOnInvoiceEventCallback.lift(`callback`),
+                )
+            }
+            val uniffiHandleSuccess = { _: Unit ->
+                val uniffiResult = UniffiForeignFutureStructVoid.UniffiByValue(
+                    UniffiRustCallStatus.ByValue()
+                )
+                uniffiResult.write()
+                uniffiFutureCallback.callback(uniffiCallbackData, uniffiResult)
+            }
+            val uniffiHandleError = { callStatus: UniffiRustCallStatus.ByValue ->
+                uniffiFutureCallback.callback(
+                    uniffiCallbackData,
+                    UniffiForeignFutureStructVoid.UniffiByValue(
+                        callStatus,
+                    ),
+                )
+            }
+
+            uniffiOutReturn.uniffiSetValue(
+                uniffiTraitInterfaceCallAsync(
+                    makeCall,
+                    uniffiHandleSuccess,
+                    uniffiHandleError
+                )
+            )
+        }
+    }
+
+    internal object uniffiFree: UniffiCallbackInterfaceFree {
+        override fun callback(handle: Long) {
+            FfiConverterTypeLightningNode.handleMap.remove(handle)
+        }
+    }
+
+    internal var vtable = UniffiVTableCallbackInterfaceLightningNode.UniffiByValue(
+        `getInfo`,
+        `createInvoice`,
+        `payInvoice`,
+        `createOffer`,
+        `getOffer`,
+        `listOffers`,
+        `payOffer`,
+        `lookupInvoice`,
+        `listTransactions`,
+        `decode`,
+        `onInvoiceEvents`,
+        uniffiFree,
+    )
+
+    // Registers the foreign callback with the Rust side.
+    // This method is generated for each callback interface.
+    internal fun register(lib: UniffiLib) {
+        lib.uniffi_lni_fn_init_callback_vtable_lightningnode(vtable)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeLightningNode: FfiConverter<LightningNode, Pointer> {
+    internal val handleMap = UniffiHandleMap<LightningNode>()
+
+    override fun lower(value: LightningNode): Pointer {
+        return Pointer(handleMap.insert(value))
+    }
+
+    override fun lift(value: Pointer): LightningNode {
+        return LightningNodeImpl(value)
+    }
+
+    override fun read(buf: ByteBuffer): LightningNode {
+        // The Rust code always writes pointers as 8 bytes, and will
+        // fail to compile if they don't fit.
+        return lift(Pointer(buf.getLong()))
+    }
+
+    override fun allocationSize(value: LightningNode) = 8UL
+
+    override fun write(value: LightningNode, buf: ByteBuffer) {
+        // The Rust code always expects pointers written as 8 bytes,
+        // and will fail to compile if they don't fit.
+        buf.putLong(Pointer.nativeValue(lower(value)))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
+// to the live Rust struct on the other side of the FFI.
+//
+// Each instance implements core operations for working with the Rust `Arc<T>` and the
+// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque pointer to the underlying Rust struct.
+//     Method calls need to read this pointer from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its pointer should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the pointer, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
+//      before it can pass the pointer over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
 public interface LndNodeInterface {
     
     suspend fun `createInvoice`(`params`: CreateInvoiceParams): Transaction
@@ -3404,6 +4541,8 @@ public interface LndNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -3670,6 +4809,27 @@ open class LndNode: Disposable, AutoCloseable, LndNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_lndnode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
@@ -3863,6 +5023,8 @@ public interface NwcNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -4129,6 +5291,27 @@ open class NwcNode: Disposable, AutoCloseable, NwcNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_nwcnode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
@@ -4305,6 +5488,328 @@ public object FfiConverterTypeNwcNode: FfiConverter<NwcNode, Pointer> {
 //
 
 
+public interface OnInvoiceEventCallback {
+    
+    fun `success`(`transaction`: Transaction?)
+    
+    fun `pending`(`transaction`: Transaction?)
+    
+    fun `failure`(`transaction`: Transaction?)
+    
+    companion object
+}
+
+open class OnInvoiceEventCallbackImpl: Disposable, AutoCloseable, OnInvoiceEventCallback
+{
+
+    constructor(pointer: Pointer) {
+        this.pointer = pointer
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    /**
+     * This constructor can be used to instantiate a fake object. Only used for tests. Any
+     * attempt to actually use an object constructed this way will fail as there is no
+     * connected Rust object.
+     */
+    @Suppress("UNUSED_PARAMETER")
+    constructor(noPointer: NoPointer) {
+        this.pointer = null
+        this.cleanable = UniffiLib.CLEANER.register(this, UniffiCleanAction(pointer))
+    }
+
+    protected val pointer: Pointer?
+    protected val cleanable: UniffiCleaner.Cleanable
+
+    private val wasDestroyed = AtomicBoolean(false)
+    private val callCounter = AtomicLong(1)
+
+    override fun destroy() {
+        // Only allow a single call to this method.
+        // TODO: maybe we should log a warning if called more than once?
+        if (this.wasDestroyed.compareAndSet(false, true)) {
+            // This decrement always matches the initial count of 1 given at creation time.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    @Synchronized
+    override fun close() {
+        this.destroy()
+    }
+
+    internal inline fun <R> callWithPointer(block: (ptr: Pointer) -> R): R {
+        // Check and increment the call counter, to keep the object alive.
+        // This needs a compare-and-set retry loop in case of concurrent updates.
+        do {
+            val c = this.callCounter.get()
+            if (c == 0L) {
+                throw IllegalStateException("${this.javaClass.simpleName} object has already been destroyed")
+            }
+            if (c == Long.MAX_VALUE) {
+                throw IllegalStateException("${this.javaClass.simpleName} call counter would overflow")
+            }
+        } while (! this.callCounter.compareAndSet(c, c + 1L))
+        // Now we can safely do the method call without the pointer being freed concurrently.
+        try {
+            return block(this.uniffiClonePointer())
+        } finally {
+            // This decrement always matches the increment we performed above.
+            if (this.callCounter.decrementAndGet() == 0L) {
+                cleanable.clean()
+            }
+        }
+    }
+
+    // Use a static inner class instead of a closure so as not to accidentally
+    // capture `this` as part of the cleanable's action.
+    private class UniffiCleanAction(private val pointer: Pointer?) : Runnable {
+        override fun run() {
+            pointer?.let { ptr ->
+                uniffiRustCall { status ->
+                    UniffiLib.INSTANCE.uniffi_lni_fn_free_oninvoiceeventcallback(ptr, status)
+                }
+            }
+        }
+    }
+
+    fun uniffiClonePointer(): Pointer {
+        return uniffiRustCall() { status ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_clone_oninvoiceeventcallback(pointer!!, status)
+        }
+    }
+
+    override fun `success`(`transaction`: Transaction?)
+        = 
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_method_oninvoiceeventcallback_success(
+        it, FfiConverterOptionalTypeTransaction.lower(`transaction`),_status)
+}
+    }
+    
+    
+
+    override fun `pending`(`transaction`: Transaction?)
+        = 
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_method_oninvoiceeventcallback_pending(
+        it, FfiConverterOptionalTypeTransaction.lower(`transaction`),_status)
+}
+    }
+    
+    
+
+    override fun `failure`(`transaction`: Transaction?)
+        = 
+    callWithPointer {
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_method_oninvoiceeventcallback_failure(
+        it, FfiConverterOptionalTypeTransaction.lower(`transaction`),_status)
+}
+    }
+    
+    
+
+    
+
+    
+    
+    companion object
+    
+}
+
+
+// Put the implementation in an object so we don't pollute the top-level namespace
+internal object uniffiCallbackInterfaceOnInvoiceEventCallback {
+    internal object `success`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod0 {
+        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`success`(
+                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `pending`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod1 {
+        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`pending`(
+                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+    internal object `failure`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod2 {
+        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
+            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
+            val makeCall = { ->
+                uniffiObj.`failure`(
+                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
+                )
+            }
+            val writeReturn = { _: Unit -> Unit }
+            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
+        }
+    }
+
+    internal object uniffiFree: UniffiCallbackInterfaceFree {
+        override fun callback(handle: Long) {
+            FfiConverterTypeOnInvoiceEventCallback.handleMap.remove(handle)
+        }
+    }
+
+    internal var vtable = UniffiVTableCallbackInterfaceOnInvoiceEventCallback.UniffiByValue(
+        `success`,
+        `pending`,
+        `failure`,
+        uniffiFree,
+    )
+
+    // Registers the foreign callback with the Rust side.
+    // This method is generated for each callback interface.
+    internal fun register(lib: UniffiLib) {
+        lib.uniffi_lni_fn_init_callback_vtable_oninvoiceeventcallback(vtable)
+    }
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeOnInvoiceEventCallback: FfiConverter<OnInvoiceEventCallback, Pointer> {
+    internal val handleMap = UniffiHandleMap<OnInvoiceEventCallback>()
+
+    override fun lower(value: OnInvoiceEventCallback): Pointer {
+        return Pointer(handleMap.insert(value))
+    }
+
+    override fun lift(value: Pointer): OnInvoiceEventCallback {
+        return OnInvoiceEventCallbackImpl(value)
+    }
+
+    override fun read(buf: ByteBuffer): OnInvoiceEventCallback {
+        // The Rust code always writes pointers as 8 bytes, and will
+        // fail to compile if they don't fit.
+        return lift(Pointer(buf.getLong()))
+    }
+
+    override fun allocationSize(value: OnInvoiceEventCallback) = 8UL
+
+    override fun write(value: OnInvoiceEventCallback, buf: ByteBuffer) {
+        // The Rust code always expects pointers written as 8 bytes,
+        // and will fail to compile if they don't fit.
+        buf.putLong(Pointer.nativeValue(lower(value)))
+    }
+}
+
+
+// This template implements a class for working with a Rust struct via a Pointer/Arc<T>
+// to the live Rust struct on the other side of the FFI.
+//
+// Each instance implements core operations for working with the Rust `Arc<T>` and the
+// Kotlin Pointer to work with the live Rust struct on the other side of the FFI.
+//
+// There's some subtlety here, because we have to be careful not to operate on a Rust
+// struct after it has been dropped, and because we must expose a public API for freeing
+// theq Kotlin wrapper object in lieu of reliable finalizers. The core requirements are:
+//
+//   * Each instance holds an opaque pointer to the underlying Rust struct.
+//     Method calls need to read this pointer from the object's state and pass it in to
+//     the Rust FFI.
+//
+//   * When an instance is no longer needed, its pointer should be passed to a
+//     special destructor function provided by the Rust FFI, which will drop the
+//     underlying Rust struct.
+//
+//   * Given an instance, calling code is expected to call the special
+//     `destroy` method in order to free it after use, either by calling it explicitly
+//     or by using a higher-level helper like the `use` method. Failing to do so risks
+//     leaking the underlying Rust struct.
+//
+//   * We can't assume that calling code will do the right thing, and must be prepared
+//     to handle Kotlin method calls executing concurrently with or even after a call to
+//     `destroy`, and to handle multiple (possibly concurrent!) calls to `destroy`.
+//
+//   * We must never allow Rust code to operate on the underlying Rust struct after
+//     the destructor has been called, and must never call the destructor more than once.
+//     Doing so may trigger memory unsafety.
+//
+//   * To mitigate many of the risks of leaking memory and use-after-free unsafety, a `Cleaner`
+//     is implemented to call the destructor when the Kotlin object becomes unreachable.
+//     This is done in a background thread. This is not a panacea, and client code should be aware that
+//      1. the thread may starve if some there are objects that have poorly performing
+//     `drop` methods or do significant work in their `drop` methods.
+//      2. the thread is shared across the whole library. This can be tuned by using `android_cleaner = true`,
+//         or `android = true` in the [`kotlin` section of the `uniffi.toml` file](https://mozilla.github.io/uniffi-rs/kotlin/configuration.html).
+//
+// If we try to implement this with mutual exclusion on access to the pointer, there is the
+// possibility of a race between a method call and a concurrent call to `destroy`:
+//
+//    * Thread A starts a method call, reads the value of the pointer, but is interrupted
+//      before it can pass the pointer over the FFI to Rust.
+//    * Thread B calls `destroy` and frees the underlying Rust struct.
+//    * Thread A resumes, passing the already-read pointer value to Rust and triggering
+//      a use-after-free.
+//
+// One possible solution would be to use a `ReadWriteLock`, with each method call taking
+// a read lock (and thus allowed to run concurrently) and the special `destroy` method
+// taking a write lock (and thus blocking on live method calls). However, we aim not to
+// generate methods with any hidden blocking semantics, and a `destroy` method that might
+// block if called incorrectly seems to meet that bar.
+//
+// So, we achieve our goals by giving each instance an associated `AtomicLong` counter to track
+// the number of in-flight method calls, and an `AtomicBoolean` flag to indicate whether `destroy`
+// has been called. These are updated according to the following rules:
+//
+//    * The initial value of the counter is 1, indicating a live object with no in-flight calls.
+//      The initial value for the flag is false.
+//
+//    * At the start of each method call, we atomically check the counter.
+//      If it is 0 then the underlying Rust struct has already been destroyed and the call is aborted.
+//      If it is nonzero them we atomically increment it by 1 and proceed with the method call.
+//
+//    * At the end of each method call, we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+//    * When `destroy` is called, we atomically flip the flag from false to true.
+//      If the flag was already true we silently fail.
+//      Otherwise we atomically decrement and check the counter.
+//      If it has reached zero then we destroy the underlying Rust struct.
+//
+// Astute readers may observe that this all sounds very similar to the way that Rust's `Arc<T>` works,
+// and indeed it is, with the addition of a flag to guard against multiple calls to `destroy`.
+//
+// The overall effect is that the underlying Rust struct is destroyed only when `destroy` has been
+// called *and* all in-flight method calls have completed, avoiding violating any of the expectations
+// of the underlying Rust code.
+//
+// This makes a cleaner a better alternative to _not_ calling `destroy()` as
+// and when the object is finished with, but the abstraction is not perfect: if the Rust object's `drop`
+// method is slow, and/or there are many objects to cleanup, and it's on a low end Android device, then the cleaner
+// thread may be starved, and the app will leak memory.
+//
+// In this case, `destroy`ing manually may be a better solution.
+//
+// The cleaner can live side by side with the manual calling of `destroy`. In the order of responsiveness, uniffi objects
+// with Rust peers are reclaimed:
+//
+// 1. By calling the `destroy` method of the object, which calls `rustObject.free()`. If that doesn't happen:
+// 2. When the object becomes unreachable, AND the Cleaner thread gets to call `rustObject.free()`. If the thread is starved then:
+// 3. The memory is reclaimed when the process terminates.
+//
+// [1] https://stackoverflow.com/questions/24376768/can-java-finalize-an-object-when-it-is-still-in-scope/24380219
+//
+
+
 public interface PhoenixdNodeInterface {
     
     suspend fun `createInvoice`(`params`: CreateInvoiceParams): Transaction
@@ -4322,6 +5827,8 @@ public interface PhoenixdNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -4588,6 +6095,27 @@ open class PhoenixdNode: Disposable, AutoCloseable, PhoenixdNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_phoenixdnode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
@@ -4766,7 +6294,7 @@ public object FfiConverterTypePhoenixdNode: FfiConverter<PhoenixdNode, Pointer> 
 
 public interface SpeedNodeInterface {
     
-    suspend fun `createInvoice`(`invoiceParams`: CreateInvoiceParams): Transaction
+    suspend fun `createInvoice`(`params`: CreateInvoiceParams): Transaction
     
     suspend fun `createOffer`(`params`: CreateOfferParams): Offer
     
@@ -4782,7 +6310,9 @@ public interface SpeedNodeInterface {
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
     
-    suspend fun `payInvoice`(`invoiceParams`: PayInvoiceParams): PayInvoiceResponse
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
+    
+    suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
     suspend fun `payOffer`(`offer`: kotlin.String, `amountMsats`: kotlin.Long, `payerNote`: kotlin.String?): PayInvoiceResponse
     
@@ -4881,12 +6411,12 @@ open class SpeedNode: Disposable, AutoCloseable, SpeedNodeInterface
     
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `createInvoice`(`invoiceParams`: CreateInvoiceParams) : Transaction {
+    override suspend fun `createInvoice`(`params`: CreateInvoiceParams) : Transaction {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_lni_fn_method_speednode_create_invoice(
                 thisPtr,
-                FfiConverterTypeCreateInvoiceParams.lower(`invoiceParams`),
+                FfiConverterTypeCreateInvoiceParams.lower(`params`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
@@ -5047,14 +6577,35 @@ open class SpeedNode: Disposable, AutoCloseable, SpeedNodeInterface
     }
 
     
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_speednode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
+    )
+    }
+
+    
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `payInvoice`(`invoiceParams`: PayInvoiceParams) : PayInvoiceResponse {
+    override suspend fun `payInvoice`(`params`: PayInvoiceParams) : PayInvoiceResponse {
         return uniffiRustCallAsync(
         callWithPointer { thisPtr ->
             UniffiLib.INSTANCE.uniffi_lni_fn_method_speednode_pay_invoice(
                 thisPtr,
-                FfiConverterTypePayInvoiceParams.lower(`invoiceParams`),
+                FfiConverterTypePayInvoiceParams.lower(`params`),
             )
         },
         { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_rust_buffer(future, callback, continuation) },
@@ -5240,6 +6791,8 @@ public interface StrikeNodeInterface {
     suspend fun `listTransactions`(`params`: ListTransactionsParams): List<Transaction>
     
     suspend fun `lookupInvoice`(`params`: LookupInvoiceParams): Transaction
+    
+    suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback)
     
     suspend fun `payInvoice`(`params`: PayInvoiceParams): PayInvoiceResponse
     
@@ -5502,6 +7055,27 @@ open class StrikeNode: Disposable, AutoCloseable, StrikeNodeInterface
         { FfiConverterTypeTransaction.lift(it) },
         // Error FFI converter
         ApiException.ErrorHandler,
+    )
+    }
+
+    
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `onInvoiceEvents`(`params`: OnInvoiceEventParams, `callback`: OnInvoiceEventCallback) {
+        return uniffiRustCallAsync(
+        callWithPointer { thisPtr ->
+            UniffiLib.INSTANCE.uniffi_lni_fn_method_strikenode_on_invoice_events(
+                thisPtr,
+                FfiConverterTypeOnInvoiceEventParams.lower(`params`),FfiConverterTypeOnInvoiceEventCallback.lower(`callback`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.INSTANCE.ffi_lni_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.INSTANCE.ffi_lni_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        UniffiNullRustCallStatusErrorHandler,
     )
     }
 
@@ -5898,17 +7472,20 @@ public object FfiConverterTypeConnectPeerRequest: FfiConverterRustBuffer<Connect
 
 
 data class CreateInvoiceParams (
-    var `invoiceType`: InvoiceType, 
-    var `amountMsats`: kotlin.Long?, 
-    var `offer`: kotlin.String?, 
-    var `description`: kotlin.String?, 
-    var `descriptionHash`: kotlin.String?, 
-    var `expiry`: kotlin.Long?, 
-    var `rPreimage`: kotlin.String?, 
-    var `isBlinded`: kotlin.Boolean?, 
-    var `isKeysend`: kotlin.Boolean?, 
-    var `isAmp`: kotlin.Boolean?, 
-    var `isPrivate`: kotlin.Boolean?
+    /**
+     * Defaults to Bolt11 if not specified
+     */
+    var `invoiceType`: InvoiceType? = null, 
+    var `amountMsats`: kotlin.Long? = null, 
+    var `offer`: kotlin.String? = null, 
+    var `description`: kotlin.String? = null, 
+    var `descriptionHash`: kotlin.String? = null, 
+    var `expiry`: kotlin.Long? = null, 
+    var `rPreimage`: kotlin.String? = null, 
+    var `isBlinded`: kotlin.Boolean? = false, 
+    var `isKeysend`: kotlin.Boolean? = false, 
+    var `isAmp`: kotlin.Boolean? = false, 
+    var `isPrivate`: kotlin.Boolean? = false
 ) {
     
     companion object
@@ -5920,7 +7497,7 @@ data class CreateInvoiceParams (
 public object FfiConverterTypeCreateInvoiceParams: FfiConverterRustBuffer<CreateInvoiceParams> {
     override fun read(buf: ByteBuffer): CreateInvoiceParams {
         return CreateInvoiceParams(
-            FfiConverterTypeInvoiceType.read(buf),
+            FfiConverterOptionalTypeInvoiceType.read(buf),
             FfiConverterOptionalLong.read(buf),
             FfiConverterOptionalString.read(buf),
             FfiConverterOptionalString.read(buf),
@@ -5935,7 +7512,7 @@ public object FfiConverterTypeCreateInvoiceParams: FfiConverterRustBuffer<Create
     }
 
     override fun allocationSize(value: CreateInvoiceParams) = (
-            FfiConverterTypeInvoiceType.allocationSize(value.`invoiceType`) +
+            FfiConverterOptionalTypeInvoiceType.allocationSize(value.`invoiceType`) +
             FfiConverterOptionalLong.allocationSize(value.`amountMsats`) +
             FfiConverterOptionalString.allocationSize(value.`offer`) +
             FfiConverterOptionalString.allocationSize(value.`description`) +
@@ -5949,7 +7526,7 @@ public object FfiConverterTypeCreateInvoiceParams: FfiConverterRustBuffer<Create
     )
 
     override fun write(value: CreateInvoiceParams, buf: ByteBuffer) {
-            FfiConverterTypeInvoiceType.write(value.`invoiceType`, buf)
+            FfiConverterOptionalTypeInvoiceType.write(value.`invoiceType`, buf)
             FfiConverterOptionalLong.write(value.`amountMsats`, buf)
             FfiConverterOptionalString.write(value.`offer`, buf)
             FfiConverterOptionalString.write(value.`description`, buf)
@@ -7074,6 +8651,107 @@ public object FfiConverterTypeUpdateChannelRequest: FfiConverterRustBuffer<Updat
 
 
 
+
+sealed class ApiException: kotlin.Exception() {
+    
+    class Http(
+        
+        val `reason`: kotlin.String
+        ) : ApiException() {
+        override val message
+            get() = "reason=${ `reason` }"
+    }
+    
+    class Api(
+        
+        val `reason`: kotlin.String
+        ) : ApiException() {
+        override val message
+            get() = "reason=${ `reason` }"
+    }
+    
+    class Json(
+        
+        val `reason`: kotlin.String
+        ) : ApiException() {
+        override val message
+            get() = "reason=${ `reason` }"
+    }
+    
+
+    companion object ErrorHandler : UniffiRustCallStatusErrorHandler<ApiException> {
+        override fun lift(error_buf: RustBuffer.ByValue): ApiException = FfiConverterTypeApiError.lift(error_buf)
+    }
+
+    
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeApiError : FfiConverterRustBuffer<ApiException> {
+    override fun read(buf: ByteBuffer): ApiException {
+        
+
+        return when(buf.getInt()) {
+            1 -> ApiException.Http(
+                FfiConverterString.read(buf),
+                )
+            2 -> ApiException.Api(
+                FfiConverterString.read(buf),
+                )
+            3 -> ApiException.Json(
+                FfiConverterString.read(buf),
+                )
+            else -> throw RuntimeException("invalid error enum value, something is very wrong!!")
+        }
+    }
+
+    override fun allocationSize(value: ApiException): ULong {
+        return when(value) {
+            is ApiException.Http -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+            is ApiException.Api -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+            is ApiException.Json -> (
+                // Add the size for the Int that specifies the variant plus the size needed for all fields
+                4UL
+                + FfiConverterString.allocationSize(value.`reason`)
+            )
+        }
+    }
+
+    override fun write(value: ApiException, buf: ByteBuffer) {
+        when(value) {
+            is ApiException.Http -> {
+                buf.putInt(1)
+                FfiConverterString.write(value.`reason`, buf)
+                Unit
+            }
+            is ApiException.Api -> {
+                buf.putInt(2)
+                FfiConverterString.write(value.`reason`, buf)
+                Unit
+            }
+            is ApiException.Json -> {
+                buf.putInt(3)
+                FfiConverterString.write(value.`reason`, buf)
+                Unit
+            }
+        }.let { /* this makes the `when` an expression, which ensures it is exhaustive */ }
+    }
+
+}
+
+
+
+
 enum class InvoiceType {
     
     BOLT11,
@@ -7100,89 +8778,6 @@ public object FfiConverterTypeInvoiceType: FfiConverterRustBuffer<InvoiceType> {
 }
 
 
-
-
-
-
-
-public interface OnInvoiceEventCallback {
-    
-    fun `success`(`transaction`: Transaction?)
-    
-    fun `pending`(`transaction`: Transaction?)
-    
-    fun `failure`(`transaction`: Transaction?)
-    
-    companion object
-}
-
-
-
-// Put the implementation in an object so we don't pollute the top-level namespace
-internal object uniffiCallbackInterfaceOnInvoiceEventCallback {
-    internal object `success`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod0 {
-        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
-            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
-            val makeCall = { ->
-                uniffiObj.`success`(
-                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
-                )
-            }
-            val writeReturn = { _: Unit -> Unit }
-            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
-        }
-    }
-    internal object `pending`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod1 {
-        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
-            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
-            val makeCall = { ->
-                uniffiObj.`pending`(
-                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
-                )
-            }
-            val writeReturn = { _: Unit -> Unit }
-            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
-        }
-    }
-    internal object `failure`: UniffiCallbackInterfaceOnInvoiceEventCallbackMethod2 {
-        override fun callback(`uniffiHandle`: Long,`transaction`: RustBuffer.ByValue,`uniffiOutReturn`: Pointer,uniffiCallStatus: UniffiRustCallStatus,) {
-            val uniffiObj = FfiConverterTypeOnInvoiceEventCallback.handleMap.get(uniffiHandle)
-            val makeCall = { ->
-                uniffiObj.`failure`(
-                    FfiConverterOptionalTypeTransaction.lift(`transaction`),
-                )
-            }
-            val writeReturn = { _: Unit -> Unit }
-            uniffiTraitInterfaceCall(uniffiCallStatus, makeCall, writeReturn)
-        }
-    }
-
-    internal object uniffiFree: UniffiCallbackInterfaceFree {
-        override fun callback(handle: Long) {
-            FfiConverterTypeOnInvoiceEventCallback.handleMap.remove(handle)
-        }
-    }
-
-    internal var vtable = UniffiVTableCallbackInterfaceOnInvoiceEventCallback.UniffiByValue(
-        `success`,
-        `pending`,
-        `failure`,
-        uniffiFree,
-    )
-
-    // Registers the foreign callback with the Rust side.
-    // This method is generated for each callback interface.
-    internal fun register(lib: UniffiLib) {
-        lib.uniffi_lni_fn_init_callback_vtable_oninvoiceeventcallback(vtable)
-    }
-}
-
-/**
- * The ffiConverter which transforms the Callbacks in to handles to pass to Rust.
- *
- * @suppress
- */
-public object FfiConverterTypeOnInvoiceEventCallback: FfiConverterCallbackInterface<OnInvoiceEventCallback>()
 
 
 
@@ -7350,6 +8945,38 @@ public object FfiConverterOptionalTypeTransaction: FfiConverterRustBuffer<Transa
 /**
  * @suppress
  */
+public object FfiConverterOptionalTypeInvoiceType: FfiConverterRustBuffer<InvoiceType?> {
+    override fun read(buf: ByteBuffer): InvoiceType? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterTypeInvoiceType.read(buf)
+    }
+
+    override fun allocationSize(value: InvoiceType?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterTypeInvoiceType.allocationSize(value)
+        }
+    }
+
+    override fun write(value: InvoiceType?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterTypeInvoiceType.write(value, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeOffer: FfiConverterRustBuffer<List<Offer>> {
     override fun read(buf: ByteBuffer): List<Offer> {
         val len = buf.getInt()
@@ -7435,6 +9062,30 @@ public object FfiConverterSequenceTypeTransaction: FfiConverterRustBuffer<List<T
 
 
 
+        /**
+         * Create a Blink node as a polymorphic LightningNode
+         */ fun `createBlinkNode`(`config`: BlinkConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_blink_node(
+        FfiConverterTypeBlinkConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create a CLN node as a polymorphic LightningNode
+         */ fun `createClnNode`(`config`: ClnConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_cln_node(
+        FfiConverterTypeClnConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
      suspend fun `createInvoice`(`config`: LndConfig, `params`: CreateInvoiceParams) : Transaction {
@@ -7449,6 +9100,66 @@ public object FfiConverterSequenceTypeTransaction: FfiConverterRustBuffer<List<T
         ApiException.ErrorHandler,
     )
     }
+
+        /**
+         * Create an LND node as a polymorphic LightningNode
+         */ fun `createLndNode`(`config`: LndConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_lnd_node(
+        FfiConverterTypeLndConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create an NWC node as a polymorphic LightningNode
+         */ fun `createNwcNode`(`config`: NwcConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_nwc_node(
+        FfiConverterTypeNwcConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create a Phoenixd node as a polymorphic LightningNode
+         */ fun `createPhoenixdNode`(`config`: PhoenixdConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_phoenixd_node(
+        FfiConverterTypePhoenixdConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create a Speed node as a polymorphic LightningNode
+         */ fun `createSpeedNode`(`config`: SpeedConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_speed_node(
+        FfiConverterTypeSpeedConfig.lower(`config`),_status)
+}
+    )
+    }
+    
+
+        /**
+         * Create a Strike node as a polymorphic LightningNode
+         */ fun `createStrikeNode`(`config`: StrikeConfig): LightningNode {
+            return FfiConverterTypeLightningNode.lift(
+    uniffiRustCall() { _status ->
+    UniffiLib.INSTANCE.uniffi_lni_fn_func_create_strike_node(
+        FfiConverterTypeStrikeConfig.lower(`config`),_status)
+}
+    )
+    }
+    
 
     @Throws(ApiException::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
