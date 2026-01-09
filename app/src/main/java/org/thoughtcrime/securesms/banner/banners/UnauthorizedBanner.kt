@@ -53,6 +53,10 @@ private fun Banner(contentPadding: PaddingValues) {
       Action(R.string.UnauthorizedReminder_reregister_action) {
         val registrationIntent = RegistrationActivity.newIntentForReRegistration(context)
         context.startActivity(registrationIntent)
+      },
+      Action(R.string.UnauthorizedReminder_relink_action) {
+        val linkDeviceIntent = RegistrationActivity.newIntentForLinkDevice(context)
+        context.startActivity(linkDeviceIntent)
       }
     ),
     paddingValues = contentPadding

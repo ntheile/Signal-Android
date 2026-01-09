@@ -3418,6 +3418,8 @@
     <string name="UnauthorizedReminder_this_is_likely_because_you_registered_your_phone_number_with_Signal_on_a_different_device">This device is no longer registered. This is likely because you registered your phone number with Signal on a different device.</string>
     <!-- Action in reminder banner that will take user to re-register -->
     <string name="UnauthorizedReminder_reregister_action">Re-register device</string>
+    <!-- Action in reminder banner that will take user to re-link device as secondary -->
+    <string name="UnauthorizedReminder_relink_action">or Re-Link Device</string>
 
     <!-- Push notification when the app is forcibly logged out by the server. -->
     <string name="LoggedOutNotification_you_have_been_logged_out">You have been logged out of Signal on this device.</string>
