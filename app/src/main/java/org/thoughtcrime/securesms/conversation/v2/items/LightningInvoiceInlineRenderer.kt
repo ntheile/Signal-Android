@@ -16,6 +16,7 @@ import org.thoughtcrime.securesms.R
 import org.thoughtcrime.securesms.conversation.ConversationMessage
 import org.thoughtcrime.securesms.conversation.colors.Colorizer
 import org.thoughtcrime.securesms.conversation.ui.payment.LightningInvoiceMessageView
+import org.thoughtcrime.securesms.database.model.MessageId
 import org.thoughtcrime.securesms.dependencies.AppDependencies
 import org.thoughtcrime.securesms.keyvalue.SignalStore
 import org.thoughtcrime.securesms.mms.PartAuthority
@@ -51,7 +52,8 @@ object LightningInvoiceInlineRenderer {
     val meta: InvoiceMeta,
     val outgoing: Boolean,
     val recipient: Recipient,
-    val invoice: String
+    val invoice: String,
+    val messageId: Long
   )
 
   private fun removeExistingPill(parent: ViewGroup) {
@@ -223,7 +225,7 @@ object LightningInvoiceInlineRenderer {
     val colorizer = Colorizer()
     pill.bind(direction, amountText, outgoing, recipient, colorizer)
 
-    return PillBinding(pill, meta, outgoing, recipient, invoice)
+    return PillBinding(pill, meta, outgoing, recipient, invoice, conversationMessage.messageRecord.id)
   }
 
   private fun configurePayAction(pillBinding: PillBinding) {
@@ -296,6 +298,10 @@ object LightningInvoiceInlineRenderer {
             pill.setPayButtonVisible(false)
             pill.setStatusText(ctx.getString(R.string.LightningInvoice_paid))
             Toast.makeText(ctx, R.string.LightningPayment__payment_successful, Toast.LENGTH_SHORT).show()
+            
+            // Notify database observer to refresh message in conversation list
+            Log.i(TAG, "Payment successful, notifying message update for messageId: ${pillBinding.messageId}")
+            AppDependencies.databaseObserver.notifyMessageUpdateObservers(MessageId(pillBinding.messageId))
           } else {
             pill.showSpinner(false)
             pill.setPayButtonEnabled(true)
@@ -360,6 +366,10 @@ object LightningInvoiceInlineRenderer {
             SignalStore.payments.setInvoicePaid(invoice)
             pill.setStatusText(ctx.getString(R.string.LightningInvoice_paid))
             pill.setRefreshButtonVisible(false)
+            
+            // Notify database observer to refresh message in conversation list
+            Log.i(TAG, "Invoice paid, notifying message update for messageId: ${pillBinding.messageId}")
+            AppDependencies.databaseObserver.notifyMessageUpdateObservers(MessageId(pillBinding.messageId))
           }
           false -> {
             pill.setStatusText(ctx.getString(R.string.LightningInvoice_pending))

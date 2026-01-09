@@ -16,6 +16,7 @@ import org.thoughtcrime.securesms.R
 import org.thoughtcrime.securesms.conversation.ConversationMessage
 import org.thoughtcrime.securesms.conversation.colors.Colorizer
 import org.thoughtcrime.securesms.conversation.ui.payment.SigmoRequestMessageView
+import org.thoughtcrime.securesms.database.model.MessageId
 import org.thoughtcrime.securesms.dependencies.AppDependencies
 import org.thoughtcrime.securesms.keyvalue.SignalStore
 import org.thoughtcrime.securesms.keyvalue.PaymentsValues.SigmoFlowStatus
@@ -51,7 +52,8 @@ object SigmoRequestInlineRenderer {
     val messageType: SigmoMessageType,
     val outgoing: Boolean,
     val recipient: Recipient,
-    val requestId: String?
+    val requestId: String?,
+    val messageId: Long
   )
 
   private fun removeExistingPill(parent: ViewGroup) {
@@ -295,7 +297,7 @@ object SigmoRequestInlineRenderer {
           pill.setStatusText(context.getString(R.string.SigmoRequest_generating_invoice))
         }
         
-        PillBinding(pill, SigmoMessageType.REQUEST, outgoing, recipient, parsedRequest.requestId)
+        PillBinding(pill, SigmoMessageType.REQUEST, outgoing, recipient, parsedRequest.requestId, conversationMessage.messageRecord.id)
       }
       
       parsedInvoice != null -> {
@@ -346,7 +348,7 @@ object SigmoRequestInlineRenderer {
           }
         }
         
-        PillBinding(pill, SigmoMessageType.INVOICE, outgoing, recipient, parsedInvoice.requestId)
+        PillBinding(pill, SigmoMessageType.INVOICE, outgoing, recipient, parsedInvoice.requestId, conversationMessage.messageRecord.id)
       }
       
       else -> null
@@ -406,6 +408,10 @@ object SigmoRequestInlineRenderer {
             pillBinding.requestId?.let { requestId ->
               SignalStore.payments.markSigmoFlowPaid(requestId)
             }
+            
+            // Notify database observer to refresh message in conversation list
+            Log.i(TAG, "Payment successful, notifying message update for messageId: ${pillBinding.messageId}")
+            AppDependencies.databaseObserver.notifyMessageUpdateObservers(MessageId(pillBinding.messageId))
           } else {
             pill.setPayButtonState(false)
             Toast.makeText(ctx, R.string.LightningInvoice_payment_failed, Toast.LENGTH_SHORT).show()
@@ -526,6 +532,10 @@ object SigmoRequestInlineRenderer {
       Log.i(TAG, "Marking SigmoFlow $requestId as paid")
       SignalStore.payments.markSigmoFlowPaid(requestId)
     }
+    
+    // Notify database observer to refresh message in conversation list
+    Log.i(TAG, "Notifying message update for messageId: ${pillBinding.messageId}")
+    AppDependencies.databaseObserver.notifyMessageUpdateObservers(MessageId(pillBinding.messageId))
   }
 
   /**
