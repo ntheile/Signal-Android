@@ -102,17 +102,22 @@ object SigmoProtocolProcessor {
         }
 
         // Check if Lightning is configured
-        if (!LightningUiInteractor.isConfigured(context)) {
+        val isConfigured = LightningUiInteractor.isConfigured(context)
+        Log.i(TAG, "Lightning configuration check: isConfigured=$isConfigured")
+        
+        if (!isConfigured) {
             Log.w(TAG, "Lightning not configured, cannot auto-generate invoice")
             return
         }
 
+        Log.i(TAG, "Starting invoice generation for $amountSats sats, requestId=${parsedUri.requestId}")
+        
         // Auto-generate and send invoice in background
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 generateAndSendInvoice(context, senderRecipientId, threadId, amountSats, parsedUri.requestId)
             } catch (e: Throwable) {
-                Log.e(TAG, "Failed to generate invoice for sigmo request", e)
+                Log.e(TAG, "Failed to generate invoice for sigmo request: ${e.message}", e)
             }
         }
     }
@@ -173,17 +178,18 @@ object SigmoProtocolProcessor {
         val sender = Recipient.resolved(senderRecipientId)
         val description = "Invoice requested by ${sender.getDisplayName(context)}"
         
-        Log.i(TAG, "Creating invoice for $amountSats sats, requestId=$requestId")
+        Log.i(TAG, "generateAndSendInvoice: Creating invoice for $amountSats sats, requestId=$requestId, sender=${sender.getDisplayName(context)}")
         
         // Use createInvoiceWithHash to get both invoice and payment hash for tracking
+        Log.d(TAG, "generateAndSendInvoice: Calling LightningUiInteractor.createInvoiceWithHashBlocking...")
         val invoiceResult = LightningUiInteractor.createInvoiceWithHashBlocking(context, amountSats, description)
         
         if (invoiceResult == null) {
-            Log.e(TAG, "Failed to create invoice")
+            Log.e(TAG, "generateAndSendInvoice: Failed to create invoice - LightningUiInteractor returned null")
             return
         }
         
-        Log.i(TAG, "Invoice created with hash ${invoiceResult.paymentHash.take(16)}..., sending back to requester")
+        Log.i(TAG, "generateAndSendInvoice: Invoice created successfully! hash=${invoiceResult.paymentHash.take(16)}...")
         
         // Build message body with sigmo: prefix for client recognition and grouping
         // Format: sigmo:{invoice}[&request_id={uuid}]

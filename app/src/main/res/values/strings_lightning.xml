@@ -83,4 +83,14 @@
     <string name="LightningPayment__pay_invoice">Pay Invoice</string>
     <string name="LightningPayment__payment_successful">Lightning payment successful!</string>
     <string name="LightningPayment__payment_failed">Lightning payment failed</string>
+    <string name="LightningPayment__receive_capacity">Receive capacity: %1$s sats</string>
+    
+    <!-- Lightning Send Flow -->
+    <string name="CreatePaymentFragment__send_lightning_payment">Send Lightning Payment</string>
+    <string name="CreatePaymentFragment__send_lightning_request_message">Request a Lightning invoice for %1$s sats from %2$s?</string>
+    <string name="CreatePaymentFragment__send_request">Send Request</string>
+    <string name="CreatePaymentFragment__invoice_request_sent">Invoice request sent to %1$s</string>
+    <string name="CreatePaymentFragment__failed_to_send_request">Failed to send invoice request</string>
+    <string name="CreatePaymentFragment__invalid_recipient">Invalid recipient</string>
+    <string name="CreatePaymentFragment__invalid_amount">Invalid amount</string>
 </resources>

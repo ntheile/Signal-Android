@@ -8,6 +8,38 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <!-- Lightning node name - displayed at top when Lightning is configured -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/payments_home_fragment_header_lightning_node_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="4dp"
+        android:textAppearance="@style/Signal.Text.BodyMedium"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="⚡ My Lightning Node"
+        tools:visibility="visible" />
+
+    <!-- Lightning balance - displayed under node name when Lightning is configured -->
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/payments_home_fragment_header_lightning_balance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingBottom="8dp"
+        android:textAppearance="@style/TextAppearance.Signal.Title1"
+        android:textColor="?android:attr/textColorPrimary"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/payments_home_fragment_header_lightning_node_name"
+        tools:text="1,234 sats"
+        tools:visibility="visible" />
+
     <org.thoughtcrime.securesms.payments.MoneyView
         android:id="@+id/payments_home_fragment_header_balance"
         android:layout_width="match_parent"
@@ -18,7 +50,7 @@
         app:autoSizeTextType="uniform"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/payments_home_fragment_header_lightning_balance"
         tools:money="MOB:7500000000000"
         tools:ignore="SpUsage" />
 

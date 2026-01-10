@@ -285,6 +285,16 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
   }
 
   /**
+   * Mark a sigmo flow as failed (e.g., amount mismatch or payment error).
+   */
+  fun markSigmoFlowFailed(requestId: String) {
+    val flow = getSigmoFlow(requestId) ?: return
+    val data = "${flow.recipientId}|${flow.amountMsats}|${flow.threadId}|${flow.requestMessageId}|${SigmoFlowStatus.FAILED.name}|${flow.invoice ?: ""}|${flow.invoiceMessageId ?: ""}"
+    val key = SIGMO_REQUEST_STATUS_PREFIX + requestId
+    store.beginWrite().putString(key, data).commit()
+  }
+
+  /**
    * Get the sigmo flow associated with a specific message ID (either request or invoice message).
    */
   fun getSigmoFlowByMessageId(messageId: Long): SigmoPaymentFlow? {

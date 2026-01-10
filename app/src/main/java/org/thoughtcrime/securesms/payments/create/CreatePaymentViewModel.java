@@ -19,6 +19,7 @@ import org.thoughtcrime.securesms.payments.CreatePaymentDetails;
 import org.thoughtcrime.securesms.payments.FiatMoneyUtil;
 import org.thoughtcrime.securesms.payments.currency.CurrencyExchange;
 import org.thoughtcrime.securesms.payments.preferences.model.PayeeParcelable;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.recipients.Recipient;
 import org.thoughtcrime.securesms.util.DefaultValueLiveData;
 import org.thoughtcrime.securesms.util.ProfileUtil;
@@ -67,15 +68,20 @@ public class CreatePaymentViewModel extends ViewModel {
     this.enclaveFailure   = LiveDataUtil.mapDistinct(SignalStore.payments().enclaveFailure(), isFailure -> isFailure);
 
     if (payee.getPayee().hasRecipientId()) {
-      isPaymentsSupportedByPayee = LiveDataUtil.mapAsync(new DefaultValueLiveData<>(payee.getPayee().requireRecipientId()), r -> {
-        try {
-          ProfileUtil.getAddressForRecipient(Recipient.resolved(r));
-          return true;
-        } catch (Exception e) {
-          Log.w(TAG, "Could not get address for recipient: ", e);
-          return false;
-        }
-      });
+      // When Lightning is configured, skip the payment address check - we use sigmo: protocol
+      if (LightningUiInteractor.isConfigured(AppDependencies.getApplication())) {
+        isPaymentsSupportedByPayee = new DefaultValueLiveData<>(true);
+      } else {
+        isPaymentsSupportedByPayee = LiveDataUtil.mapAsync(new DefaultValueLiveData<>(payee.getPayee().requireRecipientId()), r -> {
+          try {
+            ProfileUtil.getAddressForRecipient(Recipient.resolved(r));
+            return true;
+          } catch (Exception e) {
+            Log.w(TAG, "Could not get address for recipient: ", e);
+            return false;
+          }
+        });
+      }
     } else {
       isPaymentsSupportedByPayee = new DefaultValueLiveData<>(true);
     }
@@ -108,6 +114,20 @@ public class CreatePaymentViewModel extends ViewModel {
   @NonNull LiveData<Boolean> getIsPaymentsSupportedByPayee() { return isPaymentsSupportedByPayee; }
   @NonNull LiveData<CharSequence> getNote() { return Transformations.distinctUntilChanged(note); }
   @NonNull LiveData<Boolean> isValidAmount() {
+    // Lightning takes priority - validate against Lightning balance
+    if (LightningUiInteractor.isConfigured(AppDependencies.getApplication())) {
+      androidx.lifecycle.LiveData<java.lang.Long> satsBalance = org.thoughtcrime.securesms.util.livedata.LiveDataUtil.mapAsync(new DefaultValueLiveData<>(true), x -> {
+        org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeInfo nodeInfo = 
+            LightningUiInteractor.getNodeInfoBlocking(AppDependencies.getApplication());
+        return nodeInfo != null ? nodeInfo.getSendBalanceSats() : 0L;
+      });
+      return org.thoughtcrime.securesms.util.livedata.LiveDataUtil.combineLatest(satsBalance, inputState.getStateLiveData(), (balSats, s) -> {
+        try {
+          long sats = org.thoughtcrime.securesms.payments.create.CashuAmountAccessor.getAmountSats(s.getMoneyAmount());
+          return sats > 0L && sats <= balSats;
+        } catch (Throwable t) { return false; }
+      });
+    }
     if (org.thoughtcrime.securesms.keyvalue.SignalStore.payments().cashuEnabled()) {
       androidx.lifecycle.LiveData<java.lang.Long> satsBalance = org.thoughtcrime.securesms.util.livedata.LiveDataUtil.mapAsync(new DefaultValueLiveData<>(true), x -> new org.thoughtcrime.securesms.payments.engine.CashuUiRepository(AppDependencies.getApplication()).getSpendableSatsBlocking());
       return org.thoughtcrime.securesms.util.livedata.LiveDataUtil.combineLatest(satsBalance, inputState.getStateLiveData(), (balSats, s) -> {

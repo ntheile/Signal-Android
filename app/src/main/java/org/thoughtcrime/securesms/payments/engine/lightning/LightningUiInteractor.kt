@@ -72,6 +72,20 @@ object LightningUiInteractor {
     }
 
     /**
+     * Get detailed information about the Lightning node including alias.
+     * Returns null if not configured or unavailable.
+     */
+    @JvmStatic
+    fun getNodeInfoBlocking(context: Context): LightningNodeInfo? = runBlocking {
+        runCatching {
+            LightningEngineProvider.get(context).getNodeInfo()
+        }.getOrElse { throwable ->
+            Log.w(TAG, "Failed to get Lightning node info", throwable)
+            null
+        }
+    }
+
+    /**
      * Create a Lightning invoice.
      */
     @JvmStatic

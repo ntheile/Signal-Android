@@ -86,6 +86,13 @@ class SigmoRequestMessageView @JvmOverloads constructor(
     binding.sigmoRequestDirection.text = text
   }
 
+  /**
+   * Update the amount text dynamically.
+   */
+  fun setAmountText(text: String) {
+    binding.sigmoRequestAmount.text = text
+  }
+
   fun setStatusVisible(visible: Boolean) {
     binding.sigmoRequestStatus.visible = visible
     binding.sigmoRequestStatusContainer.visible = visible

@@ -191,6 +191,12 @@
     <string name="SigmoRequest_received_from">Received from %1$s</string>
     <!-- Status when waiting for payment -->
     <string name="SigmoRequest_waiting_for_payment">Waiting for payment</string>
+    <!-- Status when auto-paying invoice -->
+    <string name="SigmoRequest_auto_paying">Sending payment…</string>
+    <!-- Error when invoice amount doesn't match expected -->
+    <string name="SigmoRequest_amount_mismatch">Invoice amount doesn\'t match! Expected %1$s sats but got %2$s sats</string>
+    <!-- Status after amount mismatch -->
+    <string name="SigmoRequest_amount_mismatch_status">Amount mismatch ✗</string>
 
     <!-- Option in menu to select more photos that Signal will have access to -->
     <string name="AttachmentKeyboard_select_more_photos">Select more photos</string>

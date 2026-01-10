@@ -142,6 +142,26 @@ class LightningEngine(private val appContext: Context) {
     }
 
     /**
+     * Get detailed information about the Lightning node including alias.
+     */
+    suspend fun getNodeInfo(): LightningNodeInfo? = withContext(Dispatchers.IO) {
+        try {
+            val n = getOrCreateNode() ?: return@withContext null
+            val info = n.getInfo()
+            LightningNodeInfo(
+                alias = info.alias,
+                pubkey = info.pubkey,
+                network = info.network,
+                sendBalanceSats = (info.sendBalanceMsat ?: 0) / 1000,
+                receiveBalanceSats = (info.receiveBalanceMsat ?: 0) / 1000
+            )
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to get Lightning node info", e)
+            null
+        }
+    }
+
+    /**
      * Create a Lightning invoice for receiving payments.
      * Returns just the invoice string for backward compatibility.
      */
@@ -467,3 +487,14 @@ enum class LightningTxType {
     SEND,
     RECEIVE
 }
+
+/**
+ * Information about the connected Lightning node.
+ */
+data class LightningNodeInfo(
+    val alias: String,
+    val pubkey: String,
+    val network: String,
+    val sendBalanceSats: Long,
+    val receiveBalanceSats: Long
+)

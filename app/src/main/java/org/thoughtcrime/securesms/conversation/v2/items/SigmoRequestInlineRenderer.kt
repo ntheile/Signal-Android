@@ -42,6 +42,10 @@ object SigmoRequestInlineRenderer {
 
   private const val SIGMO_PREFIX = "sigmo:"
 
+  // Track invoices currently being auto-paid to prevent duplicate payment attempts
+  // when the RecyclerView recycles views during payment
+  private val invoicesBeingPaid = mutableSetOf<String>()
+
   enum class SigmoMessageType {
     REQUEST,   // Invoice request
     INVOICE    // Invoice response
@@ -132,14 +136,18 @@ object SigmoRequestInlineRenderer {
     if (pillBinding.messageType == SigmoMessageType.INVOICE) {
       if (pillBinding.outgoing) {
         // Outgoing invoice - configure refresh to check payment status
-        configureRefreshAction(pillBinding)
-        // Auto-check status when displayed
-        checkInvoiceStatus(pillBinding)
-      } else {
-        // Incoming invoice - configure pay action only if not already paid
         val invoice = pillBinding.view.getInvoice()
         if (invoice != null && !SignalStore.payments.isInvoicePaid(invoice)) {
-          configurePayAction(pillBinding)
+          configureRefreshAction(pillBinding)
+          // Auto-check status when displayed (only if not already paid)
+          checkInvoiceStatus(pillBinding)
+        }
+      } else {
+        // Incoming invoice - attempt auto-pay if amount matches expected
+        val invoice = pillBinding.view.getInvoice()
+        if (invoice != null && !SignalStore.payments.isInvoicePaid(invoice)) {
+          // Try auto-pay with amount verification
+          attemptAutoPayWithVerification(pillBinding)
         }
       }
     }
@@ -193,14 +201,18 @@ object SigmoRequestInlineRenderer {
     if (pillBinding.messageType == SigmoMessageType.INVOICE) {
       if (pillBinding.outgoing) {
         // Outgoing invoice - configure refresh to check payment status
-        configureRefreshAction(pillBinding)
-        // Auto-check status when displayed
-        checkInvoiceStatus(pillBinding)
-      } else {
-        // Incoming invoice - configure pay action only if not already paid
         val invoice = pillBinding.view.getInvoice()
         if (invoice != null && !SignalStore.payments.isInvoicePaid(invoice)) {
-          configurePayAction(pillBinding)
+          configureRefreshAction(pillBinding)
+          // Auto-check status when displayed (only if not already paid)
+          checkInvoiceStatus(pillBinding)
+        }
+      } else {
+        // Incoming invoice - attempt auto-pay if amount matches expected
+        val invoice = pillBinding.view.getInvoice()
+        if (invoice != null && !SignalStore.payments.isInvoicePaid(invoice)) {
+          // Try auto-pay with amount verification
+          attemptAutoPayWithVerification(pillBinding)
         }
       }
     }
@@ -317,9 +329,10 @@ object SigmoRequestInlineRenderer {
           // Outgoing invoice (we're the receiver waiting for payment)
           // Check if already paid
           if (SignalStore.payments.isInvoicePaid(parsedInvoice.invoice)) {
-            // Payment received - show "Received from User"
+            // Payment received - show "Received from User" with green check on amount
             val receivedText = context.getString(R.string.SigmoRequest_received_from, recipient.getShortDisplayName(context))
-            pill.bind(receivedText, amountText, outgoing, recipient, colorizer, hideTitle = true)
+            val amountWithCheck = "$amountText \u2705"
+            pill.bind(receivedText, amountWithCheck, outgoing, recipient, colorizer, hideTitle = true)
             pill.setStatusText("")
             pill.setStatusVisible(false)
             pill.setRefreshButtonVisible(false)
@@ -335,9 +348,10 @@ object SigmoRequestInlineRenderer {
           val isPaid = SignalStore.payments.isInvoicePaid(parsedInvoice.invoice)
           
           if (isPaid) {
-            // Show "You sent to User" after payment is complete
+            // Show "You sent to User" after payment is complete with green check on amount
             val youSentText = context.getString(R.string.SigmoRequest_you_sent_to, recipient.getShortDisplayName(context))
-            pill.bind(youSentText, amountText, outgoing, recipient, colorizer, hideTitle = true)
+            val amountWithCheck = "$amountText \u2705"
+            pill.bind(youSentText, amountWithCheck, outgoing, recipient, colorizer, hideTitle = true)
             pill.setStatusText("")
             pill.setStatusVisible(false)
           } else {
@@ -404,6 +418,15 @@ object SigmoRequestInlineRenderer {
             val youSentText = ctx.getString(R.string.SigmoRequest_you_sent_to, pillBinding.recipient.getShortDisplayName(ctx))
             pill.setDirectionText(youSentText)
             
+            // Update amount with green checkmark
+            val amountSats = parseAmountFromBolt11(invoiceStr)
+            if (amountSats != null) {
+              val formatter = java.text.NumberFormat.getInstance()
+              formatter.maximumFractionDigits = 0
+              val amountText = ctx.getString(R.string.LightningInvoice_sats_format, formatter.format(amountSats))
+              pill.setAmountText("$amountText \u2705")
+            }
+            
             // Update flow status if we have request_id
             pillBinding.requestId?.let { requestId ->
               SignalStore.payments.markSigmoFlowPaid(requestId)
@@ -421,6 +444,167 @@ object SigmoRequestInlineRenderer {
           pill.setPayButtonState(false)
           Toast.makeText(ctx, R.string.LightningInvoice_payment_failed, Toast.LENGTH_SHORT).show()
         }
+      }
+    }
+  }
+
+  /**
+   * Attempt to auto-pay an incoming invoice after verifying the amount matches
+   * what was originally requested. If amounts match, pay immediately without user interaction.
+   * If amounts don't match, show an error message.
+   */
+  private fun attemptAutoPayWithVerification(pillBinding: PillBinding) {
+    val pill = pillBinding.view
+    val invoice = pill.getInvoice() ?: return
+    val ctx = pill.context
+    val requestId = pillBinding.requestId
+    
+    // Check if this invoice is already being paid (prevents duplicate attempts during view recycling)
+    synchronized(invoicesBeingPaid) {
+      if (invoicesBeingPaid.contains(invoice)) {
+        Log.d(TAG, "Invoice already being paid, skipping duplicate auto-pay attempt")
+        // Show spinner to indicate payment in progress
+        pill.setStatusText(ctx.getString(R.string.SigmoRequest_auto_paying))
+        pill.setPayButtonVisible(false)
+        pill.showSpinner(true)
+        return
+      }
+    }
+    
+    // Parse the amount from the incoming invoice
+    val invoiceAmountSats = parseAmountFromBolt11(invoice)
+    
+    if (invoiceAmountSats == null) {
+      Log.w(TAG, "Could not parse amount from invoice, falling back to manual pay")
+      configurePayAction(pillBinding)
+      return
+    }
+    
+    // Look up the original request to get the expected amount
+    val flow = if (requestId != null) {
+      SignalStore.payments.getSigmoFlow(requestId)
+    } else {
+      null
+    }
+    
+    if (flow == null) {
+      Log.w(TAG, "No sigmo flow found for requestId=$requestId, falling back to manual pay")
+      configurePayAction(pillBinding)
+      return
+    }
+    
+    // Convert expected amount from msats to sats
+    val expectedAmountSats = flow.amountMsats / 1000
+    
+    Log.i(TAG, "Verifying invoice amount: expected=${expectedAmountSats} sats, invoice=${invoiceAmountSats} sats")
+    
+    if (invoiceAmountSats != expectedAmountSats) {
+      // Amount mismatch - show error and don't pay
+      Log.w(TAG, "Invoice amount mismatch! Expected $expectedAmountSats sats, got $invoiceAmountSats sats")
+      
+      val formatter = java.text.NumberFormat.getInstance()
+      formatter.maximumFractionDigits = 0
+      
+      Toast.makeText(
+        ctx,
+        ctx.getString(R.string.SigmoRequest_amount_mismatch, formatter.format(expectedAmountSats), formatter.format(invoiceAmountSats)),
+        Toast.LENGTH_LONG
+      ).show()
+      
+      // Update UI to show error state
+      pill.setStatusText(ctx.getString(R.string.SigmoRequest_amount_mismatch_status))
+      pill.setPayButtonVisible(false)
+      
+      // Mark flow as failed
+      pillBinding.requestId?.let { id ->
+        SignalStore.payments.markSigmoFlowFailed(id)
+      }
+      return
+    }
+    
+    // Mark invoice as being paid BEFORE starting the payment
+    synchronized(invoicesBeingPaid) {
+      invoicesBeingPaid.add(invoice)
+    }
+    
+    // Amounts match - auto-pay!
+    Log.i(TAG, "Invoice amount verified, auto-paying $invoiceAmountSats sats")
+    
+    // Update UI to show we're paying
+    pill.setStatusText(ctx.getString(R.string.SigmoRequest_auto_paying))
+    pill.setPayButtonVisible(false)
+    pill.showSpinner(true)
+    
+    CoroutineScope(Dispatchers.Main).launch {
+      try {
+        val result = withContext(Dispatchers.IO) {
+          if (LightningUiInteractor.isConfigured(ctx)) {
+            LightningUiInteractor.payInvoiceBlocking(ctx, invoice, null)
+          } else {
+            // Fall back to Cashu melt
+            val quote = org.thoughtcrime.securesms.payments.engine.CashuUiInteractor.requestMeltQuoteBlocking(
+              AppDependencies.application, invoice
+            )
+            if (quote != null) {
+              val success = org.thoughtcrime.securesms.payments.engine.CashuUiInteractor.meltBlocking(
+                AppDependencies.application, quote
+              )
+              if (success) "paid" else null
+            } else {
+              null
+            }
+          }
+        }
+        
+        pill.showSpinner(false)
+        
+        // Remove from in-progress set regardless of success/failure
+        synchronized(invoicesBeingPaid) {
+          invoicesBeingPaid.remove(invoice)
+        }
+        
+        if (result != null) {
+          // Payment successful
+          pill.setStatusText("")
+          pill.setStatusVisible(false)
+          SignalStore.payments.setInvoicePaid(invoice)
+          
+          // Update direction text to show "You sent to User"
+          val youSentText = ctx.getString(R.string.SigmoRequest_you_sent_to, pillBinding.recipient.getShortDisplayName(ctx))
+          pill.setDirectionText(youSentText)
+          
+          // Update amount with green checkmark
+          val amountSats = parseAmountFromBolt11(invoice)
+          if (amountSats != null) {
+            val formatter = java.text.NumberFormat.getInstance()
+            formatter.maximumFractionDigits = 0
+            val amountText = ctx.getString(R.string.LightningInvoice_sats_format, formatter.format(amountSats))
+            pill.setAmountText("$amountText \u2705")
+          }
+          
+          // Update flow status
+          pillBinding.requestId?.let { id ->
+            SignalStore.payments.markSigmoFlowPaid(id)
+          }
+          
+          // Notify database observer to refresh message in conversation list
+          Log.i(TAG, "Auto-payment successful, notifying message update for messageId: ${pillBinding.messageId}")
+          AppDependencies.databaseObserver.notifyMessageUpdateObservers(MessageId(pillBinding.messageId))
+        } else {
+          // Payment failed - fall back to manual pay button
+          Log.w(TAG, "Auto-payment failed, showing manual pay button")
+          Toast.makeText(ctx, R.string.LightningInvoice_payment_failed, Toast.LENGTH_SHORT).show()
+          configurePayAction(pillBinding)
+        }
+      } catch (e: Exception) {
+        Log.e(TAG, "Auto-payment failed with exception", e)
+        pill.showSpinner(false)
+        // Remove from in-progress set on exception
+        synchronized(invoicesBeingPaid) {
+          invoicesBeingPaid.remove(invoice)
+        }
+        Toast.makeText(ctx, R.string.LightningInvoice_payment_failed, Toast.LENGTH_SHORT).show()
+        configurePayAction(pillBinding)
       }
     }
   }
@@ -446,10 +630,9 @@ object SigmoRequestInlineRenderer {
     val invoice = pill.getInvoice() ?: return
     val ctx = pill.context
     
-    // First check persisted state
+    // First check persisted state - if already paid, don't poll or notify
     if (SignalStore.payments.isInvoicePaid(invoice)) {
-      Log.d(TAG, "Invoice already marked as paid locally, updating UI")
-      handlePaymentReceived(pillBinding)
+      Log.d(TAG, "Invoice already marked as paid locally, skipping polling")
       return
     }
     
@@ -520,9 +703,19 @@ object SigmoRequestInlineRenderer {
     // Persist the paid status
     SignalStore.payments.setInvoicePaid(invoice)
     
-    // Update UI to show "Received from User"
+    // Update UI to show "Received from User" with green check on amount
     val receivedText = ctx.getString(R.string.SigmoRequest_received_from, pillBinding.recipient.getShortDisplayName(ctx))
     pill.setDirectionText(receivedText)
+    
+    // Update amount with green checkmark
+    val amountSats = parseAmountFromBolt11(invoice)
+    if (amountSats != null) {
+      val formatter = java.text.NumberFormat.getInstance()
+      formatter.maximumFractionDigits = 0
+      val amountText = ctx.getString(R.string.LightningInvoice_sats_format, formatter.format(amountSats))
+      pill.setAmountText("$amountText \u2705")
+    }
+    
     pill.setStatusText("")
     pill.setStatusVisible(false)
     pill.setRefreshButtonVisible(false)
@@ -547,10 +740,9 @@ object SigmoRequestInlineRenderer {
     val invoice = pill.getInvoice() ?: return
     val ctx = pill.context
 
-    // First check persisted state
+    // First check persisted state - if already paid, skip the check
     if (SignalStore.payments.isInvoicePaid(invoice)) {
-      Log.d(TAG, "Invoice already marked as paid locally")
-      handlePaymentReceived(pillBinding)
+      Log.d(TAG, "Invoice already marked as paid locally, skipping check")
       return
     }
 
