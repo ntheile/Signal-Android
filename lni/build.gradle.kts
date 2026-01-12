@@ -2,22 +2,31 @@
  * LNI (Lightning Node Interface) Android Module
  * 
  * This module integrates the LNI Rust library with Android via UniFFI bindings.
+ * Version: v0.2.0 (includes Spark, Swift bindings, improved Kotlin bindings)
  * 
+ * Supported Nodes:
+ * - LndNode - LND (Lightning Network Daemon)
+ * - ClnNode - Core Lightning (CLN)
+ * - PhoenixdNode - Phoenixd daemon
+ * - NwcNode - Nostr Wallet Connect
+ * - StrikeNode - Strike Lightning service
+ * - BlinkNode - Blink Lightning service
+ * - SpeedNode - Speed Lightning service
+ * - SparkNode - Breez Spark SDK (NEW in v0.2.0)
+ * 
+ * Setup for new users:
+ * 1. Clone with submodules: git clone --recurse-submodules <repo>
+ *    OR if already cloned: git submodule update --init --recursive
+ * 2. That's it! Pre-built native libs are committed, Kotlin bindings come from submodule.
+ * 
+ * To rebuild native libraries (maintainers only):
  * Prerequisites:
  * 1. Rust installed with Android targets:
  *    rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
- * 2. cargo-ndk installed:
- *    cargo install cargo-ndk
+ * 2. cargo-ndk installed: cargo install cargo-ndk
  * 3. Android NDK installed (set via ANDROID_NDK_HOME)
  * 
- * To build the native libraries:
- *    ./gradlew :lni:buildRust
- * 
- * The build task will:
- * 1. Clone/update the LNI repository from GitHub
- * 2. Build the Rust library for Android targets using cargo-ndk
- * 3. Generate Kotlin bindings using uniffi-bindgen
- * 4. Copy the .so files and generated Kotlin code to the appropriate locations
+ * Then run: ./gradlew :lni:buildRust
  */
 
 plugins {
@@ -35,8 +44,8 @@ android {
 
     sourceSets {
         getByName("main") {
-            // Generated Kotlin bindings from uniffi
-            kotlin.srcDir("src/main/kotlin")
+            // Use pre-generated Kotlin bindings from upstream LNI
+            kotlin.srcDir("lni-src/bindings/kotlin/src/main/kotlin")
             // Native libraries built by cargo-ndk
             jniLibs.srcDir("src/main/jniLibs")
         }
@@ -44,33 +53,17 @@ android {
 }
 
 dependencies {
-    // JNA is required for UniFFI bindings
-    implementation("net.java.dev.jna:jna:5.14.0@aar")
+    // JNA is required for UniFFI bindings (per LNI docs)
+    implementation("net.java.dev.jna:jna:5.13.0@aar")
     
     // Kotlin coroutines for async operations
     implementation(libs.kotlinx.coroutines.core)
 }
 
-// Task to clone or update the LNI repository
-tasks.register<Exec>("cloneLni") {
-    val lniDir = file("${project.projectDir}/lni-src")
-    
-    doFirst {
-        if (!lniDir.exists()) {
-            commandLine("git", "clone", "--depth", "1", "https://github.com/lightning-node-interface/lni.git", lniDir.absolutePath)
-        } else {
-            workingDir = lniDir
-            commandLine("git", "pull")
-        }
-    }
-}
-
-// Task to build Rust library for Android
+// Task to build Rust library for Android (only needed to update native binaries)
 tasks.register("buildRust") {
     group = "build"
-    description = "Build LNI Rust library for Android targets"
-    
-    dependsOn("cloneLni")
+    description = "Build LNI Rust library for Android targets. Run 'git submodule update --remote lni/lni-src' first to get latest LNI."
     
     doLast {
         val lniDir = file("${project.projectDir}/lni-src/crates/lni")

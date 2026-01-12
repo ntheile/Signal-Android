@@ -65,57 +65,27 @@ Google Play and the Google Play logo are trademarks of Google LLC.
 
 The `lni/` module provides Lightning Network integration via the [LNI Rust library](https://github.com/lightning-node-interface/lni) with UniFFI bindings for Android.
 
-### Pre-built Binaries
+### Setup
 
-The repository includes pre-built native libraries (`.so` files) and Kotlin bindings, so **no Rust compilation is needed** for normal development. Just build the app as usual:
-
-```bash
-./gradlew assemblePlayProdDebug
-```
-
-### Rebuilding Native Libraries (Optional)
-
-Only needed if you modify the LNI Rust source code.
-
-#### Prerequisites
+LNI is included as a git submodule. After cloning, run:
 
 ```bash
-# Install Rust Android targets
-rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
-
-# Install cargo-ndk
-cargo install cargo-ndk
-
-# Ensure Android NDK is installed and ANDROID_NDK_HOME is set
-export ANDROID_NDK_HOME=$HOME/Library/Android/sdk/ndk/<version>
+./build.sh
 ```
 
-#### Build Steps
+Or manually:
 
 ```bash
-# Clone the LNI repository (if not already present)
-cd lni
-git clone --depth 1 https://github.com/lightning-node-interface/lni.git lni-src
-
-# Build for all Android targets
-cd lni-src/crates/lni
-
-cargo ndk --target aarch64-linux-android --platform 21 build --release --features uniffi
-cargo ndk --target armv7-linux-androideabi --platform 21 build --release --features uniffi
-cargo ndk --target x86_64-linux-android --platform 21 build --release --features uniffi
-cargo ndk --target i686-linux-android --platform 21 build --release --features uniffi
+git submodule update --init --recursive
 ```
 
-#### Copy Built Libraries
+Pre-built native libraries (`.so` files) are committed to the repo, so **no Rust compilation is needed** for normal development.
 
-Copy the `.so` files from the build output to the jniLibs directory:
+Troubleshoooting
+- In Android Studio , File > Sync Project With Gradle Files
 
-| Rust Target | Android ABI | Destination |
-|-------------|-------------|-------------|
-| `aarch64-linux-android` | `arm64-v8a` | `lni/src/main/jniLibs/arm64-v8a/liblni.so` |
-| `armv7-linux-androideabi` | `armeabi-v7a` | `lni/src/main/jniLibs/armeabi-v7a/liblni.so` |
-| `x86_64-linux-android` | `x86_64` | `lni/src/main/jniLibs/x86_64/liblni.so` |
-| `i686-linux-android` | `x86` | `lni/src/main/jniLibs/x86/liblni.so` |
+### Supported Lightning Nodes
 
-The built files are located at: `lni-src/target/<rust-target>/release/liblni.so`
+- LND, CLN, Phoenixd, NWC, Strike, Blink, Speed, Spark (Breez SDK)
+
 
