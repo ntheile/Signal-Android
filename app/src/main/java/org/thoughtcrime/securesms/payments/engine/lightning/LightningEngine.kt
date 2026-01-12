@@ -99,6 +99,11 @@ class LightningEngine(private val appContext: Context) {
     fun getConfiguredNodeType(): LightningNodeType? = configStore.getConfig()?.type
 
     /**
+     * Get the current Lightning configuration.
+     */
+    fun getConfig(): LightningConfig? = configStore.getConfig()
+
+    /**
      * Configure a Lightning node connection.
      */
     fun configure(config: LightningConfig) {
@@ -433,10 +438,13 @@ class LightningEngine(private val appContext: Context) {
                     Log.i(TAG, "Creating SparkNode")
                     val storageDir = config.storageDir 
                         ?: "${appContext.filesDir}/spark_wallet"
+                    // Use user-provided API key, or fall back to embedded key from BuildConfig
+                    val apiKey = config.secondaryCredential?.takeIf { it.isNotBlank() }
+                        ?: org.thoughtcrime.securesms.BuildConfig.BREEZ_API_KEY.takeIf { it.isNotBlank() }
                     createSparkNode(SparkConfig(
                         mnemonic = config.credential,
                         passphrase = null,
-                        apiKey = config.secondaryCredential,
+                        apiKey = apiKey,
                         storageDir = storageDir,
                         network = "mainnet"
                     ))

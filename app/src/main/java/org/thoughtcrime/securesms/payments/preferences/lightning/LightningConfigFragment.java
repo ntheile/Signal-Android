@@ -24,6 +24,7 @@ import org.signal.core.util.logging.Log;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.dependencies.AppDependencies;
 import org.thoughtcrime.securesms.keyvalue.SignalStore;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningConfig;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeType;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.util.ViewUtil;
@@ -100,6 +101,9 @@ public class LightningConfigFragment extends Fragment {
     // Spark inputs
     private EditText sparkMnemonicInput;
     private EditText sparkApiKeyInput;
+    private Button sparkGenerateButton;
+    private Button sparkAdvancedButton;
+    private LinearLayout sparkAdvancedSection;
     
     private LightningNodeType selectedNodeType = LightningNodeType.NWC;
 
@@ -167,6 +171,9 @@ public class LightningConfigFragment extends Fragment {
         // Spark
         sparkMnemonicInput = view.findViewById(R.id.lightning_spark_mnemonic);
         sparkApiKeyInput = view.findViewById(R.id.lightning_spark_api_key);
+        sparkGenerateButton = view.findViewById(R.id.lightning_spark_generate_button);
+        sparkAdvancedButton = view.findViewById(R.id.lightning_spark_advanced_button);
+        sparkAdvancedSection = view.findViewById(R.id.lightning_spark_advanced_section);
 
         toolbar.setNavigationOnClickListener(v -> {
             ViewUtil.hideKeyboard(requireContext(), v);
@@ -179,6 +186,8 @@ public class LightningConfigFragment extends Fragment {
         disconnectButton.setOnClickListener(v -> disconnect());
         editButton.setOnClickListener(v -> enterEditMode());
         testButton.setOnClickListener(v -> testConnection());
+        sparkGenerateButton.setOnClickListener(v -> generateMnemonic());
+        sparkAdvancedButton.setOnClickListener(v -> toggleAdvancedSettings());
 
         updateUiState();
     }
@@ -565,6 +574,28 @@ public class LightningConfigFragment extends Fragment {
         }).start();
     }
     
+    private void generateMnemonic() {
+        try {
+            // Generate 12-word mnemonic using LNI (via Kotlin helper to avoid name mangling issues)
+            String mnemonic = LniHelper.generateMnemonic(null);
+            sparkMnemonicInput.setText(mnemonic);
+            Toast.makeText(requireContext(), R.string.LightningConfig__mnemonic_generated, Toast.LENGTH_SHORT).show();
+        } catch (Throwable t) {
+            Log.w(TAG, "Failed to generate mnemonic", t);
+            Toast.makeText(requireContext(), R.string.LightningConfig__mnemonic_generation_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private void toggleAdvancedSettings() {
+        if (sparkAdvancedSection.getVisibility() == View.VISIBLE) {
+            sparkAdvancedSection.setVisibility(View.GONE);
+            sparkAdvancedButton.setText(R.string.LightningConfig__advanced_settings);
+        } else {
+            sparkAdvancedSection.setVisibility(View.VISIBLE);
+            sparkAdvancedButton.setText(R.string.LightningConfig__hide_advanced);
+        }
+    }
+    
     private void connectSpark() {
         String mnemonic = sparkMnemonicInput.getText().toString().trim();
         String apiKey = sparkApiKeyInput.getText().toString().trim();
@@ -574,9 +605,9 @@ public class LightningConfigFragment extends Fragment {
             return;
         }
         
-        // Basic validation: mnemonic should be 12 or 24 words
+        // Basic validation: mnemonic should be 12 words
         String[] words = mnemonic.split("\\s+");
-        if (words.length != 12 && words.length != 24) {
+        if (words.length != 12) {
             Toast.makeText(requireContext(), R.string.LightningConfig__invalid_mnemonic, Toast.LENGTH_LONG).show();
             return;
         }
@@ -652,8 +683,10 @@ public class LightningConfigFragment extends Fragment {
     }
 
     private void enterEditMode() {
-        // Get the current node type to pre-select the right section
-        LightningNodeType nodeType = LightningUiInteractor.getConfiguredNodeType(AppDependencies.getApplication());
+        // Get the current config to populate fields
+        LightningConfig config = LightningUiInteractor.getConfig(AppDependencies.getApplication());
+        LightningNodeType nodeType = config != null ? config.getType() : null;
+        
         if (nodeType != null) {
             selectedNodeType = nodeType;
         }
@@ -661,6 +694,11 @@ public class LightningConfigFragment extends Fragment {
         // Show the configuration UI
         requireView().findViewById(R.id.lightning_node_type_layout).setVisibility(View.VISIBLE);
         showSectionForNodeType(selectedNodeType);
+        
+        // Populate input fields with existing config values
+        if (config != null) {
+            populateFieldsFromConfig(config);
+        }
         
         // Update status to indicate edit mode
         statusText.setText(R.string.LightningConfig__editing_connection);
@@ -679,6 +717,44 @@ public class LightningConfigFragment extends Fragment {
                 nodeTypeSelector.setText(entry.getKey(), false);
                 break;
             }
+        }
+    }
+    
+    private void populateFieldsFromConfig(LightningConfig config) {
+        switch (config.getType()) {
+            case NWC:
+                nwcUriInput.setText(config.getCredential());
+                break;
+            case LND:
+                lndUrlInput.setText(config.getUrl());
+                lndMacaroonInput.setText(config.getCredential());
+                break;
+            case CLN:
+                clnUrlInput.setText(config.getUrl());
+                clnRuneInput.setText(config.getCredential());
+                break;
+            case PHOENIXD:
+                phoenixdUrlInput.setText(config.getUrl());
+                phoenixdPasswordInput.setText(config.getCredential());
+                break;
+            case STRIKE:
+                strikeApiKeyInput.setText(config.getCredential());
+                break;
+            case BLINK:
+                blinkApiKeyInput.setText(config.getCredential());
+                break;
+            case SPEED:
+                speedApiKeyInput.setText(config.getCredential());
+                break;
+            case SPARK:
+                sparkMnemonicInput.setText(config.getCredential());
+                if (config.getSecondaryCredential() != null && !config.getSecondaryCredential().isEmpty()) {
+                    sparkApiKeyInput.setText(config.getSecondaryCredential());
+                    // Show advanced section if API key is set
+                    sparkAdvancedSection.setVisibility(View.VISIBLE);
+                    sparkAdvancedButton.setText(R.string.LightningConfig__hide_advanced);
+                }
+                break;
         }
     }
 

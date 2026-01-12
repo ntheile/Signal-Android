@@ -38,3 +38,7 @@ else
 fi
 
 echo "=== Setup complete! ==="
+echo ""
+echo "NOTE: For Spark (Breez SDK) support, add your API key to local.properties:"
+echo "  breezApiKey=your_api_key_here"
+echo "Get a key at: https://breez.technology"

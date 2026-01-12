@@ -90,4 +90,12 @@ To update to a new LNI release, change `LNI_VERSION` in `build.sh` and update th
 
 - LND, CLN, Phoenixd, NWC, Strike, Blink, Speed, Spark (Breez SDK)
 
+### Breez API Key (for Spark)
+
+To use Spark, add your Breez API key to `local.properties`:
+```properties
+breezApiKey=your_api_key_here
+```
+Get a key at [breez.technology](https://breez.technology).
+
 

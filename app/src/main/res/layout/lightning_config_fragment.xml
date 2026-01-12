@@ -360,31 +360,67 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="@string/LightningConfig__spark_mnemonic_hint">
+                    android:hint="@string/LightningConfig__spark_mnemonic_hint"
+                    app:endIconMode="password_toggle">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/lightning_spark_mnemonic"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textMultiLine"
+                        android:inputType="textMultiLine|textPassword"
                         android:minLines="2" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
+                <Button
+                    android:id="@+id/lightning_spark_generate_button"
+                    style="@style/Signal.Widget.Button.Small.Primary"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:hint="@string/LightningConfig__spark_api_key_hint"
-                    app:endIconMode="password_toggle">
+                    android:text="@string/LightningConfig__generate_mnemonic" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/lightning_spark_api_key"
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:text="@string/LightningConfig__spark_backup_warning"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="@color/signal_colorError"
+                    android:drawableStart="@drawable/symbol_error_circle_fill_24"
+                    android:drawablePadding="8dp" />
+
+                <Button
+                    android:id="@+id/lightning_spark_advanced_button"
+                    style="@style/Widget.Signal.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/LightningConfig__advanced_settings" />
+
+                <LinearLayout
+                    android:id="@+id/lightning_spark_advanced_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
+                        android:layout_marginBottom="8dp"
+                        android:hint="@string/LightningConfig__spark_api_key_hint"
+                        app:endIconMode="password_toggle">
 
-                </com.google.android.material.textfield.TextInputLayout>
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/lightning_spark_api_key"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"

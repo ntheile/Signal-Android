@@ -367,4 +367,17 @@ object LightningUiInteractor {
             null
         }
     }
+
+    /**
+     * Get the current Lightning configuration.
+     */
+    @JvmStatic
+    fun getConfig(context: Context): LightningConfig? {
+        return try {
+            LightningEngineProvider.get(context).getConfig()
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to get Lightning config", e)
+            null
+        }
+    }
 }
