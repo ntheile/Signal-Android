@@ -21,6 +21,7 @@ import uniffi.lni.createLndNode
 import uniffi.lni.createClnNode
 import uniffi.lni.createPhoenixdNode
 import uniffi.lni.createSpeedNode
+import uniffi.lni.createSparkNode
 
 // Import node configs
 import uniffi.lni.StrikeConfig
@@ -30,6 +31,7 @@ import uniffi.lni.LndConfig
 import uniffi.lni.ClnConfig
 import uniffi.lni.PhoenixdConfig
 import uniffi.lni.SpeedConfig
+import uniffi.lni.SparkConfig
 
 /**
  * Result from creating a Lightning invoice, includes both the invoice string and payment hash.
@@ -57,6 +59,7 @@ data class InvoiceResult(
  * - Strike
  * - Blink
  * - Speed
+ * - Spark (Breez SDK)
  * 
  * @see <a href="https://github.com/lightning-node-interface/lni">LNI Library</a>
  */
@@ -344,7 +347,7 @@ class LightningEngine(private val appContext: Context) {
         }
     }
 
-    private fun getOrCreateNode(): LightningNode? {
+    private suspend fun getOrCreateNode(): LightningNode? {
         node?.let { return it }
         
         val config = configStore.getConfig()
@@ -424,6 +427,18 @@ class LightningEngine(private val appContext: Context) {
                         socks5Proxy = null,
                         acceptInvalidCerts = true,
                         httpTimeout = 120L
+                    ))
+                }
+                LightningNodeType.SPARK -> {
+                    Log.i(TAG, "Creating SparkNode")
+                    val storageDir = config.storageDir 
+                        ?: "${appContext.filesDir}/spark_wallet"
+                    createSparkNode(SparkConfig(
+                        mnemonic = config.credential,
+                        passphrase = null,
+                        apiKey = config.secondaryCredential,
+                        storageDir = storageDir,
+                        network = "mainnet"
                     ))
                 }
             }

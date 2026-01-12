@@ -32,3 +32,7 @@ maps.key
 /local/
 kls_database.db
 .kotlin
+
+# LNI native libraries (downloaded during build)
+app/src/main/jniLibs/**/liblni.so
+app/src/main/jniLibs/**/libbreez_sdk_*.so

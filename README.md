@@ -67,22 +67,24 @@ The `lni/` module provides Lightning Network integration via the [LNI Rust libra
 
 ### Setup
 
-LNI is included as a git submodule. After cloning, run:
+LNI requires a git submodule and native libraries. After cloning, run:
 
 ```bash
 ./build.sh
 ```
 
-Or manually:
+This will:
+1. Initialize the LNI git submodule (Kotlin bindings)
+2. Download pre-built native libraries from [GitHub releases](https://github.com/lightning-node-interface/lni/releases)
 
-```bash
-git submodule update --init --recursive
-```
+**No Rust compilation is needed** for normal development.
 
-Pre-built native libraries (`.so` files) are committed to the repo, so **no Rust compilation is needed** for normal development.
+### Troubleshooting
+- In Android Studio, File > Sync Project With Gradle Files
+- If native libraries are missing, delete `app/src/main/jniLibs/arm64-v8a/liblni.so` and re-run `./build.sh`
 
-Troubleshoooting
-- In Android Studio , File > Sync Project With Gradle Files
+### Updating LNI
+To update to a new LNI release, change `LNI_VERSION` in `build.sh` and update the submodule.
 
 ### Supported Lightning Nodes
 

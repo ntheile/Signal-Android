@@ -40,6 +40,11 @@
     <string name="LightningConfig__speed_api_key_hint">Speed API Key</string>
     <string name="LightningConfig__speed_help">Enter your Speed Wallet API key.</string>
     
+    <!-- Spark -->
+    <string name="LightningConfig__spark_mnemonic_hint">Seed Phrase (12 or 24 words)</string>
+    <string name="LightningConfig__spark_api_key_hint">Breez API Key (optional)</string>
+    <string name="LightningConfig__spark_help">Enter your 12 or 24 word seed phrase. Spark uses the Breez SDK for self-custodial Lightning. An API key is optional for testing but required for mainnet.</string>
+    
     <!-- Common -->
     <string name="LightningConfig__connect">Connect</string>
     <string name="LightningConfig__disconnect">Disconnect</string>
@@ -57,6 +62,8 @@
     <string name="LightningConfig__please_enter_macaroon">Please enter the macaroon</string>
     <string name="LightningConfig__please_enter_rune">Please enter the rune</string>
     <string name="LightningConfig__please_enter_password">Please enter the password</string>
+    <string name="LightningConfig__please_enter_mnemonic">Please enter your 12 or 24 word mnemonic</string>
+    <string name="LightningConfig__invalid_mnemonic">Invalid mnemonic. Please enter 12 or 24 words separated by spaces.</string>
     <string name="LightningConfig__connected_successfully">Lightning node connected successfully!</string>
     <string name="LightningConfig__connection_failed">Failed to connect to Lightning node. Please check your credentials and try again.</string>
     <string name="LightningConfig__configuration_failed">Failed to save Lightning configuration</string>
@@ -77,6 +84,7 @@
     <string name="LightningConfig__node_type_strike">Strike</string>
     <string name="LightningConfig__node_type_blink">Blink</string>
     <string name="LightningConfig__node_type_speed">Speed</string>
+    <string name="LightningConfig__node_type_spark">Spark (Breez)</string>
     
     <!-- Lightning Payment -->
     <string name="LightningPayment__pay_with_lightning">Pay with Lightning</string>

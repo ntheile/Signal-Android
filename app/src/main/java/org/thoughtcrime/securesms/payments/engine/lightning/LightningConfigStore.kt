@@ -85,7 +85,9 @@ class LightningConfigStore(private val appContext: Context) {
 data class LightningConfig(
     val type: LightningNodeType,
     val url: String? = null,
-    val credential: String, // macaroon, rune, password, API key, or NWC URI
+    val credential: String, // macaroon, rune, password, API key, NWC URI, or mnemonic (for Spark)
+    val secondaryCredential: String? = null, // API key for Spark
+    val storageDir: String? = null, // Storage directory for Spark
     val socks5Proxy: String? = null,
     val acceptInvalidCerts: Boolean = false
 ) {
@@ -94,6 +96,8 @@ data class LightningConfig(
         obj.put("type", type.name)
         obj.putOpt("url", url)
         obj.put("credential", credential)
+        obj.putOpt("secondaryCredential", secondaryCredential)
+        obj.putOpt("storageDir", storageDir)
         obj.putOpt("socks5Proxy", socks5Proxy)
         obj.put("acceptInvalidCerts", acceptInvalidCerts)
         return obj.toString()
@@ -106,6 +110,8 @@ data class LightningConfig(
                 type = LightningNodeType.valueOf(obj.getString("type")),
                 url = obj.optString("url", null),
                 credential = obj.getString("credential"),
+                secondaryCredential = obj.optString("secondaryCredential", null),
+                storageDir = obj.optString("storageDir", null),
                 socks5Proxy = obj.optString("socks5Proxy", null),
                 acceptInvalidCerts = obj.optBoolean("acceptInvalidCerts", false)
             )
@@ -124,5 +130,6 @@ enum class LightningNodeType {
     PHOENIXD,   // Phoenixd - needs URL + password
     STRIKE,     // Strike - needs API key
     BLINK,      // Blink - needs API key
-    SPEED       // Speed - needs API key
+    SPEED,      // Speed - needs API key
+    SPARK       // Spark (Breez SDK) - needs mnemonic + storage dir + optional API key
 }

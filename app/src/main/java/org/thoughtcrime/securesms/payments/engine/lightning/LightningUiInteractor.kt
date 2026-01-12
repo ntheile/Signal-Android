@@ -321,6 +321,29 @@ object LightningUiInteractor {
     }
 
     /**
+     * Configure a Spark connection (Breez SDK).
+     * @param mnemonic 12 or 24 word seed phrase
+     * @param apiKey Optional Breez API key (required for mainnet)
+     */
+    @JvmStatic
+    fun configureSpark(context: Context, mnemonic: String, apiKey: String?): Boolean {
+        return try {
+            val storageDir = "${context.filesDir}/spark_wallet"
+            val config = LightningConfig(
+                type = LightningNodeType.SPARK,
+                credential = mnemonic,
+                secondaryCredential = apiKey?.takeIf { it.isNotBlank() },
+                storageDir = storageDir
+            )
+            LightningEngineProvider.get(context).configure(config)
+            true
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to configure Spark", e)
+            false
+        }
+    }
+
+    /**
      * Clear the Lightning configuration.
      */
     @JvmStatic

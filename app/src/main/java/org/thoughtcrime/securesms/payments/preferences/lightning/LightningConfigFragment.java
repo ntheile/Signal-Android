@@ -71,6 +71,7 @@ public class LightningConfigFragment extends Fragment {
     private LinearLayout strikeSection;
     private LinearLayout blinkSection;
     private LinearLayout speedSection;
+    private LinearLayout sparkSection;
     
     // NWC inputs
     private EditText nwcUriInput;
@@ -95,6 +96,10 @@ public class LightningConfigFragment extends Fragment {
     
     // Speed input
     private EditText speedApiKeyInput;
+    
+    // Spark inputs
+    private EditText sparkMnemonicInput;
+    private EditText sparkApiKeyInput;
     
     private LightningNodeType selectedNodeType = LightningNodeType.NWC;
 
@@ -133,6 +138,7 @@ public class LightningConfigFragment extends Fragment {
         strikeSection = view.findViewById(R.id.lightning_strike_section);
         blinkSection = view.findViewById(R.id.lightning_blink_section);
         speedSection = view.findViewById(R.id.lightning_speed_section);
+        sparkSection = view.findViewById(R.id.lightning_spark_section);
         
         // NWC
         nwcUriInput = view.findViewById(R.id.lightning_nwc_uri);
@@ -157,6 +163,10 @@ public class LightningConfigFragment extends Fragment {
         
         // Speed
         speedApiKeyInput = view.findViewById(R.id.lightning_speed_api_key);
+        
+        // Spark
+        sparkMnemonicInput = view.findViewById(R.id.lightning_spark_mnemonic);
+        sparkApiKeyInput = view.findViewById(R.id.lightning_spark_api_key);
 
         toolbar.setNavigationOnClickListener(v -> {
             ViewUtil.hideKeyboard(requireContext(), v);
@@ -181,6 +191,7 @@ public class LightningConfigFragment extends Fragment {
         nodeTypeMap.put(getString(R.string.LightningConfig__node_type_strike), LightningNodeType.STRIKE);
         nodeTypeMap.put(getString(R.string.LightningConfig__node_type_blink), LightningNodeType.BLINK);
         nodeTypeMap.put(getString(R.string.LightningConfig__node_type_speed), LightningNodeType.SPEED);
+        nodeTypeMap.put(getString(R.string.LightningConfig__node_type_spark), LightningNodeType.SPARK);
     }
     
     private void setupNodeTypeSelector() {
@@ -206,6 +217,7 @@ public class LightningConfigFragment extends Fragment {
         strikeSection.setVisibility(View.GONE);
         blinkSection.setVisibility(View.GONE);
         speedSection.setVisibility(View.GONE);
+        sparkSection.setVisibility(View.GONE);
         
         // Show the selected section
         switch (type) {
@@ -230,6 +242,9 @@ public class LightningConfigFragment extends Fragment {
             case SPEED:
                 speedSection.setVisibility(View.VISIBLE);
                 break;
+            case SPARK:
+                sparkSection.setVisibility(View.VISIBLE);
+                break;
         }
     }
 
@@ -252,6 +267,7 @@ public class LightningConfigFragment extends Fragment {
             strikeSection.setVisibility(View.GONE);
             blinkSection.setVisibility(View.GONE);
             speedSection.setVisibility(View.GONE);
+            sparkSection.setVisibility(View.GONE);
             
             connectButton.setVisibility(View.GONE);
             disconnectButton.setVisibility(View.VISIBLE);
@@ -372,6 +388,9 @@ public class LightningConfigFragment extends Fragment {
                 break;
             case SPEED:
                 connectSpeed();
+                break;
+            case SPARK:
+                connectSpark();
                 break;
         }
     }
@@ -541,6 +560,40 @@ public class LightningConfigFragment extends Fragment {
                 handleConnectionResult(success);
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure Speed", t);
+                handleConnectionError();
+            }
+        }).start();
+    }
+    
+    private void connectSpark() {
+        String mnemonic = sparkMnemonicInput.getText().toString().trim();
+        String apiKey = sparkApiKeyInput.getText().toString().trim();
+        
+        if (TextUtils.isEmpty(mnemonic)) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__please_enter_mnemonic, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Basic validation: mnemonic should be 12 or 24 words
+        String[] words = mnemonic.split("\\s+");
+        if (words.length != 12 && words.length != 24) {
+            Toast.makeText(requireContext(), R.string.LightningConfig__invalid_mnemonic, Toast.LENGTH_LONG).show();
+            return;
+        }
+        
+        setLoading(true);
+        
+        new Thread(() -> {
+            try {
+                // API key is optional for Spark
+                boolean success = LightningUiInteractor.configureSpark(
+                    AppDependencies.getApplication(), 
+                    mnemonic, 
+                    TextUtils.isEmpty(apiKey) ? null : apiKey
+                );
+                handleConnectionResult(success);
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure Spark", t);
                 handleConnectionError();
             }
         }).start();
