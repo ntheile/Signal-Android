@@ -43,6 +43,9 @@
     <!-- Common -->
     <string name="LightningConfig__connect">Connect</string>
     <string name="LightningConfig__disconnect">Disconnect</string>
+    <string name="LightningConfig__edit">Edit Connection</string>
+    <string name="LightningConfig__save_changes">Save Changes</string>
+    <string name="LightningConfig__editing_connection">Editing connection…</string>
     <string name="LightningConfig__test_connection">Test Connection</string>
     <string name="LightningConfig__connected_to">Connected to %1$s</string>
     <string name="LightningConfig__not_connected">Not connected</string>

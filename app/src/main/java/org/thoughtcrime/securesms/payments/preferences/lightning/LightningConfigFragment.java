@@ -56,6 +56,7 @@ public class LightningConfigFragment extends Fragment {
     private AutoCompleteTextView nodeTypeSelector;
     private Button connectButton;
     private Button disconnectButton;
+    private Button editButton;
     private Button testButton;
     private ProgressBar spinner;
     private TextView statusText;
@@ -117,6 +118,7 @@ public class LightningConfigFragment extends Fragment {
         nodeTypeSelector = view.findViewById(R.id.lightning_node_type);
         connectButton = view.findViewById(R.id.lightning_connect_button);
         disconnectButton = view.findViewById(R.id.lightning_disconnect_button);
+        editButton = view.findViewById(R.id.lightning_edit_button);
         testButton = view.findViewById(R.id.lightning_test_button);
         spinner = view.findViewById(R.id.lightning_spinner);
         statusText = view.findViewById(R.id.lightning_status);
@@ -165,6 +167,7 @@ public class LightningConfigFragment extends Fragment {
         
         connectButton.setOnClickListener(v -> connect());
         disconnectButton.setOnClickListener(v -> disconnect());
+        editButton.setOnClickListener(v -> enterEditMode());
         testButton.setOnClickListener(v -> testConnection());
 
         updateUiState();
@@ -252,6 +255,7 @@ public class LightningConfigFragment extends Fragment {
             
             connectButton.setVisibility(View.GONE);
             disconnectButton.setVisibility(View.VISIBLE);
+            editButton.setVisibility(View.VISIBLE);
             testButton.setVisibility(View.VISIBLE);
             balanceSection.setVisibility(View.VISIBLE);
             
@@ -266,7 +270,9 @@ public class LightningConfigFragment extends Fragment {
             showSectionForNodeType(selectedNodeType);
             
             connectButton.setVisibility(View.VISIBLE);
+            connectButton.setText(R.string.LightningConfig__connect);
             disconnectButton.setVisibility(View.GONE);
+            editButton.setVisibility(View.GONE);
             testButton.setVisibility(View.GONE);
             balanceSection.setVisibility(View.GONE);
         }
@@ -592,10 +598,42 @@ public class LightningConfigFragment extends Fragment {
         }).start();
     }
 
+    private void enterEditMode() {
+        // Get the current node type to pre-select the right section
+        LightningNodeType nodeType = LightningUiInteractor.getConfiguredNodeType(AppDependencies.getApplication());
+        if (nodeType != null) {
+            selectedNodeType = nodeType;
+        }
+        
+        // Show the configuration UI
+        requireView().findViewById(R.id.lightning_node_type_layout).setVisibility(View.VISIBLE);
+        showSectionForNodeType(selectedNodeType);
+        
+        // Update status to indicate edit mode
+        statusText.setText(R.string.LightningConfig__editing_connection);
+        
+        // Show connect button (to save changes), hide disconnect and edit buttons
+        connectButton.setVisibility(View.VISIBLE);
+        connectButton.setText(R.string.LightningConfig__save_changes);
+        disconnectButton.setVisibility(View.GONE);
+        editButton.setVisibility(View.GONE);
+        testButton.setVisibility(View.GONE);
+        balanceSection.setVisibility(View.GONE);
+        
+        // Pre-select the node type in the dropdown
+        for (Map.Entry<String, LightningNodeType> entry : nodeTypeMap.entrySet()) {
+            if (entry.getValue() == selectedNodeType) {
+                nodeTypeSelector.setText(entry.getKey(), false);
+                break;
+            }
+        }
+    }
+
     private void setLoading(boolean loading) {
         spinner.setVisibility(loading ? View.VISIBLE : View.GONE);
         connectButton.setEnabled(!loading);
         disconnectButton.setEnabled(!loading);
+        editButton.setEnabled(!loading);
         testButton.setEnabled(!loading);
         nodeTypeSelector.setEnabled(!loading);
     }
