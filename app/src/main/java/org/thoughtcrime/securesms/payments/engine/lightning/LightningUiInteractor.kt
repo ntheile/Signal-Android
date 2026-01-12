@@ -380,4 +380,47 @@ object LightningUiInteractor {
             null
         }
     }
+
+    /**
+     * Auto-configure Spark with a generated mnemonic if no Lightning node is configured.
+     * This is called on app startup to ensure users have a default wallet ready.
+     */
+    @JvmStatic
+    fun autoConfigureSparkIfNeeded(context: Context) {
+        try {
+            if (hasConfiguration(context)) {
+                Log.d(TAG, "Lightning already configured, skipping auto-configure")
+                return
+            }
+            
+            Log.i(TAG, "No Lightning configured, auto-configuring Spark with generated seed")
+            
+            // Generate a new 12-word mnemonic
+            val mnemonic = uniffi.lni.generateMnemonic(null)
+            
+            // Get the API key from BuildConfig (may be empty string if not set)
+            val apiKey = org.thoughtcrime.securesms.BuildConfig.BREEZ_API_KEY
+            
+            // Create storage directory for Spark
+            val storageDir = java.io.File(context.filesDir, "spark").absolutePath
+            java.io.File(storageDir).mkdirs()
+            
+            // Create and save the Spark configuration
+            val config = LightningConfig(
+                type = LightningNodeType.SPARK,
+                credential = mnemonic,
+                secondaryCredential = apiKey.ifEmpty { null },
+                storageDir = storageDir
+            )
+            
+            LightningEngineProvider.get(context).configure(config)
+            
+            // Enable Lightning payments
+            org.thoughtcrime.securesms.keyvalue.SignalStore.payments.setLightningEnabled(true)
+            
+            Log.i(TAG, "Spark auto-configured successfully")
+        } catch (e: Throwable) {
+            Log.w(TAG, "Failed to auto-configure Spark", e)
+        }
+    }
 }
