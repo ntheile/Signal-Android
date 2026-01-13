@@ -26,7 +26,10 @@ import org.thoughtcrime.securesms.payments.UnreadPaymentsRepository;
 import org.thoughtcrime.securesms.payments.currency.CurrencyExchange;
 import org.thoughtcrime.securesms.payments.currency.CurrencyExchangeRepository;
 import org.thoughtcrime.securesms.payments.engine.CashuUiRepository;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningTx;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
 import org.thoughtcrime.securesms.payments.preferences.model.CashuActivityItem;
+import org.thoughtcrime.securesms.payments.preferences.model.LightningActivityItem;
 import org.thoughtcrime.securesms.payments.preferences.model.InProgress;
 import org.thoughtcrime.securesms.payments.preferences.model.InfoCard;
 import org.thoughtcrime.securesms.payments.preferences.model.IntroducingPayments;
@@ -70,6 +73,11 @@ public class PaymentsHomeViewModel extends ViewModel {
   private final LiveData<Long> cashuSatsBalance;
   private final LiveData<String> cashuFiatText;
   private final LiveData<List<CashuActivityItem>> cashuRecentActivity;
+
+  // Lightning additions
+  private final boolean lightningEnabled;
+  private final MutableLiveData<Object> lightningRefresh = new MutableLiveData<>(new Object());
+  private final LiveData<List<LightningActivityItem>> lightningRecentActivity;
 
   PaymentsHomeViewModel(@NonNull PaymentsHomeRepository paymentsHomeRepository,
                         @NonNull PaymentsRepository paymentsRepository,
@@ -149,10 +157,38 @@ public class PaymentsHomeViewModel extends ViewModel {
       }
     });
 
-    // Build UI list whenever either store state or Cashu activity changes
-    androidx.lifecycle.LiveData<androidx.core.util.Pair<PaymentsHomeState, java.util.List<CashuActivityItem>>> combined =
-        org.thoughtcrime.securesms.util.livedata.LiveDataUtil.combineLatest(store.getStateLiveData(), cashuRecentActivity, androidx.core.util.Pair::new);
-    this.list = androidx.lifecycle.Transformations.map(combined, pair -> createList(pair.first, pair.second));
+    // Lightning: Check if Lightning is enabled and configured
+    this.lightningEnabled = SignalStore.payments().lightningEnabled() && 
+                            LightningUiInteractor.isConfigured(AppDependencies.getApplication());
+
+    // Fetch Lightning transactions off main thread
+    this.lightningRecentActivity = LiveDataUtil.mapAsync(lightningRefresh, o -> {
+      try {
+        if (!lightningEnabled) {
+          return java.util.Collections.<LightningActivityItem>emptyList();
+        }
+        java.util.List<LightningTx> txs = LightningUiInteractor.listTransactionsBlocking(AppDependencies.getApplication(), 100);
+        java.util.List<LightningActivityItem> items = new ArrayList<>();
+        for (LightningTx tx : txs) {
+          items.add(LightningActivityItem.fromLightningTx(tx));
+        }
+        return items;
+      } catch (Throwable t) {
+        Log.w(TAG, "Failed to fetch Lightning transactions", t);
+        return java.util.Collections.<LightningActivityItem>emptyList();
+      }
+    });
+
+    // Build UI list whenever store state, Cashu activity, or Lightning activity changes
+    // Using a triple-combine approach: first combine cashu and lightning, then combine with store
+    androidx.lifecycle.LiveData<androidx.core.util.Pair<java.util.List<CashuActivityItem>, java.util.List<LightningActivityItem>>> activityCombined =
+        org.thoughtcrime.securesms.util.livedata.LiveDataUtil.combineLatest(cashuRecentActivity, lightningRecentActivity, androidx.core.util.Pair::new);
+    
+    androidx.lifecycle.LiveData<androidx.core.util.Pair<PaymentsHomeState, androidx.core.util.Pair<java.util.List<CashuActivityItem>, java.util.List<LightningActivityItem>>>> fullCombined =
+        org.thoughtcrime.securesms.util.livedata.LiveDataUtil.combineLatest(store.getStateLiveData(), activityCombined, androidx.core.util.Pair::new);
+    
+    this.list = androidx.lifecycle.Transformations.map(fullCombined, pair -> 
+        createList(pair.first, pair.second.first, pair.second.second));
 
     LiveData<CurrencyExchange.ExchangeRate> liveExchangeRate = LiveDataUtil.combineLatest(SignalStore.payments().liveCurrentCurrency(),
                                                                                           LiveDataUtil.mapDistinct(store.getStateLiveData(), PaymentsHomeState::getCurrencyExchange),
@@ -166,6 +202,11 @@ public class PaymentsHomeViewModel extends ViewModel {
     if (this.cashuEnabled) {
       // Ensure we load Cashu activity immediately
       this.cashuRefresh.postValue(new Object());
+    }
+
+    if (this.lightningEnabled) {
+      // Ensure we load Lightning activity immediately
+      this.lightningRefresh.postValue(new Object());
     }
 
     refreshExchangeRates(true);
@@ -257,24 +298,40 @@ public class PaymentsHomeViewModel extends ViewModel {
     }
   }
 
-  private @NonNull MappingModelList createList(@NonNull PaymentsHomeState state, @Nullable List<CashuActivityItem> cashuItems) {
+  private @NonNull MappingModelList createList(@NonNull PaymentsHomeState state, 
+                                               @Nullable List<CashuActivityItem> cashuItems,
+                                               @Nullable List<LightningActivityItem> lightningItems) {
     MappingModelList list = new MappingModelList();
 
     if (state.getPaymentsState() == PaymentsHomeState.PaymentsState.ACTIVATED) {
       list.add(new SettingHeader.Item(R.string.PaymentsHomeFragment__recent_activity));
 
-      int maxItems = 5;
+      int maxItems = 100; // Show up to 100 items for Lightning transactions
       int added = 0;
 
-      // Cashu: show pending, completed, and sent items first
+      // Lightning: show transactions first if Lightning is enabled
+      if (lightningEnabled) {
+        if (lightningItems == null) {
+          // Still loading in background; we'll show InProgress below
+        } else if (!lightningItems.isEmpty()) {
+          int take = Math.min(maxItems - added, lightningItems.size());
+          for (int i = 0; i < take; i++) { 
+            list.add(lightningItems.get(i)); 
+            added++;
+          }
+        }
+      }
+
+      // Cashu: show pending, completed, and sent items
       if (cashuEnabled) {
         if (cashuItems == null) {
           // Still loading in background; we'll show InProgress below
         } else if (!cashuItems.isEmpty()) {
-          int take = Math.min(MAX_PAYMENT_ITEMS, cashuItems.size());
-          for (int i = 0; i < take; i++) { list.add(cashuItems.get(i)); }
-          // Added sent items may consume the entire list; skip legacy payments if so
-          if (take >= MAX_PAYMENT_ITEMS) return list;
+          int take = Math.min(maxItems - added, cashuItems.size());
+          for (int i = 0; i < take; i++) { 
+            list.add(cashuItems.get(i)); 
+            added++;
+          }
         }
       }
 
@@ -286,8 +343,8 @@ public class PaymentsHomeViewModel extends ViewModel {
         added += take;
       }
 
-      if (!state.isRecentPaymentsLoaded() || (cashuEnabled && cashuItems == null)) {
-        // Show loading if legacy payments not loaded yet OR cashu items still loading
+      if (!state.isRecentPaymentsLoaded() || (cashuEnabled && cashuItems == null) || (lightningEnabled && lightningItems == null)) {
+        // Show loading if legacy payments not loaded yet OR cashu/lightning items still loading
         list.add(new InProgress());
       } else if (added == 0) {
         list.add(new NoRecentActivity());
@@ -319,8 +376,15 @@ public class PaymentsHomeViewModel extends ViewModel {
     if (cashuEnabled) cashuRefresh.postValue(new Object());
   }
 
+  // Public: explicit refresh for Lightning recent activity
+  public void refreshLightningActivity() {
+    if (lightningEnabled) lightningRefresh.postValue(new Object());
+  }
+
   public void updateStore() {
     store.update(s -> s);
+    // Also refresh Lightning when store is updated
+    if (lightningEnabled) lightningRefresh.postValue(new Object());
   }
 
   public void activatePayments() {

@@ -344,6 +344,7 @@ class LightningEngine(private val appContext: Context) {
                     amountSats = tx.amountMsats / 1000,
                     feesPaidSats = tx.feesPaid / 1000,
                     description = tx.description,
+                    preimage = tx.preimage,
                     createdAt = tx.createdAt * 1000,
                     settledAt = if (tx.settledAt > 0) tx.settledAt * 1000 else null,
                     isPaid = tx.settledAt > 0
@@ -498,6 +499,7 @@ data class LightningTx(
     val amountSats: Long,
     val feesPaidSats: Long,
     val description: String,
+    val preimage: String,
     val createdAt: Long,
     val settledAt: Long?,
     val isPaid: Boolean

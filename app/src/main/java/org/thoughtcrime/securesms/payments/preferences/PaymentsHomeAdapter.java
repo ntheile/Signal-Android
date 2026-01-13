@@ -1,6 +1,8 @@
 package org.thoughtcrime.securesms.payments.preferences;
 import org.thoughtcrime.securesms.payments.preferences.model.CashuActivityItem;
+import org.thoughtcrime.securesms.payments.preferences.model.LightningActivityItem;
 import org.thoughtcrime.securesms.payments.preferences.viewholder.CashuActivityViewHolder;
+import org.thoughtcrime.securesms.payments.preferences.viewholder.LightningActivityViewHolder;
 
 
 import androidx.annotation.NonNull;
@@ -31,6 +33,7 @@ public class PaymentsHomeAdapter extends MappingAdapter {
     registerFactory(SettingHeader.Item.class, SettingHeader.ViewHolder::new, R.layout.base_settings_header_item);
     registerFactory(SeeAll.class, p -> new SeeAllViewHolder(p, callbacks), R.layout.payments_home_see_all_item);
     registerFactory(CashuActivityItem.class, CashuActivityViewHolder::new, R.layout.cashu_activity_item);
+    registerFactory(LightningActivityItem.class, p -> new LightningActivityViewHolder(p, callbacks), R.layout.lightning_activity_item);
     registerFactory(InfoCard.class, p -> new InfoCardViewHolder(p, callbacks), R.layout.payment_info_card);
   }
 
@@ -39,6 +42,7 @@ public class PaymentsHomeAdapter extends MappingAdapter {
     default void onRestorePaymentsAccount() {}
     default void onSeeAll(@NonNull PaymentType paymentType) {}
     default void onPaymentItem(@NonNull PaymentItem model) {}
+    default void onLightningItem(@NonNull LightningActivityItem model) {}
     default void onInfoCardDismissed(InfoCard.Type type) {}
     default void onViewRecoveryPhrase() {}
     default void onUpdatePin() {}

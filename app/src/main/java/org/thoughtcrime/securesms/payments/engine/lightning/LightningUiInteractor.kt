@@ -382,6 +382,21 @@ object LightningUiInteractor {
     }
 
     /**
+     * List recent Lightning transactions.
+     * @param limit Maximum number of transactions to return (default 100)
+     * @return List of LightningTx or empty list on failure
+     */
+    @JvmStatic
+    fun listTransactionsBlocking(context: Context, limit: Int = 100): List<LightningTx> = runBlocking {
+        runCatching {
+            LightningEngineProvider.get(context).listTransactions(limit).getOrElse { emptyList() }
+        }.getOrElse { throwable ->
+            Log.w(TAG, "Failed to list Lightning transactions", throwable)
+            emptyList()
+        }
+    }
+
+    /**
      * Auto-configure Spark with a generated mnemonic if no Lightning node is configured.
      * This is called on app startup to ensure users have a default wallet ready.
      */

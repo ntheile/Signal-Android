@@ -39,7 +39,9 @@ import org.thoughtcrime.securesms.payments.backup.confirm.PaymentsRecoveryPhrase
 import org.thoughtcrime.securesms.payments.engine.MintWatcher;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeInfo;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
+import org.thoughtcrime.securesms.payments.preferences.details.LightningTransactionDetailsParcelable;
 import org.thoughtcrime.securesms.payments.preferences.model.InfoCard;
+import org.thoughtcrime.securesms.payments.preferences.model.LightningActivityItem;
 import org.thoughtcrime.securesms.payments.preferences.model.PaymentItem;
 import org.thoughtcrime.securesms.util.CommunicationActions;
 import org.thoughtcrime.securesms.util.PlayStoreUtil;
@@ -653,6 +655,22 @@ public class PaymentsHomeFragment extends LoggingFragment {
     public void onPaymentItem(@NonNull PaymentItem model) {
       SafeNavigation.safeNavigate(NavHostFragment.findNavController(PaymentsHomeFragment.this),
                                   PaymentPreferencesDirections.actionDirectlyToPaymentDetails(model.getPaymentDetailsParcelable()));
+    }
+
+    @Override
+    public void onLightningItem(@NonNull LightningActivityItem model) {
+      LightningTransactionDetailsParcelable details = new LightningTransactionDetailsParcelable(
+          model.getPaymentHash(),
+          model.getTimestampMs(),
+          model.getAmountSats(),
+          model.getFeesPaidSats(),
+          model.getDescription(),
+          model.getPreimage(),
+          model.getState() == LightningActivityItem.State.RECEIVE,
+          model.isPaid()
+      );
+      SafeNavigation.safeNavigate(NavHostFragment.findNavController(PaymentsHomeFragment.this),
+                                  PaymentsHomeFragmentDirections.actionPaymentsHomeToLightningTransactionDetails(details));
     }
 
     @Override
