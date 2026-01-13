@@ -151,6 +151,8 @@
     <string name="LightningInvoice_checking">Checking…</string>
     <!-- Status when invoice is pending payment -->
     <string name="LightningInvoice_pending">Pending</string>
+    <!-- Content description for button to open invoice in external wallet app -->
+    <string name="LightningInvoice_open_external">Open in external wallet</string>
 
     <!-- SigmoRequest inline message view (Send ₿ flow) -->
     <!-- Title for outgoing sigmo request (you want to send) -->

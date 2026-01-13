@@ -67,56 +67,85 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/lightning_invoice_action_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="180dp"
+        android:orientation="horizontal"
         android:layout_marginTop="8dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lightning_invoice_amount_layout">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/lightning_invoice_pay_button"
-            style="@style/Widget.Signal.Button.Small"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minWidth="180dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:insetTop="0dp"
-            android:text="@string/LightningInvoice_pay"
-            app:icon="@drawable/symbol_flash_24"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/lightning_invoice_refresh_button"
-            style="@style/Signal.Widget.Button.Small.Secondary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minWidth="180dp"
-            android:insetBottom="0dp"
-            android:insetLeft="0dp"
-            android:insetRight="0dp"
-            android:insetTop="0dp"
-            android:text="@string/LightningInvoice_check_status"
-            android:visibility="gone"
-            app:icon="@drawable/symbol_refresh_24"
-            app:iconGravity="textStart"
-            app:iconPadding="8dp" />
-
-        <android.widget.ProgressBar
-            android:id="@+id/lightning_invoice_spinner"
-            style="@style/Widget.Material3.CircularProgressIndicator.ExtraSmall"
+        <FrameLayout
+            android:id="@+id/lightning_invoice_pay_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:visibility="gone" />
+            android:minWidth="140dp">
 
-    </FrameLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/lightning_invoice_pay_button"
+                style="@style/Signal.Widget.Button.Small.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minWidth="140dp"
+                android:textColor="@color/core_white"
+                android:backgroundTint="@color/core_orange"
+                app:iconTint="@color/core_white"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:insetTop="0dp"
+                android:text="@string/LightningInvoice_pay"
+                app:icon="@drawable/symbol_flash_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/lightning_invoice_refresh_button"
+                style="@style/Signal.Widget.Button.Small.Secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minWidth="140dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:insetTop="0dp"
+                android:text="@string/LightningInvoice_check_status"
+                android:visibility="gone"
+                app:icon="@drawable/symbol_refresh_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <android.widget.ProgressBar
+                android:id="@+id/lightning_invoice_spinner"
+                style="@style/Widget.Material3.CircularProgressIndicator.ExtraSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/lightning_invoice_open_external_button"
+            style="@style/Widget.Signal.Button.Small"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:insetBottom="0dp"
+            android:insetLeft="0dp"
+            android:insetRight="0dp"
+            android:insetTop="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:contentDescription="@string/LightningInvoice_open_external"
+            app:icon="@drawable/symbol_open_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp" />
+
+    </LinearLayout>
 
     <org.thoughtcrime.securesms.components.emoji.EmojiTextView
         android:id="@+id/lightning_invoice_status"

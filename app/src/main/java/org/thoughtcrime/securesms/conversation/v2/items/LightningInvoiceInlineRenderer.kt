@@ -1,6 +1,8 @@
 package org.thoughtcrime.securesms.conversation.v2.items
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -232,10 +234,14 @@ object LightningInvoiceInlineRenderer {
     val pill = pillBinding.view
     val invoice = pillBinding.invoice
 
+    // Configure open external button for all cases (visible for incoming unpaid)
+    configureOpenExternalAction(pillBinding)
+
     // For outgoing messages (sender), show refresh button to check status
     if (pillBinding.outgoing) {
       pill.setPayButtonVisible(false)
       pill.setRefreshButtonVisible(true)
+      pill.setOpenExternalButtonVisible(false)
       configureRefreshAction(pillBinding)
       // Auto-check status when displayed
       checkInvoiceStatus(pillBinding)
@@ -246,14 +252,16 @@ object LightningInvoiceInlineRenderer {
     if (SignalStore.payments.isInvoicePaid(invoice)) {
       pill.setPayButtonVisible(false)
       pill.setRefreshButtonVisible(false)
+      pill.setOpenExternalButtonVisible(false)
       pill.setStatusText(pill.context.getString(R.string.LightningInvoice_paid))
       return
     }
 
-    // Show pay button for unpaid incoming invoices
+    // Show pay button and external button for unpaid incoming invoices
     pill.setPayButtonVisible(true)
     pill.setRefreshButtonVisible(false)
     pill.setPayButtonEnabled(true)
+    pill.setOpenExternalButtonVisible(true)
 
     val payButton = pill.getPayButton()
     val payContainer = pill.getPayContainer()
@@ -330,6 +338,25 @@ object LightningInvoiceInlineRenderer {
 
     refreshButton.setOnClickListener {
       checkInvoiceStatus(pillBinding)
+    }
+  }
+
+  private fun configureOpenExternalAction(pillBinding: PillBinding) {
+    val pill = pillBinding.view
+    val invoice = pillBinding.invoice
+    val openExternalButton = pill.getOpenExternalButton()
+
+    openExternalButton.setOnClickListener {
+      val ctx = pill.context
+      try {
+        val lightningUri = Uri.parse("lightning:$invoice")
+        val intent = Intent(Intent.ACTION_VIEW, lightningUri)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        ctx.startActivity(intent)
+      } catch (e: Throwable) {
+        Log.w(TAG, "Failed to open lightning invoice in external app", e)
+        Toast.makeText(ctx, R.string.ConversationActivity_there_is_no_app_available_to_handle_this_link_on_your_device, Toast.LENGTH_SHORT).show()
+      }
     }
   }
 

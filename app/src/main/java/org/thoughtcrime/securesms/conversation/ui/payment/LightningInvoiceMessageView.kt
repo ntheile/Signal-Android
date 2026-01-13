@@ -128,6 +128,12 @@ class LightningInvoiceMessageView @JvmOverloads constructor(
 
   fun getRefreshButton(): View = binding.lightningInvoiceRefreshButton
 
+  fun getOpenExternalButton(): View = binding.lightningInvoiceOpenExternalButton
+
+  fun setOpenExternalButtonVisible(visible: Boolean) {
+    binding.lightningInvoiceOpenExternalButton.visible = visible
+  }
+
   fun setRefreshButtonVisible(visible: Boolean) {
     binding.lightningInvoiceRefreshButton.visible = visible
   }
