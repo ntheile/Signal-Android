@@ -253,8 +253,12 @@ open class V2ConversationItemTextOnlyViewHolder<Model : MappingModel<Model>>(
       return
     }
 
-    // Cashu: try inline rendering before presenting body to avoid showing truncated token text
+    // Reset all custom inline renderers before rebinding to handle view recycling properly
     CashuTokenInlineRenderer.resetIfPresent(binding)
+    SigmoRequestInlineRenderer.resetIfPresent(binding)
+    LightningInvoiceInlineRenderer.resetIfPresent(binding)
+
+    // Cashu: try inline rendering before presenting body to avoid showing truncated token text
     if (CashuTokenInlineRenderer.maybeAttachReceiveUi(binding, conversationMessage)) {
       presentDate()
       presentDeliveryStatus()
@@ -286,7 +290,6 @@ open class V2ConversationItemTextOnlyViewHolder<Model : MappingModel<Model>>(
     }
 
     // Sigmo Protocol: try inline rendering for sigmo: URIs
-    SigmoRequestInlineRenderer.resetIfPresent(binding)
     if (SigmoRequestInlineRenderer.maybeAttachSigmoUi(binding, conversationMessage)) {
       presentDate()
       presentDeliveryStatus()
@@ -316,7 +319,6 @@ open class V2ConversationItemTextOnlyViewHolder<Model : MappingModel<Model>>(
     }
 
     // Lightning Invoice: try inline rendering for BOLT11 invoices
-    LightningInvoiceInlineRenderer.resetIfPresent(binding)
     if (LightningInvoiceInlineRenderer.maybeAttachInvoiceUi(binding, conversationMessage)) {
       presentDate()
       presentDeliveryStatus()
