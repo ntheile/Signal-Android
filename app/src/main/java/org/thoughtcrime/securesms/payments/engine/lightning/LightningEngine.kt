@@ -12,6 +12,9 @@ import uniffi.lni.PayInvoiceParams as LniPayInvoiceParams
 import uniffi.lni.InvoiceType as LniInvoiceType
 import uniffi.lni.ListTransactionsParams as LniListTransactionsParams
 import uniffi.lni.LookupInvoiceParams as LniLookupInvoiceParams
+import uniffi.lni.OnInvoiceEventParams as LniOnInvoiceEventParams
+import uniffi.lni.OnInvoiceEventCallback as LniOnInvoiceEventCallback
+import uniffi.lni.Transaction as LniTransaction
 
 // Import factory functions for creating nodes (polymorphic via Arc<dyn LightningNode>)
 import uniffi.lni.createStrikeNode
@@ -350,6 +353,67 @@ class LightningEngine(private val appContext: Context) {
                     isPaid = tx.settledAt > 0
                 )
             }
+        }
+    }
+
+    /**
+     * Callback interface for invoice payment events.
+     */
+    interface InvoiceEventCallback {
+        fun onSuccess(paymentHash: String, amountSats: Long)
+        fun onPending(paymentHash: String)
+        fun onFailure(paymentHash: String)
+    }
+
+    /**
+     * Watch an invoice for payment status changes.
+     * This uses polling to check if an invoice has been paid.
+     * 
+     * @param paymentHash The payment hash of the invoice to watch
+     * @param pollingDelaySec How often to poll (default 3 seconds)
+     * @param maxPollingSec Maximum time to poll (default 300 seconds = 5 minutes)
+     * @param callback Callback for payment events
+     */
+    suspend fun watchInvoice(
+        paymentHash: String,
+        pollingDelaySec: Long = 3,
+        maxPollingSec: Long = 300,
+        callback: InvoiceEventCallback
+    ) = withContext(Dispatchers.IO) {
+        try {
+            val n = getOrCreateNode() ?: throw IllegalStateException("Lightning node not configured")
+            
+            val params = LniOnInvoiceEventParams(
+                paymentHash = paymentHash,
+                search = null,
+                pollingDelaySec = pollingDelaySec,
+                maxPollingSec = maxPollingSec
+            )
+            
+            val lniCallback = object : LniOnInvoiceEventCallback {
+                override fun success(transaction: LniTransaction?) {
+                    Log.i(TAG, "Invoice paid! paymentHash=$paymentHash")
+                    callback.onSuccess(
+                        paymentHash = transaction?.paymentHash ?: paymentHash,
+                        amountSats = (transaction?.amountMsats ?: 0) / 1000
+                    )
+                }
+                
+                override fun pending(transaction: LniTransaction?) {
+                    Log.d(TAG, "Invoice pending: paymentHash=$paymentHash")
+                    callback.onPending(transaction?.paymentHash ?: paymentHash)
+                }
+                
+                override fun failure(transaction: LniTransaction?) {
+                    Log.w(TAG, "Invoice failed/expired: paymentHash=$paymentHash")
+                    callback.onFailure(transaction?.paymentHash ?: paymentHash)
+                }
+            }
+            
+            n.onInvoiceEvents(params, lniCallback)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Error watching invoice", e)
+            callback.onFailure(paymentHash)
         }
     }
 

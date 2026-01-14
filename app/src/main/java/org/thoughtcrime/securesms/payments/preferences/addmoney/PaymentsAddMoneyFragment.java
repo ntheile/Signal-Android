@@ -26,6 +26,7 @@ import org.thoughtcrime.securesms.dependencies.AppDependencies;
 import org.thoughtcrime.securesms.keyvalue.SignalStore;
 import org.thoughtcrime.securesms.payments.engine.MintWatcher;
 import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
+import org.thoughtcrime.securesms.payments.engine.lightning.InvoiceResult;
 import org.thoughtcrime.securesms.payments.preferences.cashu.CashuMintQuoteUiHelper;
 import org.thoughtcrime.securesms.util.views.LearnMoreTextView;
 
@@ -92,30 +93,38 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
         View progressBar = view.findViewById(R.id.cashu_invoice_progress);
         if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
         
+        // Get references to the payment status views
+        View invoicePaidContainer = view.findViewById(R.id.invoice_paid_container);
+        View invoiceWaitingProgress = view.findViewById(R.id.invoice_waiting_progress);
+        TextView invoiceWaitingText = view.findViewById(R.id.invoice_waiting_text);
+        
         // Use Lightning exclusively - no Cashu fallback
         new Thread(() -> {
-          String text;
+          InvoiceResult invoiceResult = null;
+          String errorText = null;
           try {
             Log.i(TAG, "Creating Lightning invoice for " + sats + " sats");
-            String lightningInvoice = LightningUiInteractor.createInvoiceBlocking(
+            invoiceResult = LightningUiInteractor.createInvoiceWithHashBlocking(
                 AppDependencies.getApplication(), sats, "Signal payment");
-            if (lightningInvoice != null && !lightningInvoice.isEmpty()) {
-              text = lightningInvoice;
-              Log.i(TAG, "Lightning invoice created successfully");
-            } else {
-              text = "error:lightning_invoice_failed";
+            if (invoiceResult == null || invoiceResult.getPaymentRequest().isEmpty()) {
+              errorText = "lightning_invoice_failed";
               Log.e(TAG, "Lightning invoice creation returned null");
+            } else {
+              Log.i(TAG, "Lightning invoice created successfully, paymentHash=" + invoiceResult.getPaymentHash().substring(0, Math.min(16, invoiceResult.getPaymentHash().length())) + "...");
             }
           } catch (Throwable t) {
             Log.e(TAG, "Lightning invoice creation error", t);
-            text = "error:" + t.getMessage();
+            errorText = t.getMessage();
           }
-          final String qrText = text;
+          
+          final InvoiceResult finalInvoiceResult = invoiceResult;
+          final String finalErrorText = errorText;
+          
           requireActivity().runOnUiThread(() -> {
             if (progressBar != null) progressBar.setVisibility(View.GONE);
             
-            if (qrText.startsWith("error:")) {
-              Toast.makeText(requireContext(), "Failed to create invoice: " + qrText.substring(6), Toast.LENGTH_LONG).show();
+            if (finalErrorText != null) {
+              Toast.makeText(requireContext(), "Failed to create invoice: " + finalErrorText, Toast.LENGTH_LONG).show();
               return;
             }
             
@@ -124,9 +133,63 @@ public final class PaymentsAddMoneyFragment extends LoggingFragment {
             qrBorder.setVisibility(View.VISIBLE);
             TextView walletLabel = getView().findViewById(R.id.payments_add_money_your_wallet_address);
             if (walletLabel != null) walletLabel.setText("⚡ Lightning Invoice");
-            walletAddressAbbreviated.setText(qrText);
-            qrImageView.setQrText(qrText);
+            walletAddressAbbreviated.setText(finalInvoiceResult.getPaymentRequest());
+            qrImageView.setQrText(finalInvoiceResult.getPaymentRequest());
             info.setText("Pay this Lightning invoice to add funds to your wallet.");
+            
+            // Show waiting indicator
+            if (invoiceWaitingProgress != null) invoiceWaitingProgress.setVisibility(View.VISIBLE);
+            if (invoiceWaitingText != null) invoiceWaitingText.setVisibility(View.VISIBLE);
+            
+            // Start watching for payment
+            LightningUiInteractor.watchInvoice(
+                AppDependencies.getApplication(),
+                finalInvoiceResult.getPaymentHash(),
+                3L, // poll every 3 seconds
+                300L, // for up to 5 minutes
+                (paymentHash, amountSats) -> {
+                  // onSuccess - payment received!
+                  requireActivity().runOnUiThread(() -> {
+                    Log.i(TAG, "Invoice PAID! paymentHash=" + paymentHash + ", amount=" + amountSats + " sats");
+                    
+                    // Hide waiting indicator
+                    if (invoiceWaitingProgress != null) invoiceWaitingProgress.setVisibility(View.GONE);
+                    if (invoiceWaitingText != null) invoiceWaitingText.setVisibility(View.GONE);
+                    
+                    // Show success checkmark
+                    if (invoicePaidContainer != null) invoicePaidContainer.setVisibility(View.VISIBLE);
+                    
+                    // Update info text
+                    info.setText("✓ Payment received! " + amountSats + " sats added to your wallet.");
+                    
+                    // Hide QR code after short delay
+                    qrImageView.postDelayed(() -> {
+                      qrImageView.setVisibility(View.GONE);
+                      walletAddressAbbreviated.setVisibility(View.GONE);
+                    }, 2000);
+                    
+                    // Notify that history may have changed
+                    getParentFragmentManager().setFragmentResult("cashu_history_changed", new Bundle());
+                    
+                    Toast.makeText(requireContext(), "Payment received! ⚡", Toast.LENGTH_LONG).show();
+                  });
+                  return kotlin.Unit.INSTANCE;
+                },
+                (paymentHash) -> {
+                  // onPending - still waiting
+                  Log.d(TAG, "Invoice still pending: " + paymentHash);
+                  return kotlin.Unit.INSTANCE;
+                },
+                (paymentHash) -> {
+                  // onFailure - timeout or error
+                  requireActivity().runOnUiThread(() -> {
+                    Log.w(TAG, "Invoice watch ended without payment: " + paymentHash);
+                    if (invoiceWaitingProgress != null) invoiceWaitingProgress.setVisibility(View.GONE);
+                    if (invoiceWaitingText != null) invoiceWaitingText.setText("Invoice expired or timed out");
+                  });
+                  return kotlin.Unit.INSTANCE;
+                }
+            );
           });
         }).start();
       });

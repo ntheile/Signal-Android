@@ -1,6 +1,7 @@
 package org.thoughtcrime.securesms.payments.engine.lightning
 
 import android.content.Context
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.signal.core.util.logging.Log
 
@@ -162,6 +163,54 @@ object LightningUiInteractor {
         }.getOrElse { throwable ->
             Log.w(TAG, "Failed to lookup invoice", throwable)
             null
+        }
+    }
+
+    /**
+     * Watch an invoice for payment and invoke callbacks on status changes.
+     * This uses polling to check if an invoice has been paid.
+     * 
+     * @param context Application context
+     * @param paymentHash The payment hash of the invoice to watch
+     * @param pollingDelaySec How often to poll (default 3 seconds)
+     * @param maxPollingSec Maximum time to poll (default 300 seconds = 5 minutes)
+     * @param onSuccess Called when payment is received
+     * @param onPending Called on each pending poll (optional)
+     * @param onFailure Called on failure/timeout (optional)
+     */
+    @JvmStatic
+    fun watchInvoice(
+        context: Context,
+        paymentHash: String,
+        pollingDelaySec: Long = 3,
+        maxPollingSec: Long = 300,
+        onSuccess: (paymentHash: String, amountSats: Long) -> Unit,
+        onPending: ((paymentHash: String) -> Unit)? = null,
+        onFailure: ((paymentHash: String) -> Unit)? = null
+    ) {
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val engine = LightningEngineProvider.get(context)
+                engine.watchInvoice(
+                    paymentHash = paymentHash,
+                    pollingDelaySec = pollingDelaySec,
+                    maxPollingSec = maxPollingSec,
+                    callback = object : LightningEngine.InvoiceEventCallback {
+                        override fun onSuccess(paymentHash: String, amountSats: Long) {
+                            onSuccess(paymentHash, amountSats)
+                        }
+                        override fun onPending(paymentHash: String) {
+                            onPending?.invoke(paymentHash)
+                        }
+                        override fun onFailure(paymentHash: String) {
+                            onFailure?.invoke(paymentHash)
+                        }
+                    }
+                )
+            } catch (e: Throwable) {
+                Log.w(TAG, "Error watching invoice", e)
+                onFailure?.invoke(paymentHash)
+            }
         }
     }
 

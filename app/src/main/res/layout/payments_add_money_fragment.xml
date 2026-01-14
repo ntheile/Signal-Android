@@ -128,6 +128,51 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/PaymentsAddMoneyFragment__copy" />
 
+            <LinearLayout
+                android:id="@+id/invoice_paid_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/invoice_paid_check"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:src="@drawable/ic_check_circle_solid_24"
+                    android:tint="@color/signal_colorPrimary"
+                    android:contentDescription="Payment received" />
+
+                <TextView
+                    android:id="@+id/invoice_paid_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Payment Received!"
+                    android:textAppearance="@style/TextAppearance.Signal.Body1.Bold"
+                    android:textColor="@color/signal_colorPrimary" />
+
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/invoice_waiting_progress"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/invoice_waiting_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Waiting for payment..."
+                android:textAppearance="@style/TextAppearance.Signal.Body2"
+                android:textColor="@color/signal_text_secondary"
+                android:visibility="gone" />
+
         </LinearLayout>
 
         <org.thoughtcrime.securesms.util.views.LearnMoreTextView
