@@ -49,7 +49,7 @@ class AdvancedPinSettingsViewModel : ViewModel() {
       !enabled && hasRegistrationLock -> {
         internalDialog.value = Dialog.REGISTRATION_LOCK
       }
-      !enabled && SignalStore.payments.mobileCoinPaymentsEnabled() && !SignalStore.payments.userConfirmedMnemonic -> {
+      !enabled && (SignalStore.payments.mobileCoinPaymentsEnabled() || SignalStore.payments.cashuEnabled() || SignalStore.payments.lightningEnabled()) && !SignalStore.payments.userConfirmedMnemonic -> {
         internalDialog.value = Dialog.RECORD_PAYMENTS_RECOVERY_PHRASE
       }
       !enabled -> {

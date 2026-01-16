@@ -287,7 +287,10 @@ public class PaymentsHomeViewModel extends ViewModel {
 
   void checkPaymentActivationState() {
     PaymentsHomeState.PaymentsState storedState     = store.getState().getPaymentsState();
-    boolean                         paymentsEnabled = SignalStore.payments().mobileCoinPaymentsEnabled();
+    // Consider payments enabled if MobileCoin, Cashu, OR Lightning is enabled
+    boolean                         paymentsEnabled = SignalStore.payments().mobileCoinPaymentsEnabled()
+                                                      || SignalStore.payments().cashuEnabled()
+                                                      || SignalStore.payments().lightningEnabled();
 
     if (storedState.equals(PaymentsHomeState.PaymentsState.ACTIVATED) && !paymentsEnabled) {
       store.update(s -> s.updatePaymentsEnabled(PaymentsHomeState.PaymentsState.NOT_ACTIVATED));
