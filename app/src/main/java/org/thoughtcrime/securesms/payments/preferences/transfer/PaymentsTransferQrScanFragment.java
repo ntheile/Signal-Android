@@ -48,10 +48,8 @@ public final class PaymentsTransferQrScanFragment extends LoggingFragment {
       overlay.setOrientation(LinearLayout.VERTICAL);
     }
 
-    // Only create MobileCoin ViewModel if not using Cashu
-    if (!org.thoughtcrime.securesms.keyvalue.SignalStore.payments().cashuEnabled()) {
-      viewModel = new ViewModelProvider(Navigation.findNavController(view).getViewModelStoreOwner(R.id.payments_transfer), new PaymentsTransferViewModel.Factory()).get(PaymentsTransferViewModel.class);
-    }
+    // Always create ViewModel to post QR scan data
+    viewModel = new ViewModelProvider(Navigation.findNavController(view).getViewModelStoreOwner(R.id.payments_transfer), new PaymentsTransferViewModel.Factory()).get(PaymentsTransferViewModel.class);
 
     Toolbar toolbar = view.findViewById(R.id.payments_transfer_scan_qr);
     toolbar.setNavigationOnClickListener(v -> Navigation.findNavController(v).popBackStack());

@@ -27,6 +27,14 @@
             app:popExitAnim="@anim/fragment_close_exit" />
 
         <action
+            android:id="@+id/action_paymentsTransfer_to_lightningPaymentSuccess"
+            app:destination="@id/lightningPaymentSuccess"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+        <action
             android:id="@+id/action_paymentsTransfer_to_createPayment"
             app:destination="@id/payments_create"
             app:enterAnim="@anim/fragment_open_enter"
@@ -71,6 +79,18 @@
         android:id="@+id/payInvoiceConfirm"
         android:name="org.thoughtcrime.securesms.payments.preferences.transfer.PayInvoiceConfirmFragment"
         tools:layout="@layout/pay_invoice_confirm_fragment" />
+
+    <fragment
+        android:id="@+id/lightningPaymentSuccess"
+        android:name="org.thoughtcrime.securesms.payments.preferences.transfer.LightningPaymentSuccessFragment"
+        android:label="@string/LightningPayment__payment_successful"
+        tools:layout="@layout/lightning_payment_success_fragment">
+
+        <argument
+            android:name="transactionDetails"
+            app:argType="org.thoughtcrime.securesms.payments.preferences.details.LightningTransactionDetailsParcelable" />
+
+    </fragment>
 
     <include app:graph="@navigation/payments_create" />
 
