@@ -392,6 +392,10 @@ class PaymentsValues internal constructor(store: KeyValueStore) : SignalStoreVal
       if (!SignalStore.account.isRegistered) {
         return PaymentsAvailability.NOT_IN_REGION
       }
+      // Lightning path: ignore region/compliance; show full send/receive when enabled
+      if (lightningEnabled()) {
+        return PaymentsAvailability.WITHDRAW_AND_SEND
+      }
       // Cashu path: ignore region/compliance; show full send/receive when enabled
       if (cashuEnabled()) {
         return PaymentsAvailability.WITHDRAW_AND_SEND
