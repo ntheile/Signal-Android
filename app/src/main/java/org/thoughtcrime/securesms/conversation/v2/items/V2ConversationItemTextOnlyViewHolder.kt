@@ -253,9 +253,73 @@ open class V2ConversationItemTextOnlyViewHolder<Model : MappingModel<Model>>(
       return
     }
 
-    // Cashu: try inline rendering before presenting body to avoid showing truncated token text
+    // Reset all custom inline renderers before rebinding to handle view recycling properly
     CashuTokenInlineRenderer.resetIfPresent(binding)
+    SigmoRequestInlineRenderer.resetIfPresent(binding)
+    LightningInvoiceInlineRenderer.resetIfPresent(binding)
+
+    // Cashu: try inline rendering before presenting body to avoid showing truncated token text
     if (CashuTokenInlineRenderer.maybeAttachReceiveUi(binding, conversationMessage)) {
+      presentDate()
+      presentDeliveryStatus()
+      presentFooterBackground()
+      presentFooterExpiry()
+      presentFooterEndPadding()
+      presentAlert()
+      presentSender()
+      presentSenderNameColor()
+      presentSenderNameBackground()
+      presentReactions()
+
+      bodyBubbleDrawable.setCorners(shapeDelegate.cornersLTR)
+      if (binding.body.isJumbomoji) {
+        bodyBubbleDrawable.setLocalChatColors(transparentChatColors)
+      } else if (binding.isIncoming) {
+        bodyBubbleDrawable.setLocalChatColors(ChatColors.forColor(ChatColors.Id.NotSet, themeDelegate.getBodyBubbleColor(conversationMessage)))
+      } else {
+        bodyBubbleDrawable.clearLocalChatColors()
+      }
+
+      binding.reply.setBackgroundColor(themeDelegate.getReplyIconBackgroundColor())
+
+      itemView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        topMargin = shape.topPadding.toInt()
+        bottomMargin = shape.bottomPadding.toInt()
+      }
+      return
+    }
+
+    // Sigmo Protocol: try inline rendering for sigmo: URIs
+    if (SigmoRequestInlineRenderer.maybeAttachSigmoUi(binding, conversationMessage)) {
+      presentDate()
+      presentDeliveryStatus()
+      presentFooterBackground()
+      presentFooterExpiry()
+      presentFooterEndPadding()
+      presentAlert()
+      presentSender()
+      presentSenderNameColor()
+      presentSenderNameBackground()
+      presentReactions()
+
+      bodyBubbleDrawable.setCorners(shapeDelegate.cornersLTR)
+      if (binding.body.isJumbomoji) {
+        bodyBubbleDrawable.setLocalChatColors(transparentChatColors)
+      } else if (binding.isIncoming) {
+        bodyBubbleDrawable.setLocalChatColors(ChatColors.forColor(ChatColors.Id.NotSet, themeDelegate.getBodyBubbleColor(conversationMessage)))
+      } else {
+        bodyBubbleDrawable.clearLocalChatColors()
+      }
+
+      itemView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        topMargin = shape.topPadding.toInt()
+        bottomMargin = shape.bottomPadding.toInt()
+      }
+      return
+    }
+
+    // Lightning Invoice: try inline rendering for BOLT11 invoices
+    if (LightningInvoiceInlineRenderer.maybeAttachInvoiceUi(binding, conversationMessage)) {
       presentDate()
       presentDeliveryStatus()
       presentFooterBackground()

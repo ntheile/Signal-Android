@@ -1008,6 +1008,27 @@ object DataMessageProcessor {
 
     return if (insertResult != null) {
       AppDependencies.messageNotifier.updateNotification(context, ConversationId.forConversation(insertResult.threadId))
+      
+      // Check for sigmo: protocol messages
+      if (SigmoProtocolProcessor.isSigmoMessage(body)) {
+        // Check if this is an invoice request (needs auto-response) or invoice response
+        if (SigmoProtocolProcessor.isInvoiceRequest(body)) {
+          // Auto-generate invoice response
+          SigmoProtocolProcessor.processIncomingMessage(
+            context = context,
+            messageBody = body,
+            senderRecipientId = senderRecipient.id,
+            threadId = insertResult.threadId
+          )
+        } else if (SigmoProtocolProcessor.isInvoiceResponse(body)) {
+          // Update flow status for the original request
+          val parsedInvoice = SigmoProtocolProcessor.parseSigmoInvoice(body)
+          if (parsedInvoice?.requestId != null) {
+            SignalStore.payments.updateSigmoFlowWithInvoice(parsedInvoice.requestId, parsedInvoice.invoice, insertResult.messageId)
+          }
+        }
+      }
+      
       insertResult
     } else {
       null

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
+    android:paddingStart="16dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="10dp">
+
+    <org.thoughtcrime.securesms.components.AvatarImageView
+        android:id="@+id/lightning_activity_avatar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_lightning_bolt_24" />
+
+    <TextView
+        android:id="@+id/lightning_activity_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textAppearance="@style/Signal.Text.Body"
+        android:textColor="@color/signal_text_primary"
+        app:layout_constraintEnd_toStartOf="@+id/lightning_activity_amount"
+        app:layout_constraintStart_toEndOf="@id/lightning_activity_avatar"
+        app:layout_constraintTop_toTopOf="@id/lightning_activity_avatar"
+        tools:text="Sent payment" />
+
+    <TextView
+        android:id="@+id/lightning_activity_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textAppearance="@style/Signal.Text.Caption"
+        android:textColor="@color/signal_text_secondary"
+        app:layout_constraintEnd_toStartOf="@+id/lightning_activity_amount"
+        app:layout_constraintStart_toEndOf="@id/lightning_activity_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/lightning_activity_title"
+        tools:text="2/2/20" />
+
+    <TextView
+        android:id="@+id/lightning_activity_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/Signal.Text.Body"
+        android:textColor="@color/core_green"
+        app:layout_constraintBottom_toBottomOf="@+id/lightning_activity_title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/lightning_activity_title"
+        tools:text="-10,000 sat" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

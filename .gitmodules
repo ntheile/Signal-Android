@@ -1,0 +1,3 @@
+[submodule "lni/lni-src"]
+	path = lni/lni-src
+	url = https://github.com/lightning-node-interface/lni.git

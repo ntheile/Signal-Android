@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Lightning bolt -->
+  <path
+      android:pathData="M13,2L5,12h5l-1,8 8,-10h-5z"
+      android:fillColor="#FF9500"/>
+  <!-- Arrow pointing inward (request/receive) -->
+  <path
+      android:pathData="M19,12L19,14L21,14L21,12L19,12Z"
+      android:fillColor="#000"/>
+  <path
+      android:pathData="M21,12L17,9L17,11L14,11L14,13L17,13L17,15L21,12Z"
+      android:fillColor="#000"/>
+</vector>

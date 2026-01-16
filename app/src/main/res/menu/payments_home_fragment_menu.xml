@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:id="@+id/payments_home_fragment_menu_lightning_config"
+        android:title="@string/PaymentsHomeFragment__lightning_node" />
+
     <item android:id="@+id/payments_home_fragment_menu_transfer_to_exchange"
         android:title="@string/PaymentsHomeFragment__transfer_to_exchange" />
 

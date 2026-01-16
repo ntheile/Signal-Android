@@ -2,12 +2,14 @@ package org.thoughtcrime.securesms.payments.preferences.transfer;
 
 import androidx.annotation.AnyThread;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import org.thoughtcrime.securesms.dependencies.AppDependencies;
+import org.thoughtcrime.securesms.keyvalue.SignalStore;
 import org.thoughtcrime.securesms.payments.MobileCoinPublicAddress;
 
 final class PaymentsTransferViewModel extends ViewModel {
@@ -16,13 +18,19 @@ final class PaymentsTransferViewModel extends ViewModel {
   private final MobileCoinPublicAddress ownAddress;
 
   PaymentsTransferViewModel() {
-    ownAddress = AppDependencies.getPayments().getWallet().getMobileCoinPublicAddress();
+    // Only get MobileCoin address if not in Cashu mode
+    if (!SignalStore.payments().cashuEnabled()) {
+      ownAddress = AppDependencies.getPayments().getWallet().getMobileCoinPublicAddress();
+    } else {
+      ownAddress = null;
+    }
   }
 
   LiveData<String> getAddress() {
     return address;
   }
 
+  @Nullable
   MobileCoinPublicAddress getOwnAddress() {
     return ownAddress;
   }

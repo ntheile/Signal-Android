@@ -9,6 +9,7 @@
 
     <color name="core_green">#4caf50</color>
     <color name="core_yellow">#ffd624</color>
+    <color name="core_orange">#ff9500</color>
     <color name="core_red">#f44336</color>
     <color name="core_red_50">#80f44336</color>
     <color name="core_red_highlight">#ef5350</color>

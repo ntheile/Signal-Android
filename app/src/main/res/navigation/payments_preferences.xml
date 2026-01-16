@@ -120,7 +120,28 @@
             app:popEnterAnim="@anim/fragment_close_enter"
             app:popExitAnim="@anim/fragment_close_exit" />
 
+        <action
+            android:id="@+id/action_paymentsHome_to_lightningConfig"
+            app:destination="@id/lightningConfig"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+        <action
+            android:id="@+id/action_paymentsHome_to_lightningTransactionDetails"
+            app:destination="@id/lightningTransactionDetails"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
     </fragment>
+
+    <fragment
+        android:id="@+id/lightningConfig"
+        android:name="org.thoughtcrime.securesms.payments.preferences.lightning.LightningConfigFragment"
+        tools:layout="@layout/lightning_config_fragment" />
 
     <fragment
         android:id="@+id/paymentsAllActivity"
@@ -141,6 +162,18 @@
         <argument
             android:name="paymentDetails"
             app:argType="org.thoughtcrime.securesms.payments.preferences.details.PaymentDetailsParcelable"
+            app:nullable="false" />
+
+    </fragment>
+
+    <fragment
+        android:id="@+id/lightningTransactionDetails"
+        android:name="org.thoughtcrime.securesms.payments.preferences.details.LightningTransactionDetailsFragment"
+        tools:layout="@layout/lightning_transaction_details_fragment">
+
+        <argument
+            android:name="transactionDetails"
+            app:argType="org.thoughtcrime.securesms.payments.preferences.details.LightningTransactionDetailsParcelable"
             app:nullable="false" />
 
     </fragment>
@@ -176,7 +209,17 @@
     <fragment
         android:id="@+id/paymentsAddMoney"
         android:name="org.thoughtcrime.securesms.payments.preferences.addmoney.PaymentsAddMoneyFragment"
-        tools:layout="@layout/payments_add_money_fragment" />
+        tools:layout="@layout/payments_add_money_fragment">
+
+        <action
+            android:id="@+id/action_paymentsAddMoney_to_lightningConfig"
+            app:destination="@id/lightningConfig"
+            app:enterAnim="@anim/fragment_open_enter"
+            app:exitAnim="@anim/fragment_open_exit"
+            app:popEnterAnim="@anim/fragment_close_enter"
+            app:popExitAnim="@anim/fragment_close_exit" />
+
+    </fragment>
 
     <fragment
         android:id="@+id/setCurrency"

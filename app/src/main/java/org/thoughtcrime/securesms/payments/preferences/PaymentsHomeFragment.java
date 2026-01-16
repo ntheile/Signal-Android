@@ -37,7 +37,11 @@ import org.thoughtcrime.securesms.payments.MoneyView;
 import org.thoughtcrime.securesms.payments.backup.RecoveryPhraseStates;
 import org.thoughtcrime.securesms.payments.backup.confirm.PaymentsRecoveryPhraseConfirmFragment;
 import org.thoughtcrime.securesms.payments.engine.MintWatcher;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeInfo;
+import org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor;
+import org.thoughtcrime.securesms.payments.preferences.details.LightningTransactionDetailsParcelable;
 import org.thoughtcrime.securesms.payments.preferences.model.InfoCard;
+import org.thoughtcrime.securesms.payments.preferences.model.LightningActivityItem;
 import org.thoughtcrime.securesms.payments.preferences.model.PaymentItem;
 import org.thoughtcrime.securesms.util.CommunicationActions;
 import org.thoughtcrime.securesms.util.PlayStoreUtil;
@@ -66,6 +70,8 @@ public class PaymentsHomeFragment extends LoggingFragment {
   private View balanceView;
   private View exchangeView;
   private View headerView;
+  private TextView lightningNodeNameView;
+  private TextView lightningBalanceView;
 
   // Cashu: simple sats formatter for header
   private String formatSats(long sats) {
@@ -122,6 +128,8 @@ public class PaymentsHomeFragment extends LoggingFragment {
     View                mint             = view.findViewById(R.id.payments_home_fragment_header_mint);
     LottieAnimationView refreshAnimation = view.findViewById(R.id.payments_home_fragment_header_refresh_animation);
     Stub<ComposeView>   bannerView       = ViewUtil.findStubById(view, R.id.banner_compose_view);
+    TextView            lightningNodeName = view.findViewById(R.id.payments_home_fragment_header_lightning_node_name);
+    TextView            lightningBalance = view.findViewById(R.id.payments_home_fragment_header_lightning_balance);
     
     // Store references for visibility control
     this.addMoneyButton = addMoney;
@@ -132,12 +140,15 @@ public class PaymentsHomeFragment extends LoggingFragment {
     this.balanceView = balance;
     this.exchangeView = exchange;
     this.headerView = header;
+    this.lightningNodeNameView = lightningNodeName;
+    this.lightningBalanceView = lightningBalance;
 
     toolbar.setNavigationOnClickListener(v -> {
       viewModel.markAllPaymentsSeen();
       requireActivity().finish();
     });
 
+    toolbar.inflateMenu(R.menu.payments_home_fragment_menu);
     toolbar.setOnMenuItemClickListener(this::onMenuItemSelected);
 
     addMoney.setOnClickListener(v -> {
@@ -182,6 +193,11 @@ public class PaymentsHomeFragment extends LoggingFragment {
     if (!initiallyActivated) {
       // Hide all payment UI immediately if payments are not activated
       updateButtonVisibility(false);
+    }
+    
+    // Fetch and display Lightning node info if Lightning is configured
+    if (LightningUiInteractor.isConfigured(requireContext())) {
+      fetchAndDisplayLightningNodeInfo();
     }
     
     // Handle mint selector visibility separately based on Cashu enabled state and payment activation
@@ -382,6 +398,10 @@ public class PaymentsHomeFragment extends LoggingFragment {
     if (viewModel != null && viewModel.isCashuEnabled()) {
       viewModel.updateStore();
     }
+    // Refresh Lightning node info when returning to screen
+    if (LightningUiInteractor.isConfigured(requireContext())) {
+      fetchAndDisplayLightningNodeInfo();
+    }
   }
 
   /**
@@ -419,6 +439,50 @@ public class PaymentsHomeFragment extends LoggingFragment {
       if (middle != null) middle.setVisibility(visibility);
       if (middleRight != null) middleRight.setVisibility(visibility);
     }
+  }
+
+  /**
+   * Fetch Lightning node info (alias and balance) and display in the header.
+   * Runs on a background thread and updates UI on main thread.
+   */
+  private void fetchAndDisplayLightningNodeInfo() {
+    new Thread(() -> {
+      try {
+        LightningNodeInfo nodeInfo = LightningUiInteractor.getNodeInfoBlocking(requireContext());
+        if (nodeInfo != null && getView() != null) {
+          String nodeName = nodeInfo.getAlias();
+          long sendBalance = nodeInfo.getSendBalanceSats();
+          long receiveBalance = nodeInfo.getReceiveBalanceSats();
+          
+          // Format the display text with node name and balance
+          String displayText = "⚡ " + (nodeName.isEmpty() ? "Lightning Node" : nodeName);
+          String balanceText = formatSats(sendBalance) + " sats";
+          
+          getView().post(() -> {
+            // Show Lightning node name
+            if (lightningNodeNameView != null) {
+              lightningNodeNameView.setText(displayText);
+              lightningNodeNameView.setVisibility(View.VISIBLE);
+            }
+            
+            // Show Lightning balance in dedicated view
+            if (lightningBalanceView != null) {
+              lightningBalanceView.setText(balanceText);
+              lightningBalanceView.setVisibility(View.VISIBLE);
+            }
+            
+            // Update exchange text with Lightning receive capacity
+            if (exchangeView != null && exchangeView instanceof TextView) {
+              ((TextView) exchangeView).setText("Receive: " + formatSats(receiveBalance) + " sats");
+            }
+            
+            Log.i(TAG, "Lightning node info displayed: " + nodeName + ", balance=" + sendBalance + " sats");
+          });
+        }
+      } catch (Throwable t) {
+        Log.w(TAG, "Failed to fetch Lightning node info", t);
+      }
+    }).start();
   }
 
   private void showUpdateIsRequiredDialog() {
@@ -522,7 +586,10 @@ public class PaymentsHomeFragment extends LoggingFragment {
   }
 
   private boolean onMenuItemSelected(@NonNull MenuItem item) {
-    if (item.getItemId() == R.id.payments_home_fragment_menu_transfer_to_exchange) {
+    if (item.getItemId() == R.id.payments_home_fragment_menu_lightning_config) {
+      SafeNavigation.safeNavigate(NavHostFragment.findNavController(this), R.id.action_paymentsHome_to_lightningConfig);
+      return true;
+    } else if (item.getItemId() == R.id.payments_home_fragment_menu_transfer_to_exchange) {
       if (viewModel.isEnclaveFailurePresent()) {
         showUpdateIsRequiredDialog();
       } else {
@@ -588,6 +655,22 @@ public class PaymentsHomeFragment extends LoggingFragment {
     public void onPaymentItem(@NonNull PaymentItem model) {
       SafeNavigation.safeNavigate(NavHostFragment.findNavController(PaymentsHomeFragment.this),
                                   PaymentPreferencesDirections.actionDirectlyToPaymentDetails(model.getPaymentDetailsParcelable()));
+    }
+
+    @Override
+    public void onLightningItem(@NonNull LightningActivityItem model) {
+      LightningTransactionDetailsParcelable details = new LightningTransactionDetailsParcelable(
+          model.getPaymentHash(),
+          model.getTimestampMs(),
+          model.getAmountSats(),
+          model.getFeesPaidSats(),
+          model.getDescription(),
+          model.getPreimage(),
+          model.getState() == LightningActivityItem.State.RECEIVE,
+          model.isPaid()
+      );
+      SafeNavigation.safeNavigate(NavHostFragment.findNavController(PaymentsHomeFragment.this),
+                                  PaymentsHomeFragmentDirections.actionPaymentsHomeToLightningTransactionDetails(details));
     }
 
     @Override

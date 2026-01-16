@@ -109,6 +109,7 @@ class RegisterLinkDeviceQrViewModel : ViewModel() {
 
         it.copy(
           currentSocketId = socket.id,
+          provisioningUrl = url,
           qrState = QrState.Loaded(
             qrData = QrCodeData.forData(
               data = url,
@@ -163,6 +164,7 @@ class RegisterLinkDeviceQrViewModel : ViewModel() {
   data class RegisterLinkDeviceState(
     val isRegistering: Boolean = false,
     val qrState: QrState = QrState.Loading,
+    val provisioningUrl: String? = null,
     val provisionMessage: ProvisionMessage? = null,
     val showProvisioningError: Boolean = false,
     val registrationErrorResult: RegisterLinkDeviceResult? = null,

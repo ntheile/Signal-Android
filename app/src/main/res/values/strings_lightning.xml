@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Menu item for Payments Home -->
+    <string name="PaymentsHomeFragment__lightning_node">Lightning Node</string>
+    
+    <!-- Lightning Configuration Fragment -->
+    <string name="LightningConfig__title">Lightning Node</string>
+    <string name="LightningConfig__header">Connect Lightning Node</string>
+    <string name="LightningConfig__description">Connect to your Lightning node for direct payments. Select your node type and enter the required credentials.</string>
+    <string name="LightningConfig__node_type_hint">Node Type</string>
+    
+    <!-- NWC -->
+    <string name="LightningConfig__nwc_uri_hint">Nostr Wallet Connect URI</string>
+    <string name="LightningConfig__nwc_help">Paste your NWC URI starting with nostr+walletconnect:// or nostr://. You can get this from wallets like Alby, Umbrel, or any NWC-compatible wallet.</string>
+    
+    <!-- LND -->
+    <string name="LightningConfig__lnd_url_hint">LND REST URL</string>
+    <string name="LightningConfig__lnd_macaroon_hint">Admin Macaroon (hex)</string>
+    <string name="LightningConfig__lnd_help">Enter your LND REST API URL (e.g., https://your-node:8080) and the admin macaroon in hex format.</string>
+    
+    <!-- CLN -->
+    <string name="LightningConfig__cln_url_hint">Core Lightning REST URL</string>
+    <string name="LightningConfig__cln_rune_hint">Rune</string>
+    <string name="LightningConfig__cln_help">Enter your CLN REST API URL and rune for authentication.</string>
+    
+    <!-- Phoenixd -->
+    <string name="LightningConfig__phoenixd_url_hint">Phoenixd URL</string>
+    <string name="LightningConfig__phoenixd_password_hint">Password</string>
+    <string name="LightningConfig__phoenixd_help">Enter your Phoenixd server URL (e.g., http://localhost:9740) and password.</string>
+    
+    <!-- Strike -->
+    <string name="LightningConfig__strike_api_key_hint">Strike API Key</string>
+    <string name="LightningConfig__strike_help">Enter your Strike API key. You can generate one from your Strike developer dashboard.</string>
+    
+    <!-- Blink -->
+    <string name="LightningConfig__blink_api_key_hint">Blink API Key</string>
+    <string name="LightningConfig__blink_help">Enter your Blink (Galoy) API key from your Blink wallet settings.</string>
+    
+    <!-- Speed -->
+    <string name="LightningConfig__speed_api_key_hint">Speed API Key</string>
+    <string name="LightningConfig__speed_help">Enter your Speed Wallet API key.</string>
+    
+    <!-- Spark -->
+    <string name="LightningConfig__spark_mnemonic_hint">Seed Phrase (12 words)</string>
+    <string name="LightningConfig__spark_api_key_hint">Breez API Key</string>
+    <string name="LightningConfig__spark_help">Spark uses the Breez SDK Lightning.</string>
+    <string name="LightningConfig__spark_backup_warning">⚠️ Write down your seed phrase and store it safely. You will need it to recover your funds. Never share it with anyone.</string>
+    <string name="LightningConfig__generate_mnemonic">Generate New Seed</string>
+    <string name="LightningConfig__advanced_settings">Advanced Settings</string>
+    <string name="LightningConfig__hide_advanced">Hide Advanced</string>
+    
+    <!-- Common -->
+    <string name="LightningConfig__connect">Connect</string>
+    <string name="LightningConfig__disconnect">Disconnect</string>
+    <string name="LightningConfig__edit">Edit Connection</string>
+    <string name="LightningConfig__save_changes">Save Changes</string>
+    <string name="LightningConfig__editing_connection">Editing connection…</string>
+    <string name="LightningConfig__test_connection">Test Connection</string>
+    <string name="LightningConfig__connected_to">Connected to %1$s</string>
+    <string name="LightningConfig__not_connected">Not connected</string>
+    <string name="LightningConfig__please_enter_credentials">Please enter the required credentials</string>
+    <string name="LightningConfig__please_enter_nwc_uri">Please enter a NWC URI</string>
+    <string name="LightningConfig__invalid_nwc_uri">Invalid NWC URI. It should start with nostr+walletconnect:// or nostr://</string>
+    <string name="LightningConfig__please_enter_url">Please enter the node URL</string>
+    <string name="LightningConfig__please_enter_api_key">Please enter the API key</string>
+    <string name="LightningConfig__please_enter_macaroon">Please enter the macaroon</string>
+    <string name="LightningConfig__please_enter_rune">Please enter the rune</string>
+    <string name="LightningConfig__please_enter_password">Please enter the password</string>
+    <string name="LightningConfig__please_enter_mnemonic">Please enter your 12 word seed phrase</string>
+    <string name="LightningConfig__invalid_mnemonic">Invalid mnemonic. Please enter 12 words separated by spaces.</string>
+    <string name="LightningConfig__mnemonic_generated">New seed phrase generated. Back it up securely!</string>
+    <string name="LightningConfig__mnemonic_generation_failed">Failed to generate seed phrase</string>
+    <string name="LightningConfig__connected_successfully">Lightning node connected successfully!</string>
+    <string name="LightningConfig__connection_failed">Failed to connect to Lightning node. Please check your credentials and try again.</string>
+    <string name="LightningConfig__configuration_failed">Failed to save Lightning configuration</string>
+    <string name="LightningConfig__disconnected">Lightning node disconnected</string>
+    <string name="LightningConfig__disconnect_failed">Failed to disconnect Lightning node</string>
+    <string name="LightningConfig__powered_by_lni">Powered by Lightning Node Interface (LNI)</string>
+    <string name="LightningConfig__balance">Balance</string>
+    <string name="LightningConfig__testing_connection">Testing connection…</string>
+    <string name="LightningConfig__connection_successful">Connection successful!</string>
+    <string name="LightningConfig__send_balance">Send: %1$s sats</string>
+    <string name="LightningConfig__receive_balance">Receive: %1$s sats</string>
+    
+    <!-- Node type names -->
+    <string name="LightningConfig__node_type_nwc">NWC (Nostr Wallet Connect)</string>
+    <string name="LightningConfig__node_type_lnd">LND</string>
+    <string name="LightningConfig__node_type_cln">Core Lightning (CLN)</string>
+    <string name="LightningConfig__node_type_phoenixd">Phoenixd</string>
+    <string name="LightningConfig__node_type_strike">Strike</string>
+    <string name="LightningConfig__node_type_blink">Blink</string>
+    <string name="LightningConfig__node_type_speed">Speed</string>
+    <string name="LightningConfig__node_type_spark">Spark</string>
+    
+    <!-- Lightning Payment -->
+    <string name="LightningPayment__pay_with_lightning">Pay with Lightning</string>
+    <string name="LightningPayment__receive_via_lightning">Receive via Lightning</string>
+    <string name="LightningPayment__lightning_balance">Lightning Balance</string>
+    <string name="LightningPayment__create_invoice">Create Invoice</string>
+    <string name="LightningPayment__pay_invoice">Pay Invoice</string>
+    <string name="LightningPayment__payment_successful">Lightning payment successful!</string>
+    <string name="LightningPayment__payment_failed">Lightning payment failed</string>
+    <string name="LightningPayment__receive_capacity">Receive capacity: %1$s sats</string>
+    
+    <!-- Lightning Send Flow -->
+    <string name="CreatePaymentFragment__send_lightning_payment">Send Lightning Payment</string>
+    <string name="CreatePaymentFragment__send_lightning_request_message">Request a Lightning invoice for %1$s sats from %2$s?</string>
+    <string name="CreatePaymentFragment__send_request">Send Request</string>
+    <string name="CreatePaymentFragment__invoice_request_sent">Invoice request sent to %1$s</string>
+    <string name="CreatePaymentFragment__failed_to_send_request">Failed to send invoice request</string>
+    <string name="CreatePaymentFragment__invalid_recipient">Invalid recipient</string>
+    <string name="CreatePaymentFragment__invalid_amount">Invalid amount</string>
+</resources>

@@ -239,7 +239,8 @@ android {
     buildConfigField("String", "STRIPE_BASE_URL", "\"https://api.stripe.com/v1\"")
     buildConfigField("String", "STRIPE_PUBLISHABLE_KEY", "\"pk_live_6cmGZopuTsV8novGgJJW9JpC00vLIgtQ1D\"")
     buildConfigField("boolean", "TRACING_ENABLED", "false")
-    buildConfigField("boolean", "LINK_DEVICE_UX_ENABLED", "false")
+    buildConfigField("boolean", "LINK_DEVICE_UX_ENABLED", "true")
+    buildConfigField("String", "BREEZ_API_KEY", "\"${getBreezApiKey()}\"")
 
     ndk {
       abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
@@ -507,6 +508,7 @@ dependencies {
   implementation(project(":sticky-header-grid"))
   implementation(project(":photoview"))
   implementation(project(":core-ui"))
+  implementation(project(":lni"))
 
   implementation(libs.androidx.fragment.ktx)
   implementation(libs.androidx.fragment.compose)
@@ -725,6 +727,19 @@ fun loadKeystoreProperties(filename: String): Properties? {
   } else {
     null
   }
+}
+
+fun getBreezApiKey(): String {
+  val localProperties = file("${project.rootDir}/local.properties")
+  if (localProperties.exists()) {
+    val props = Properties()
+    props.load(FileInputStream(localProperties))
+    val key = props.getProperty("breezApiKey")
+    if (!key.isNullOrBlank()) {
+      return key
+    }
+  }
+  return ""
 }
 
 fun getDateSuffix(): String {

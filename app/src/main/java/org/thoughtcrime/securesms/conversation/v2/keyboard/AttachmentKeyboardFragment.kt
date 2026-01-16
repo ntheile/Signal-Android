@@ -48,6 +48,14 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
 
   private val lifecycleDisposable = LifecycleDisposable()
   private val removePaymentFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.PAYMENT }
+  private val removeRequestPaymentFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.REQUEST_PAYMENT }
+  private val removeSendBitcoinFilter: Predicate<AttachmentKeyboardButton> = Predicate { button -> button != AttachmentKeyboardButton.SEND_BITCOIN }
+  private val removeLightningPaymentFilters: Predicate<AttachmentKeyboardButton> = Predicate { button -> 
+    button != AttachmentKeyboardButton.REQUEST_PAYMENT && button != AttachmentKeyboardButton.SEND_BITCOIN
+  }
+  private val removeAllPaymentFilters: Predicate<AttachmentKeyboardButton> = Predicate { button -> 
+    button != AttachmentKeyboardButton.PAYMENT && button != AttachmentKeyboardButton.REQUEST_PAYMENT && button != AttachmentKeyboardButton.SEND_BITCOIN
+  }
 
   @Suppress("ReplaceGetOrSet")
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,8 +65,26 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
     attachmentKeyboardView = view.findViewById(R.id.attachment_keyboard)
     attachmentKeyboardView.apply {
       setCallback(this@AttachmentKeyboardFragment)
-      if (!SignalStore.payments.paymentsAvailability.isSendAllowed) {
-        filterAttachmentKeyboardButtons(removePaymentFilter)
+      // Initial filter - will be updated when recipient is available
+      val lightningConfigured = try {
+        org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())
+      } catch (e: Throwable) {
+        false
+      }
+      
+      when {
+        SignalStore.payments.paymentsAvailability.isSendAllowed && lightningConfigured -> {
+          // Show all buttons initially
+        }
+        SignalStore.payments.paymentsAvailability.isSendAllowed -> {
+          filterAttachmentKeyboardButtons(removeLightningPaymentFilters)
+        }
+        lightningConfigured -> {
+          filterAttachmentKeyboardButtons(removePaymentFilter)
+        }
+        else -> {
+          filterAttachmentKeyboardButtons(removeAllPaymentFilters)
+        }
       }
     }
 
@@ -128,14 +154,41 @@ class AttachmentKeyboardFragment : LoggingFragment(R.layout.attachment_keyboard_
 
   private fun updatePaymentsAvailable(recipient: Recipient) {
     val paymentsValues = SignalStore.payments
-    if (paymentsValues.paymentsAvailability.isSendAllowed &&
+    val canSendPayments = paymentsValues.paymentsAvailability.isSendAllowed &&
       !recipient.isSelf &&
       !recipient.isGroup &&
       recipient.isRegistered
-    ) {
-      attachmentKeyboardView.filterAttachmentKeyboardButtons(null)
-    } else {
-      attachmentKeyboardView.filterAttachmentKeyboardButtons(removePaymentFilter)
+    
+    // Check if Lightning is configured for request payment and send bitcoin features
+    val lightningConfigured = try {
+      org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())
+    } catch (e: Throwable) {
+      false
+    }
+    
+    // Determine which buttons to show:
+    // - PAYMENT: Show if paymentsAvailability.isSendAllowed and recipient criteria met
+    // - REQUEST_PAYMENT: Show if Lightning is configured and recipient is 1:1 chat
+    // - SEND_BITCOIN: Show if Lightning is configured and recipient is 1:1 chat
+    val canUseLightning = lightningConfigured && !recipient.isSelf && !recipient.isGroup && recipient.isRegistered
+    
+    when {
+      canSendPayments && canUseLightning -> {
+        // Show all buttons
+        attachmentKeyboardView.filterAttachmentKeyboardButtons(null)
+      }
+      canSendPayments && !canUseLightning -> {
+        // Show only Payment, hide Request Payment and Send Bitcoin
+        attachmentKeyboardView.filterAttachmentKeyboardButtons(removeLightningPaymentFilters)
+      }
+      !canSendPayments && canUseLightning -> {
+        // Show only Request Payment and Send Bitcoin, hide Payment
+        attachmentKeyboardView.filterAttachmentKeyboardButtons(removePaymentFilter)
+      }
+      else -> {
+        // Hide all payment buttons
+        attachmentKeyboardView.filterAttachmentKeyboardButtons(removeAllPaymentFilters)
+      }
     }
   }
 }

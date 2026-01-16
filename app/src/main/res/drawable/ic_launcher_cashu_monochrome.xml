@@ -1,0 +1,34 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Monochrome version for Android 13+ themed icons -->
+    
+    <!-- Speech bubble outline -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M54,24
+            C36.33,24 22,37.43 22,54
+            C22,62.5 25.8,70.13 32,75.5
+            L32,86
+            L43,78.5
+            C46.5,79.5 50.15,80 54,80
+            C71.67,80 86,66.57 86,50
+            C86,37.43 71.67,24 54,24
+            Z"/>
+    
+    <!-- Lightning bolt cutout -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M58,36
+            L48,56
+            L54,56
+            L50,72
+            L66,48
+            L58,48
+            L64,36
+            Z"/>
+            
+</vector>

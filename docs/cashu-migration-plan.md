@@ -85,9 +85,36 @@ Non‑goals (initial phases):
   - [ ] Remove MobileCoin code after stable release window
 
 - [ ] Phase 6: Optional Enhancements
-  - [ ] Lightning mint top‑up/withdraw
+  - [x] Lightning integration via LNI (Lightning Node Interface) library
   - [ ] Cross‑device sync via encrypted backup
   - [ ] Multi‑mint management and swapping
+
+
+## Lightning Integration (LNI)
+
+The payment system now supports direct Lightning payments via the LNI library integration.
+
+### Supported Lightning Backends
+- **NWC (Nostr Wallet Connect)** - Currently implemented, simplest to configure
+- **LND** - Planned via LNI library
+- **CLN (Core Lightning)** - Planned via LNI library
+- **Phoenixd** - Planned via LNI library
+- **Strike/Blink/Speed** - Planned via LNI library
+
+### Lightning Features
+- Direct Lightning invoice payment (bypasses Cashu melt)
+- Direct Lightning invoice creation (bypasses Cashu mint)
+- Separate Lightning node balance tracking
+- NWC configuration via nostr+walletconnect:// URI
+
+### Architecture
+The Lightning integration follows the LNI library interface design:
+- `LightningNode` interface for various backends
+- `LightningEngine` for managing connections
+- `LightningConfigStore` for secure credential storage
+- Integration with existing `PaymentsEngine` interface
+
+Reference: https://github.com/lightning-node-interface/lni
 
 
 ## Detailed Work Plan

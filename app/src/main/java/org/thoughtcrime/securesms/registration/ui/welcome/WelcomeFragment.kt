@@ -54,6 +54,10 @@ class WelcomeFragment : LoggingFragment(R.layout.fragment_registration_welcome_v
     binding.welcomeTransferOrRestore.setOnClickListener { onRestoreOrTransferClicked() }
     binding.welcomeTransferOrRestore.visible = !sharedViewModel.isReregister
 
+    // Link device button - visible when enabled and not re-registering
+    binding.welcomeLinkDevice.setOnClickListener { onLinkDeviceClicked() }
+    binding.welcomeLinkDevice.visible = BuildConfig.LINK_DEVICE_UX_ENABLED && !sharedViewModel.isReregister
+
     if (BuildConfig.LINK_DEVICE_UX_ENABLED) {
       binding.image.setOnLongClickListener {
         MaterialAlertDialogBuilder(requireContext())

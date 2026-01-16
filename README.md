@@ -59,3 +59,43 @@ Copyright 2013-2025 Signal Messenger, LLC
 Licensed under the GNU AGPLv3: https://www.gnu.org/licenses/agpl-3.0.html
 
 Google Play and the Google Play logo are trademarks of Google LLC.
+
+
+## LNI (Lightning Node Interface)
+
+The `lni/` module provides Lightning Network integration via the [LNI Rust library](https://github.com/lightning-node-interface/lni) with UniFFI bindings for Android.
+
+### Setup
+
+LNI requires a git submodule and native libraries. After cloning, run:
+
+```bash
+./build.sh
+```
+
+This will:
+1. Initialize the LNI git submodule (Kotlin bindings)
+2. Download pre-built native libraries from [GitHub releases](https://github.com/lightning-node-interface/lni/releases)
+
+**No Rust compilation is needed** for normal development.
+
+### Troubleshooting
+- In Android Studio, File > Sync Project With Gradle Files
+- If native libraries are missing, delete `app/src/main/jniLibs/arm64-v8a/liblni.so` and re-run `./build.sh`
+
+### Updating LNI
+To update to a new LNI release, change `LNI_VERSION` in `build.sh` and update the submodule.
+
+### Supported Lightning Nodes
+
+- LND, CLN, Phoenixd, NWC, Strike, Blink, Speed, Spark (Breez SDK)
+
+### Breez API Key (for Spark)
+
+To use Spark, add your Breez API key to `local.properties`:
+```properties
+breezApiKey=your_api_key_here
+```
+Get a key at [breez.technology](https://breez.technology).
+
+

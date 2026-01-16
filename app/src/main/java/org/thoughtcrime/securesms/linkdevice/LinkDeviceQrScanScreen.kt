@@ -1,18 +1,31 @@
 package org.thoughtcrime.securesms.linkdevice
 
+import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import org.signal.core.ui.compose.Buttons
 import org.signal.core.ui.compose.Dialogs
 import org.signal.qr.QrScannerView
 import org.thoughtcrime.securesms.R
@@ -39,7 +52,8 @@ fun LinkDeviceQrScanScreen(
   onLinkDeviceSuccess: () -> Unit,
   onLinkDeviceFailure: () -> Unit,
   navController: NavController?,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  onPasteFromClipboard: (() -> Unit)? = null
 ) {
   val lifecycleOwner = LocalLifecycleOwner.current
   val context = LocalContext.current
@@ -115,6 +129,29 @@ fun LinkDeviceQrScanScreen(
         onRequestPermissions = onRequestPermissions,
         qrHeaderLabelString = stringResource(R.string.AddLinkDeviceFragment__scan_the_qr_code)
       )
+    }
+
+    // Paste from clipboard button - useful for same-device linking
+    if (onPasteFromClipboard != null) {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(16.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Buttons.MediumTonal(
+          onClick = onPasteFromClipboard
+        ) {
+          Icon(
+            painter = painterResource(R.drawable.symbol_link_24),
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+          )
+          Spacer(modifier = Modifier.width(8.dp))
+          Text(text = stringResource(R.string.AddLinkDeviceFragment__paste_link))
+        }
+      }
     }
   }
 }

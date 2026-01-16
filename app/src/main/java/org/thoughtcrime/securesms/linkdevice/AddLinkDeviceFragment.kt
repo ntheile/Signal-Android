@@ -2,6 +2,8 @@ package org.thoughtcrime.securesms.linkdevice
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -13,6 +15,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -50,6 +53,7 @@ class AddLinkDeviceFragment : ComposeFragment() {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val navController: NavController by remember { mutableStateOf(findNavController()) }
     val cameraPermissionState: PermissionState = rememberPermissionState(permission = Manifest.permission.CAMERA)
+    val context = LocalContext.current
 
     if (!state.seenQrEducationSheet) {
       navController.safeNavigate(R.id.action_addLinkDeviceFragment_to_linkDeviceIntroBottomSheet)
@@ -81,7 +85,24 @@ class AddLinkDeviceFragment : ComposeFragment() {
       onLinkDeviceSuccess = {
         viewModel.onLinkDeviceResult(showSheet = true)
       },
-      onLinkDeviceFailure = { viewModel.onLinkDeviceResult(showSheet = false) }
+      onLinkDeviceFailure = { viewModel.onLinkDeviceResult(showSheet = false) },
+      onPasteFromClipboard = {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipData = clipboard.primaryClip
+        if (clipData != null && clipData.itemCount > 0) {
+          val pastedText = clipData.getItemAt(0).text?.toString()
+          if (pastedText != null && pastedText.startsWith("sgnl://")) {
+            if (VibrateUtil.isHapticFeedbackEnabled(context)) {
+              VibrateUtil.vibrate(context, VIBRATE_DURATION_MS)
+            }
+            viewModel.onQrCodeScanned(pastedText)
+          } else {
+            Toast.makeText(context, R.string.DeviceActivity_sorry_this_is_not_a_valid_device_link_qr_code, Toast.LENGTH_LONG).show()
+          }
+        } else {
+          Toast.makeText(context, "Clipboard is empty", Toast.LENGTH_SHORT).show()
+        }
+      }
     )
   }
 
@@ -112,7 +133,8 @@ private fun MainScreen(
   onQrCodeDismissed: () -> Unit = {},
   onQrCodeRetry: () -> Unit = {},
   onLinkDeviceSuccess: () -> Unit = {},
-  onLinkDeviceFailure: () -> Unit = {}
+  onLinkDeviceFailure: () -> Unit = {},
+  onPasteFromClipboard: (() -> Unit)? = null
 ) {
   Scaffolds.Settings(
     title = "",
@@ -138,7 +160,8 @@ private fun MainScreen(
       onLinkDeviceSuccess = onLinkDeviceSuccess,
       onLinkDeviceFailure = onLinkDeviceFailure,
       navController = navController,
-      modifier = Modifier.padding(contentPadding)
+      modifier = Modifier.padding(contentPadding),
+      onPasteFromClipboard = onPasteFromClipboard
     )
   }
 }

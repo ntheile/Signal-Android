@@ -24,6 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import org.thoughtcrime.securesms.LoggingFragment;
 import org.thoughtcrime.securesms.R;
 import org.thoughtcrime.securesms.components.emoji.EmojiTextView;
+import org.thoughtcrime.securesms.payments.CreatePaymentDetails;
 import org.thoughtcrime.securesms.payments.MoneyView;
 import org.thoughtcrime.securesms.payments.preferences.RecipientHasNotEnabledPaymentsDialog;
 import org.thoughtcrime.securesms.util.CommunicationActions;
@@ -67,6 +68,7 @@ public class CreatePaymentFragment extends LoggingFragment {
   private View             toggle;
   private Drawable         infoIcon;
   private Drawable         spacer;
+  private CreatePaymentViewModel viewModel;
 
   private ConstraintSet cryptoConstraintSet;
   private ConstraintSet fiatConstraintSet;
@@ -87,7 +89,7 @@ public class CreatePaymentFragment extends LoggingFragment {
 
     CreatePaymentFragmentArgs      arguments = CreatePaymentFragmentArgs.fromBundle(requireArguments());
     CreatePaymentViewModel.Factory factory   = new CreatePaymentViewModel.Factory(arguments.getPayee(), arguments.getNote());
-    CreatePaymentViewModel         viewModel = new ViewModelProvider(Navigation.findNavController(view).getViewModelStoreOwner(R.id.payments_create), factory).get(CreatePaymentViewModel.class);
+    viewModel = new ViewModelProvider(Navigation.findNavController(view).getViewModelStoreOwner(R.id.payments_create), factory).get(CreatePaymentViewModel.class);
 
     constraintLayout = view.findViewById(R.id.create_payment_fragment_amount_header);
     request          = view.findViewById(R.id.create_payment_fragment_request);
@@ -122,6 +124,11 @@ public class CreatePaymentFragment extends LoggingFragment {
     addNote.setOnClickListener(v -> SafeNavigation.safeNavigate(Navigation.findNavController(v), R.id.action_createPaymentFragment_to_editPaymentNoteFragment));
 
     pay.setOnClickListener(v -> {
+      // Check if Lightning is configured - use sigmo: protocol flow
+      if (org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())) {
+        sendLightningSigmoRequest();
+        return;
+      }
       if (org.thoughtcrime.securesms.keyvalue.SignalStore.payments().cashuEnabled()) {
         // In Cashu mode, we defer token creation and sending to the confirmation dialog.
       }
@@ -161,7 +168,24 @@ public class CreatePaymentFragment extends LoggingFragment {
     viewModel.isValidAmount().observe(getViewLifecycleOwner(), this::updateRequestAmountButtons);
     viewModel.getNote().observe(getViewLifecycleOwner(), this::updateNote);
     viewModel.getSpendableBalance().observe(getViewLifecycleOwner(), mob -> {
-      if (org.thoughtcrime.securesms.keyvalue.SignalStore.payments().cashuEnabled()) {
+      // Check for Lightning first - it takes priority
+      if (org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())) {
+        // Fetch Lightning balance on background thread
+        new Thread(() -> {
+          try {
+            org.thoughtcrime.securesms.payments.engine.lightning.LightningNodeInfo nodeInfo = 
+                org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.getNodeInfoBlocking(requireContext());
+            if (nodeInfo != null && getView() != null) {
+              long sendBalance = nodeInfo.getSendBalanceSats();
+              requireActivity().runOnUiThread(() -> {
+                this.balance.setText("Available: " + formatSats(sendBalance) + " sats");
+              });
+            }
+          } catch (Throwable t) {
+            org.signal.core.util.logging.Log.w("CreatePaymentFragment", "Failed to get Lightning balance", t);
+          }
+        }).start();
+      } else if (org.thoughtcrime.securesms.keyvalue.SignalStore.payments().cashuEnabled()) {
         // Use LiveData to avoid blocking main thread
         org.thoughtcrime.securesms.payments.engine.CashuUiRepository repo = new org.thoughtcrime.securesms.payments.engine.CashuUiRepository(requireContext().getApplicationContext());
         repo.getSpendableSatsLiveData().observe(getViewLifecycleOwner(), satsAvailable -> {
@@ -406,5 +430,126 @@ public class CreatePaymentFragment extends LoggingFragment {
         amount.setTextColor(ContextCompat.getColor(requireContext(), R.color.signal_text_primary));
         break;
     }
+  }
+
+  /**
+   * Send a sigmo: protocol message to request a Lightning invoice from the recipient.
+   * This is used when Lightning is configured - it sends a message requesting an invoice,
+   * and the recipient's client will auto-generate and send back the invoice for payment.
+   */
+  private void sendLightningSigmoRequest() {
+    CreatePaymentDetails details = viewModel.getCreatePaymentDetails();
+    org.thoughtcrime.securesms.payments.Payee payee = details.getPayee();
+    
+    if (!payee.hasRecipientId()) {
+      android.widget.Toast.makeText(requireContext(), R.string.CreatePaymentFragment__invalid_recipient, android.widget.Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    // Get the amount in sats
+    long amountSats;
+    try {
+      amountSats = CashuAmountAccessor.getAmountSats(viewModel.getCurrentMoneyAmountForCashu());
+    } catch (Exception e) {
+      android.widget.Toast.makeText(requireContext(), R.string.CreatePaymentFragment__invalid_amount, android.widget.Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    if (amountSats <= 0) {
+      android.widget.Toast.makeText(requireContext(), R.string.CreatePaymentFragment__invalid_amount, android.widget.Toast.LENGTH_SHORT).show();
+      return;
+    }
+
+    org.thoughtcrime.securesms.recipients.Recipient recipient = org.thoughtcrime.securesms.recipients.Recipient.resolved(payee.requireRecipientId());
+    
+    // Convert sats to millisats (1 sat = 1000 msats)
+    long amountMsats = amountSats * 1000;
+    
+    // Show confirmation and send the sigmo request
+    new MaterialAlertDialogBuilder(requireContext())
+      .setTitle(R.string.CreatePaymentFragment__send_lightning_payment)
+      .setMessage(getString(R.string.CreatePaymentFragment__send_lightning_request_message, formatSats(amountSats), recipient.getShortDisplayName(requireContext())))
+      .setPositiveButton(R.string.CreatePaymentFragment__send_request, (dialog, which) -> {
+        sendSigmoRequest(recipient, amountMsats);
+      })
+      .setNegativeButton(android.R.string.cancel, null)
+      .show();
+  }
+
+  /**
+   * Actually send the sigmo: protocol message to the recipient.
+   */
+  private void sendSigmoRequest(org.thoughtcrime.securesms.recipients.Recipient recipient, long amountMsats) {
+    new Thread(() -> {
+      try {
+        String username = recipient.getDisplayName(requireContext());
+        // Generate a unique request ID for tracking this payment flow
+        String requestId = java.util.UUID.randomUUID().toString().substring(0, 8);
+        // Build the sigmo: URI with request_id for correlation
+        String sigmoUri = "sigmo:lnurlp/" + username + "/callback?amount=" + amountMsats + "&request_id=" + requestId;
+
+        // Get or create thread for recipient
+        long threadId = org.thoughtcrime.securesms.database.SignalDatabase.threads().getOrCreateThreadIdFor(recipient);
+
+        // Send the sigmo URI as a message
+        org.thoughtcrime.securesms.mms.OutgoingMessage outgoingMessage = new org.thoughtcrime.securesms.mms.OutgoingMessage(
+          recipient,                       // recipient
+          sigmoUri,                        // body
+          java.util.Collections.emptyList(), // attachments
+          System.currentTimeMillis(),      // timestamp
+          0L,                              // expiresIn
+          1,                               // expireTimerVersion
+          false,                           // viewOnce
+          org.thoughtcrime.securesms.database.ThreadTable.DistributionTypes.DEFAULT, // distributionType
+          org.thoughtcrime.securesms.database.model.StoryType.NONE, // storyType
+          null,                            // parentStoryId
+          false,                           // isStoryReaction
+          null,                            // quote
+          java.util.Collections.emptyList(), // contacts
+          java.util.Collections.emptyList(), // previews
+          java.util.Collections.emptyList(), // mentions
+          java.util.Collections.emptySet(),  // networkFailures
+          java.util.Collections.emptySet(),  // mismatches
+          null,                            // giftBadge
+          true,                            // isSecure
+          null,                            // bodyRanges
+          -1L,                             // scheduledDate
+          0L                               // messageToEdit
+        );
+
+        long messageId = org.thoughtcrime.securesms.sms.MessageSender.send(
+          org.thoughtcrime.securesms.dependencies.AppDependencies.getApplication(),
+          outgoingMessage,
+          threadId,
+          org.thoughtcrime.securesms.sms.MessageSender.SendType.SIGNAL,
+          null,
+          null
+        );
+
+        // Store the pending payment request for tracking
+        org.thoughtcrime.securesms.keyvalue.SignalStore.payments().storeSigmoRequest(
+          requestId,
+          recipient.getId().serialize(),
+          amountMsats,
+          threadId,
+          messageId
+        );
+
+        requireActivity().runOnUiThread(() -> {
+          android.widget.Toast.makeText(
+            requireContext(),
+            getString(R.string.CreatePaymentFragment__invoice_request_sent, recipient.getShortDisplayName(requireContext())),
+            android.widget.Toast.LENGTH_SHORT
+          ).show();
+          // Navigate back to payments home
+          androidx.navigation.Navigation.findNavController(requireView()).popBackStack(R.id.paymentsHome, false);
+        });
+      } catch (Throwable e) {
+        org.signal.core.util.logging.Log.w("CreatePaymentFragment", "Failed to send sigmo request", e);
+        requireActivity().runOnUiThread(() -> {
+          android.widget.Toast.makeText(requireContext(), R.string.CreatePaymentFragment__failed_to_send_request, android.widget.Toast.LENGTH_SHORT).show();
+        });
+      }
+    }).start();
   }
 }

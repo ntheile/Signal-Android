@@ -8,6 +8,8 @@ import org.thoughtcrime.securesms.R;
 public enum AttachmentKeyboardButton {
 
   GALLERY(R.string.AttachmentKeyboard_gallery, R.drawable.symbol_album_tilt_24),
+  SEND_BITCOIN(R.string.AttachmentKeyboard_send_bitcoin, R.drawable.symbol_request_bitcoin_24),
+  REQUEST_PAYMENT(R.string.AttachmentKeyboard_request_payment, R.drawable.symbol_send_bitcoin_24),
   FILE(R.string.AttachmentKeyboard_file, R.drawable.symbol_file_24),
   PAYMENT(R.string.AttachmentKeyboard_payment, R.drawable.symbol_payment_24),
   CONTACT(R.string.AttachmentKeyboard_contact, R.drawable.symbol_person_circle_24),

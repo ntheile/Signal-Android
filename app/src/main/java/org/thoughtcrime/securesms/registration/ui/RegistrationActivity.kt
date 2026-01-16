@@ -97,5 +97,12 @@ class RegistrationActivity : BaseActivity() {
         putExtra(RE_REGISTRATION_EXTRA, true)
       }
     }
+
+    @JvmStatic
+    fun newIntentForLinkDevice(context: Context): Intent {
+      return Intent(context, RegistrationActivity::class.java).apply {
+        putExtra(RE_REGISTRATION_EXTRA, false)
+      }
+    }
   }
 }

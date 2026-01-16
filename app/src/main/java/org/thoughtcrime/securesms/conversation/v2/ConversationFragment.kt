@@ -2524,6 +2524,193 @@ class ConversationFragment :
     dialogBuilder.show()
   }
 
+  private fun showRequestPaymentDialog(recipient: Recipient) {
+    // Check if Lightning is configured
+    if (!org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())) {
+      Toast.makeText(requireContext(), R.string.RequestPaymentDialog_lightning_not_configured, Toast.LENGTH_SHORT).show()
+      return
+    }
+
+    // Create the amount input dialog
+    val inputLayout = android.widget.LinearLayout(requireContext()).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      val padding = 48
+      setPadding(padding, padding / 2, padding, 0)
+    }
+
+    val amountInput = android.widget.EditText(requireContext()).apply {
+      hint = getString(R.string.RequestPaymentDialog_amount_hint)
+      inputType = android.text.InputType.TYPE_CLASS_NUMBER
+    }
+    inputLayout.addView(amountInput)
+
+    MaterialAlertDialogBuilder(requireContext())
+      .setTitle(R.string.RequestPaymentDialog_title)
+      .setView(inputLayout)
+      .setPositiveButton(android.R.string.ok) { _, _ ->
+        val amountText = amountInput.text.toString().trim()
+        val amountSats = amountText.toLongOrNull()
+
+        if (amountSats == null || amountSats <= 0) {
+          Toast.makeText(requireContext(), R.string.RequestPaymentDialog_invalid_amount, Toast.LENGTH_SHORT).show()
+          return@setPositiveButton
+        }
+
+        // Create invoice and send as message
+        Toast.makeText(requireContext(), R.string.RequestPaymentDialog_creating_invoice, Toast.LENGTH_SHORT).show()
+        createAndSendLightningInvoice(recipient, amountSats)
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  private fun createAndSendLightningInvoice(recipient: Recipient, amountSats: Long) {
+    lifecycleScope.launch(Dispatchers.IO) {
+      try {
+        val invoice = org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.createInvoiceBlocking(
+          requireContext(),
+          amountSats,
+          "Payment request from ${recipient.getDisplayName(requireContext())}"
+        )
+
+        if (invoice != null) {
+          // Send the invoice as a message
+          val threadId = viewModel.threadId
+          val outgoingMessage = org.thoughtcrime.securesms.mms.OutgoingMessage(
+            threadRecipient = recipient,
+            body = invoice,
+            sentTimeMillis = System.currentTimeMillis(),
+            isUrgent = true,
+            isSecure = true
+          )
+
+          org.thoughtcrime.securesms.sms.MessageSender.send(
+            org.thoughtcrime.securesms.dependencies.AppDependencies.application,
+            outgoingMessage,
+            threadId,
+            org.thoughtcrime.securesms.sms.MessageSender.SendType.SIGNAL,
+            null,
+            null
+          )
+
+          launch(Dispatchers.Main) {
+            Toast.makeText(requireContext(), R.string.RequestPaymentDialog_invoice_sent, Toast.LENGTH_SHORT).show()
+          }
+        } else {
+          launch(Dispatchers.Main) {
+            Toast.makeText(requireContext(), R.string.RequestPaymentDialog_invoice_failed, Toast.LENGTH_SHORT).show()
+          }
+        }
+      } catch (e: Throwable) {
+        org.signal.core.util.logging.Log.w("ConversationFragment", "Failed to create invoice", e)
+        launch(Dispatchers.Main) {
+          Toast.makeText(requireContext(), R.string.RequestPaymentDialog_invoice_failed, Toast.LENGTH_SHORT).show()
+        }
+      }
+    }
+  }
+
+  /**
+   * Show dialog to send bitcoin using the sigmo: protocol.
+   * This sends a sigmo:lnurlp URI to the recipient requesting an invoice for a specific amount.
+   * The recipient's client auto-generates an invoice and sends it back.
+   */
+  private fun showSendBitcoinDialog(recipient: Recipient) {
+    // Check if Lightning is configured
+    if (!org.thoughtcrime.securesms.payments.engine.lightning.LightningUiInteractor.isConfigured(requireContext())) {
+      Toast.makeText(requireContext(), R.string.SendBitcoinDialog_lightning_not_configured, Toast.LENGTH_SHORT).show()
+      return
+    }
+
+    // Create the amount input dialog
+    val inputLayout = android.widget.LinearLayout(requireContext()).apply {
+      orientation = android.widget.LinearLayout.VERTICAL
+      val padding = 48
+      setPadding(padding, padding / 2, padding, 0)
+    }
+
+    val amountInput = android.widget.EditText(requireContext()).apply {
+      hint = getString(R.string.SendBitcoinDialog_amount_hint)
+      inputType = android.text.InputType.TYPE_CLASS_NUMBER
+    }
+    inputLayout.addView(amountInput)
+
+    MaterialAlertDialogBuilder(requireContext())
+      .setTitle(R.string.SendBitcoinDialog_title)
+      .setView(inputLayout)
+      .setPositiveButton(android.R.string.ok) { _, _ ->
+        val amountText = amountInput.text.toString().trim()
+        val amountSats = amountText.toLongOrNull()
+
+        if (amountSats == null || amountSats <= 0) {
+          Toast.makeText(requireContext(), R.string.SendBitcoinDialog_invalid_amount, Toast.LENGTH_SHORT).show()
+          return@setPositiveButton
+        }
+
+        // Convert sats to millisats (1 sat = 1000 msats)
+        val amountMsats = amountSats * 1000
+        
+        // Send sigmo: protocol message to request invoice
+        sendSigmoInvoiceRequest(recipient, amountMsats)
+      }
+      .setNegativeButton(android.R.string.cancel, null)
+      .show()
+  }
+
+  /**
+   * Send a sigmo: protocol message to request an invoice from the recipient.
+   * Format: sigmo:lnurlp/{username}/callback?amount={amount_in_msats}
+   */
+  private fun sendSigmoInvoiceRequest(recipient: Recipient, amountMsats: Long) {
+    lifecycleScope.launch(Dispatchers.IO) {
+      try {
+        val username = recipient.getDisplayName(requireContext())
+        // Generate a unique request ID for tracking this payment flow
+        val requestId = java.util.UUID.randomUUID().toString().substring(0, 8)
+        // Build the sigmo: URI with request_id for correlation
+        val sigmoUri = "sigmo:lnurlp/$username/callback?amount=$amountMsats&request_id=$requestId"
+
+        // Send the sigmo URI as a message
+        val threadId = viewModel.threadId
+        val outgoingMessage = org.thoughtcrime.securesms.mms.OutgoingMessage(
+          threadRecipient = recipient,
+          body = sigmoUri,
+          sentTimeMillis = System.currentTimeMillis(),
+          isUrgent = true,
+          isSecure = true
+        )
+
+        val messageId = org.thoughtcrime.securesms.sms.MessageSender.send(
+          org.thoughtcrime.securesms.dependencies.AppDependencies.application,
+          outgoingMessage,
+          threadId,
+          org.thoughtcrime.securesms.sms.MessageSender.SendType.SIGNAL,
+          null,
+          null
+        )
+
+        // Store the pending payment request for tracking
+        org.thoughtcrime.securesms.keyvalue.SignalStore.payments.storeSigmoRequest(
+          requestId = requestId,
+          recipientId = recipient.id.serialize(),
+          amountMsats = amountMsats,
+          threadId = threadId,
+          requestMessageId = messageId
+        )
+
+        launch(Dispatchers.Main) {
+          Toast.makeText(
+            requireContext(),
+            getString(R.string.SendBitcoinDialog_request_sent, recipient.getShortDisplayName(requireContext())),
+            Toast.LENGTH_SHORT
+          ).show()
+        }
+      } catch (e: Throwable) {
+        org.signal.core.util.logging.Log.w("ConversationFragment", "Failed to send sigmo request", e)
+      }
+    }
+  }
+
   private fun handleDisplayDetails(conversationMessage: ConversationMessage) {
     val recipientSnapshot = viewModel.recipientSnapshot ?: return
     MessageDetailsFragment.create(conversationMessage.messageRecord, recipientSnapshot.id).show(childFragmentManager, null)
@@ -4380,6 +4567,8 @@ class ConversationFragment :
           AttachmentKeyboardButton.CONTACT -> conversationActivityResultContracts.launchSelectContact()
           AttachmentKeyboardButton.LOCATION -> conversationActivityResultContracts.launchSelectLocation(recipient.chatColors)
           AttachmentKeyboardButton.PAYMENT -> AttachmentManager.selectPayment(this@ConversationFragment, recipient)
+          AttachmentKeyboardButton.REQUEST_PAYMENT -> showRequestPaymentDialog(recipient)
+          AttachmentKeyboardButton.SEND_BITCOIN -> showSendBitcoinDialog(recipient)
           AttachmentKeyboardButton.FILE -> {
             if (!conversationActivityResultContracts.launchSelectFile()) {
               toast(R.string.AttachmentManager_cant_open_media_selection, Toast.LENGTH_LONG)
